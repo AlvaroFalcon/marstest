@@ -199,6 +199,15 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 - Every PR is created with the `create-pull-request` skill so the body always follows the same structure. Run the `code-reviewer` agent before requesting human review; the `qa-reviewer` agent validates the acceptance criteria of each PR in the running app.
 - Review comments use "we", give an objective reason and propose an alternative.
 
+### Continuous integration
+
+| Workflow | Trigger | Jobs |
+| --- | --- | --- |
+| `.github/workflows/pr-checks.yml` | Every pull request (opened, new commits, reopened, ready for review) | `Lint` (`npm run lint`), `Build` (`npm run build`), `Unit tests` (`npm run test`), `E2E tests` (`npm run test:e2e`, report uploaded on failure) |
+
+- Workflows only call npm scripts, so a check that passes locally passes in CI. Node version comes from `.nvmrc`.
+- New or changed workflows are done by the `devops-expert` agent.
+
 ## 11. Agents
 
 Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with a clear deliverable.
@@ -210,6 +219,7 @@ Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with 
 | `test-expert` | Writes Vitest/RTL unit and component tests and Playwright E2E tests for implemented features. | After each implemented feature or bug fix, and before opening a PR. | `design-patterns` (to recognise seams worth testing). |
 | `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review. Read-only. | Before requesting human review, or with a PR number to draft a review. Posts on the PR only when asked. | Checks PRs against the `create-pull-request` structure. |
 | `qa-reviewer` | Runs the real app, takes screenshots, validates the PR's acceptance criteria and comments the verdict on the PR with screenshots embedded (stored in the `qa-screenshots` branch). | Automatically from a Claude Code routine when a pull request is opened or updated, or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
+| `devops-expert` | Implements and maintains GitHub Actions workflows and CI/CD setup: SHA-pinned actions, least-privilege permissions, caching, parallel jobs. | Whenever the user asks for a new workflow (checks, deploys, scheduled jobs) or a CI run fails for infrastructure reasons. | — |
 | `decision-recorder` | Records Architecture Decision Records in `docs/decisions/` and keeps the index updated. | In the background at the end of every RPI phase, and whenever a library, pattern, structure or trade-off is chosen. | — |
 
 ## 12. Skills
