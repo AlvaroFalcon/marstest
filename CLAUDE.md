@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Project guide for Claude Code. Based on the [MarsBased React guidelines](https://handbook.marsbased.com/guides/development/react-guidelines) (Vite SPA variant). React Native and Next.js sections of the handbook do **not** apply to this project.
+Project guide for Claude Code. Based on the MarsBased handbook guidelines (React, TypeScript, CSS, testing, coding, code review and git), Vite SPA variant. React Native and Next.js sections of the handbook do **not** apply to this project.
 
 ## 0. Non-negotiable rules
 
@@ -165,8 +165,6 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 
 ## 7. Styling (handbook CSS guidelines, summary)
 
-This section is a summary. When a case is not covered here, the full guide is the source of truth (see §14).
-
 - Tailwind v4 configured in CSS (`@import "tailwindcss"`, `@theme`). shadcn/ui components are project code: map their colours to tokens and replace `transition-all`.
 - Components use **semantic tokens** (`bg-primary`), never raw palette classes (`bg-neutral-200`) or arbitrary colour/spacing values.
 - Theme via custom properties on `:root` redefined in `.dark` (`src/index.css`). No `dark:` class chains in our components (generated shadcn primitives in `components/ui/` may keep theirs).
@@ -175,7 +173,15 @@ This section is a summary. When a case is not covered here, the full guide is th
 - `rem` for spacing/type, `svh` instead of `vh`, unitless `line-height`, never `transition: all`.
 - Keep visible focus on `:focus-visible` (`outline-hidden`, not `outline-none`).
 - Gate transform-based motion and smooth scrolling behind `prefers-reduced-motion: no-preference` (Tailwind `motion-safe:`). **Never** add a global rule that disables all animations.
-- Mobile-first, intrinsic layouts and container queries over breakpoints.
+- Mobile-first, intrinsic layouts and container queries over breakpoints. Responsive values change in the token layer (`clamp()` for fluid sizes), not through breakpoint chains in components.
+- Tokens in three tiers: primitives, semantic roles (`--primary`) and component knobs only when needed. Colours in `oklch()`; hover/active shades derived with `color-mix(in oklch, ...)`, never hard-coded.
+- Tailwind v4 is configured in CSS only: primitives in `@theme`, semantic aliases in `@theme inline`, custom utilities in `@utility`. Use `@apply` only on elements in `base`, never to build `.btn`-style classes.
+- Arbitrary values (`[...]`) only for computed values, child selectors and grid templates; a bracketed colour, spacing or font value means a token is missing.
+- One variant mechanism: `cva`. Class order and wrapping are handled by ESLint, never by hand.
+- Name transitioned properties (never `transition-all`); durations and easings come from tokens. Hover styles apply only on devices that can hover.
+- z-index values come from a named token scale (no `9999`); use `isolation: isolate` for stacking contexts.
+- Inline styles only for runtime values, passed as custom properties. Comment the origin of every magic number.
+- Fonts are self-hosted `woff2` with `font-display: swap`.
 
 ## 8. Comments and documentation
 
@@ -245,17 +251,6 @@ Located in `.claude/skills/`. Loaded on demand.
 
 Never try to work around a blocked hook: ask the user to perform the action instead.
 
-## 14. Handbook sources
+## 14. Source of truth
 
-The rules in this file summarise the MarsBased handbook. When a summary is ambiguous or a case is not covered, read the original guide before deciding or suggesting anything, and never suggest something that contradicts it.
-
-| Topic | Guide |
-| --- | --- |
-| React (Vite SPA sections only) | https://handbook.marsbased.com/guides/development/react-guidelines |
-| TypeScript | https://handbook.marsbased.com/guides/typescript-guidelines |
-| CSS / Tailwind | https://handbook.marsbased.com/guides/development/css-guidelines |
-| Testing | https://handbook.marsbased.com/guides/development/testing-guidelines |
-| Coding | https://handbook.marsbased.com/guides/development/coding-guidelines |
-| Code reviews | https://handbook.marsbased.com/guides/development/code-reviews-guidelines |
-| Git and commits | https://handbook.marsbased.com/guides/development/git-guidelines |
-| AI-augmented development | https://handbook.marsbased.com/guides/development/ai-augmented-development |
+This file and `.claude/rules/` are the **only** source of conventions for this project; no external guide is consulted. If a case is not covered, do not guess from general practice: ask the user, and if a new rule is agreed, add it here.

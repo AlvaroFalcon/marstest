@@ -25,7 +25,7 @@ Everything you write — code, class names, copy placeholders, comments, JSDoc �
 - Compose feature components in `src/components/<feature>/` on top of the primitives. Pages in `src/pages/` only arrange feature components.
 - One variant mechanism: `cva` (shipped with shadcn). Compose classes with `cn()`, caller's `className` last.
 
-## Styling rules (CLAUDE.md §7 and handbook CSS guidelines)
+## Styling rules (CLAUDE.md §7)
 
 - Semantic tokens only (`bg-primary`, `text-muted-foreground`). No raw palette classes (`bg-neutral-200`), no arbitrary colour/spacing values in brackets: a missing value means a missing token in `@theme`.
 - Theme via custom properties on `:root` redefined in `.dark`. No `dark:` chains in components.

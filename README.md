@@ -1,6 +1,6 @@
 # marstest
 
-React + Vite single-page application built following the [MarsBased React guidelines](https://handbook.marsbased.com/guides/development/react-guidelines).
+React + Vite single-page application built following the MarsBased handbook guidelines, summarised in [`CLAUDE.md`](CLAUDE.md).
 
 ## Getting started
 

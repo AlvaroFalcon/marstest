@@ -57,7 +57,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.claude/hooks/**/*.mjs'],
+    files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.claude/**/*.mjs'],
     languageOptions: {
       globals: globals.node,
     },
