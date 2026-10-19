@@ -37,6 +37,10 @@ for (const section of REQUIRED_SECTIONS) {
 if (!/^- \[ \] .+/m.test(body)) {
   problems.push('Acceptance criteria must contain at least one unchecked item (`- [ ] ...`).')
 }
+const ciOnlyCriteria = body.match(/^- \[ \] .*\b(lint|build|tests?|test:e2e)\b.*\bpass(es)?\b.*$/gim) ?? []
+for (const criterion of ciOnlyCriteria) {
+  problems.push(`Acceptance criterion only restates a CI check, which CI already enforces: "${criterion}".`)
+}
 if (body.includes('<!--')) {
   problems.push('Body still contains template comments (`<!-- ... -->`); they would end up in the squash commit.')
 }

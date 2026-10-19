@@ -12,8 +12,6 @@ export const environmentSchema = z.object({
   ),
 })
 
-export type Environment = z.infer<typeof environmentSchema>
-
 const environment = environmentSchema.parse(import.meta.env)
 
 /**
