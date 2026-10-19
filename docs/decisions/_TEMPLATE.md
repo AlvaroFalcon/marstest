@@ -2,23 +2,23 @@
 
 - **Date:** YYYY-MM-DD
 - **Status:** Proposed | Accepted | Superseded by [NNNN](NNNN-title.md)
-- **Decided by:** User | Claude, approved by the user | Claude
+- **Decided by:** User | User, on Claude's proposal
 - **Phase:** Research | Plan | Implement
 - **Related:** `docs/plans/...`, PR #...
 
 ## Context
 
 The problem or force that required a decision. Facts only.
-For user decisions, include the reason the user gave, quoted when possible.
+Include the reason the user gave, quoted (mark translations as `(translated)`).
 
 ## Options considered
 
 1. **Option A** — pros / cons.
-2. **Option B** — pros / cons.
+2. **Option B** (proposed by Claude, if so) — pros / cons.
 
 ## Decision
 
-What was chosen, in one or two sentences.
+What the user chose, in one or two sentences.
 
 ## Consequences
 

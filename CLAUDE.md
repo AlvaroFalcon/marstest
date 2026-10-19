@@ -27,7 +27,7 @@ Before declaring any task done: `npm run build`, `npm run lint` and `npm run tes
 
 ## 2. Tech stack
 
-All installed. Rationale and caveats in `docs/decisions/0002-frontend-stack.md`.
+All installed (decided in `docs/decisions/0009-full-recommended-stack.md`).
 
 | Concern | Library |
 | --- | --- |
@@ -37,7 +37,7 @@ All installed. Rationale and caveats in `docs/decisions/0002-frontend-stack.md`.
 | Routing | [react-router](https://reactrouter.com/) v7 |
 | Server state / fetching | [TanStack Query](https://tanstack.com/query) v5 |
 | Global client state | [zustand](https://github.com/pmndrs/zustand) (only if Context is not enough) |
-| Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to 5.2.x, see ADR 0009) |
+| Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to `~5.2.2`: from 5.4.3 its optional peer dependencies make npm write a lockfile that `npm ci` rejects) |
 | Validation | [zod](https://zod.dev/) v4 |
 | Tables | [TanStack Table](https://tanstack.com/table) v9 + shadcn `Data Table` |
 | HTTP | [ky](https://github.com/sindresorhus/ky) |
@@ -62,7 +62,7 @@ Each phase runs in a fresh context window and produces a document. All three doc
 | **Plan** | `docs/plans/` | Numbered steps referencing specific files, acceptance criteria, test strategy. Ask the user when a decision has several valid options. | Is the approach sound? |
 | **Implement** | `docs/implementation/` | Follow the plan step by step. Log progress and **every deviation with its reason**. Verify against acceptance criteria. | Does it match the requirements? |
 
-Cross-cutting: `docs/decisions/` holds Architecture Decision Records written by the `decision-recorder` agent during every phase.
+Cross-cutting: `docs/decisions/` is the log of the user's decisions, written by the `decision-recorder` agent during every phase. Claude's own technical choices are explained in commit messages, code comments or this file, not there.
 
 Templates live in each folder as `_TEMPLATE.md`. Split large implementations into chunks, each in its own context window.
 
@@ -220,7 +220,7 @@ Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with 
 | `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review. Read-only. | Before requesting human review, or with a PR number to draft a review. Posts on the PR only when asked. | Checks PRs against the `create-pull-request` structure. |
 | `qa-reviewer` | Runs the real app, takes screenshots, validates the PR's acceptance criteria and comments the verdict on the PR with screenshots embedded (stored in the `qa-screenshots` branch). | Automatically from a Claude Code routine when a pull request is opened or updated, or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
 | `devops-expert` | Implements and maintains GitHub Actions workflows and CI/CD setup: SHA-pinned actions, least-privilege permissions, caching, parallel jobs. | Whenever the user asks for a new workflow (checks, deploys, scheduled jobs) or a CI run fails for infrastructure reasons. | — |
-| `decision-recorder` | Records Architecture Decision Records in `docs/decisions/`, mainly for decisions **the user** takes (choices, scope cuts, approvals, preferences), with the user's reasons. Claude's own technical decisions are recorded only when significant, and every ADR states who decided. | In the background right after the user decides something and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
+| `decision-recorder` | Records in `docs/decisions/` the decisions **the user** takes (choices, scope cuts, preferences) and the ideas proposed by Claude that the user adopts, with the user's reasons. Claude's own decisions are never recorded. | In the background right after the user decides something and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
 
 ## 12. Skills
 

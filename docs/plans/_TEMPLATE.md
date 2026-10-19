@@ -11,7 +11,7 @@ What will be built, in two or three sentences.
 
 ## Decisions
 
-Choices made for this plan. Each non-trivial one gets an ADR in `docs/decisions/`.
+Choices made for this plan. Decisions taken by the user (including adopted proposals from Claude) get an ADR in `docs/decisions/`.
 
 | Decision | Options considered | Chosen | Decided by | ADR |
 | --- | --- | --- | --- | --- |

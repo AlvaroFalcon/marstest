@@ -41,7 +41,7 @@ Read `CLAUDE.md` and the `.claude/rules/` files matching the changed paths befor
 
 **Git and PR**
 14. PR title follows `[ISSUE-CODE] <type>(<scope>): <subject>` (≤ 72 chars) and the body follows the `create-pull-request` structure with verifiable acceptance criteria.
-15. New dependencies are well maintained, reasonably sized, with a compatible licence, and have an ADR in `docs/decisions/`.
+15. New dependencies are well maintained, reasonably sized, with a compatible licence, and justified in the PR description.
 
 Also run `npm run lint`, `npm run build` and `npm run test` on the branch and report failures.
 

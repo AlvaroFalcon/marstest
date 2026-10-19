@@ -14,7 +14,7 @@
 
 ## Deviations from the plan
 
-Every change of direction, with its reason. Significant ones also get an ADR.
+Every change of direction, with its reason. Deviations decided or approved by the user also get an ADR.
 
 | Step | Planned | Done instead | Reason |
 | --- | --- | --- | --- |
