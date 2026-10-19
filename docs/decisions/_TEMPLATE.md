@@ -2,12 +2,14 @@
 
 - **Date:** YYYY-MM-DD
 - **Status:** Proposed | Accepted | Superseded by [NNNN](NNNN-title.md)
+- **Decided by:** User | Claude, approved by the user | Claude
 - **Phase:** Research | Plan | Implement
 - **Related:** `docs/plans/...`, PR #...
 
 ## Context
 
 The problem or force that required a decision. Facts only.
+For user decisions, include the reason the user gave, quoted when possible.
 
 ## Options considered
 

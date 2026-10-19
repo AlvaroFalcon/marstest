@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** User (Claude chose the configuration details)
 - **Phase:** Implement
 - **Related:** `eslint.config.js`, `.stylelintrc.json`
 

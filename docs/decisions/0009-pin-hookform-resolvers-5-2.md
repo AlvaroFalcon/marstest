@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** Claude
 - **Phase:** Implement
 - **Related:** ADR 0002, ADR 0008, `package.json`, PR #1
 

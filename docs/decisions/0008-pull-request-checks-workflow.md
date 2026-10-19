@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** User (Claude chose the job layout)
 - **Phase:** Implement
 - **Related:** `.github/workflows/pr-checks.yml`, `.claude/agents/devops-expert.md`, `.nvmrc`
 

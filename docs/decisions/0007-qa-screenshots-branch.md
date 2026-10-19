@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** Claude, approved by the user
 - **Phase:** Plan
 - **Related:** `.claude/agents/qa-reviewer.md`
 

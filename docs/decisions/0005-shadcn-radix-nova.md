@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** Claude
 - **Phase:** Implement
 - **Related:** `components.json`, `src/index.css`
 

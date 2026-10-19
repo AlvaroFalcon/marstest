@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** User
 - **Phase:** Plan
 - **Related:** `CLAUDE.md` §2, `package.json`
 

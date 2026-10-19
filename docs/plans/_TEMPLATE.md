@@ -13,9 +13,9 @@ What will be built, in two or three sentences.
 
 Choices made for this plan. Each non-trivial one gets an ADR in `docs/decisions/`.
 
-| Decision | Options considered | Chosen | ADR |
-| --- | --- | --- | --- |
-| | | | |
+| Decision | Options considered | Chosen | Decided by | ADR |
+| --- | --- | --- | --- | --- |
+| | | | User / Claude | |
 
 ## Steps
 

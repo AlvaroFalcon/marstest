@@ -2,6 +2,7 @@
 
 - **Date:** 2026-10-19
 - **Status:** Accepted
+- **Decided by:** User (Claude chose the implementation details)
 - **Phase:** Implement
 - **Related:** `.claude/settings.json`, `.claude/hooks/`, `.claude/rules/`
 
