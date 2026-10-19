@@ -27,3 +27,5 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0012](0012-code-reviewer-agent.md) | Code reviewer agent | User, on Claude's proposal | Accepted | 2026-10-19 |
 | [0013](0013-pull-request-checks-workflow.md) | Pull request checks workflow and a DevOps agent | User | Accepted | 2026-10-19 |
 | [0014](0014-decision-log-records-user-decisions.md) | The decision log records only the user's decisions | User | Accepted | 2026-10-19 |
+| [0015](0015-screenshots-are-qa-only.md) | Visual evidence is the QA agent's responsibility only | User | Accepted | 2026-10-19 |
+| [0016](0016-separate-tsconfig-for-tests.md) | Separate TypeScript project for tests | User, on Claude's proposal | Accepted | 2026-10-19 |

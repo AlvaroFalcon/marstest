@@ -55,10 +55,9 @@ Fill [template.md](template.md):
 - **How to test**: numbered, reproducible steps starting from a clean checkout or the preview URL. Exact routes, data and clicks. A person (or `qa-reviewer`) who has never seen the feature must be able to follow them.
 - **Expected behaviour**: what should be observed after the steps, including states (loading, empty, error) and responsive/mobile behaviour when relevant.
 - **Acceptance criteria**: unchecked checklist (`- [ ]`) of verifiable, observable statements about the app's behaviour. One behaviour per item. Avoid vague wording ("works well", "is fast"). Do not add "lint/build/tests pass" items: the CI workflow enforces them on every PR.
-- **Screenshots**: before/after for UI changes, otherwise remove the section.
 - **Notes**: deviations from the plan, follow-ups, risks. Remove if empty.
 
-Do not leave placeholder text or empty sections (except the optional ones, which are removed).
+Do not leave placeholder text or empty sections (the optional **Notes** section is removed when empty). Do not add screenshots: visual evidence is the `qa-reviewer` agent's responsibility, and it posts it on the PR.
 
 ### 5. Push and create
 

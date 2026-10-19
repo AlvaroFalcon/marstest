@@ -165,13 +165,16 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 
 ## 7. Styling (handbook CSS guidelines, summary)
 
+This section is a summary. When a case is not covered here, the full guide is the source of truth (see §14).
+
 - Tailwind v4 configured in CSS (`@import "tailwindcss"`, `@theme`). shadcn/ui components are project code: map their colours to tokens and replace `transition-all`.
 - Components use **semantic tokens** (`bg-primary`), never raw palette classes (`bg-neutral-200`) or arbitrary colour/spacing values.
 - Theme via custom properties on `:root` redefined in `.dark` (`src/index.css`). No `dark:` class chains in our components (generated shadcn primitives in `components/ui/` may keep theirs).
 - Compose classes with `cn()`, caller's `className` last. Components set no outer margin; parents control spacing with `gap`.
 - State through attributes (`aria-expanded`, `data-state`), not `.is-open` classes. No `!important`, no IDs in selectors.
 - `rem` for spacing/type, `svh` instead of `vh`, unitless `line-height`, never `transition: all`.
-- Keep visible focus on `:focus-visible` (`outline-hidden`, not `outline-none`). Respect `prefers-reduced-motion`.
+- Keep visible focus on `:focus-visible` (`outline-hidden`, not `outline-none`).
+- Gate transform-based motion and smooth scrolling behind `prefers-reduced-motion: no-preference` (Tailwind `motion-safe:`). **Never** add a global rule that disables all animations.
 - Mobile-first, intrinsic layouts and container queries over breakpoints.
 
 ## 8. Comments and documentation
@@ -217,7 +220,7 @@ Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with 
 | `react-vite-expert` | Implements features in React + Vite following this file to the letter, with meaningful JSDoc on every exported symbol. | Implement phase of RPI for any logic, hook, page, routing, data-fetching or state work. | `design-patterns` when a recurring design problem appears; `create-pull-request` when the feature is ready. |
 | `ui-ux-expert` | Designs and builds accessible, responsive UI using shadcn/ui + Tailwind tokens. | Any new screen, component, layout, visual state (loading/empty/error) or UX review. | `design-patterns` (Composite, Strategy, Adapter for UI variants). |
 | `test-expert` | Writes Vitest/RTL unit and component tests and Playwright E2E tests for implemented features. | After each implemented feature or bug fix, and before opening a PR. | `design-patterns` (to recognise seams worth testing). |
-| `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review. Read-only. | Before requesting human review, or with a PR number to draft a review. Posts on the PR only when asked. | Checks PRs against the `create-pull-request` structure. |
+| `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review, citing the handbook for every comment. Reads CI results instead of re-running checks. Never deals with screenshots. Read-only. | Before requesting human review, or with a PR number to draft a review. Posts on the PR only when asked. | Checks PRs against the `create-pull-request` structure. |
 | `qa-reviewer` | Runs the real app, takes screenshots, validates the PR's acceptance criteria and comments the verdict on the PR with screenshots embedded (stored in the `qa-screenshots` branch). | Automatically from a Claude Code routine when a pull request is opened or updated, or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
 | `devops-expert` | Implements and maintains GitHub Actions workflows and CI/CD setup: SHA-pinned actions, least-privilege permissions, caching, parallel jobs. | Whenever the user asks for a new workflow (checks, deploys, scheduled jobs) or a CI run fails for infrastructure reasons. | — |
 | `decision-recorder` | Records in `docs/decisions/` the decisions **the user** takes (choices, scope cuts, preferences) and the ideas proposed by Claude that the user adopts, with the user's reasons. Claude's own decisions are never recorded. | In the background right after the user decides something and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
@@ -241,3 +244,18 @@ Located in `.claude/skills/`. Loaded on demand.
 | Scoped rules | `.claude/rules/` | Extra instructions loaded only when matching files are touched: `tests.md`, `ui-components.md`, `pages-and-routing.md`, `lib-and-hooks.md`. |
 
 Never try to work around a blocked hook: ask the user to perform the action instead.
+
+## 14. Handbook sources
+
+The rules in this file summarise the MarsBased handbook. When a summary is ambiguous or a case is not covered, read the original guide before deciding or suggesting anything, and never suggest something that contradicts it.
+
+| Topic | Guide |
+| --- | --- |
+| React (Vite SPA sections only) | https://handbook.marsbased.com/guides/development/react-guidelines |
+| TypeScript | https://handbook.marsbased.com/guides/typescript-guidelines |
+| CSS / Tailwind | https://handbook.marsbased.com/guides/development/css-guidelines |
+| Testing | https://handbook.marsbased.com/guides/development/testing-guidelines |
+| Coding | https://handbook.marsbased.com/guides/development/coding-guidelines |
+| Code reviews | https://handbook.marsbased.com/guides/development/code-reviews-guidelines |
+| Git and commits | https://handbook.marsbased.com/guides/development/git-guidelines |
+| AI-augmented development | https://handbook.marsbased.com/guides/development/ai-augmented-development |

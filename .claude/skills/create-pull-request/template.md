@@ -22,10 +22,6 @@
 - [ ] ...
 - [ ] ...
 
-## Screenshots
-
-<!-- UI changes only: before / after. Remove this section otherwise. -->
-
 ## Notes
 
 <!-- Deviations from the plan, follow-ups, risks. Remove this section if empty. -->
