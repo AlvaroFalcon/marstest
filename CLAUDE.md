@@ -37,7 +37,7 @@ All installed. Rationale and caveats in `docs/decisions/0002-frontend-stack.md`.
 | Routing | [react-router](https://reactrouter.com/) v7 |
 | Server state / fetching | [TanStack Query](https://tanstack.com/query) v5 |
 | Global client state | [zustand](https://github.com/pmndrs/zustand) (only if Context is not enough) |
-| Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to 5.x, see ADR 0002) |
+| Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to 5.2.x, see ADR 0009) |
 | Validation | [zod](https://zod.dev/) v4 |
 | Tables | [TanStack Table](https://tanstack.com/table) v9 + shadcn `Data Table` |
 | HTTP | [ky](https://github.com/sindresorhus/ky) |

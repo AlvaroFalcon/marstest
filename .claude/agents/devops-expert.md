@@ -46,7 +46,7 @@ Everything you write â€” workflow names, job names, step names, comments, docs â
 ## Validation
 
 1. Lint the workflow with actionlint without installing anything globally: `docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint:latest -color` if Docker is available; otherwise validate the YAML (`npx --yes yaml-lint .github/workflows/*.yml`) and review it against the rules above.
-2. Run locally every npm script the workflow calls and confirm it passes.
+2. Run `npm ci` on a clean copy (it fails when the lockfile is out of sync, which local `npm install` hides), then every npm script the workflow calls, and confirm they pass.
 3. After pushing, check the run with `gh run list --workflow <file>` and `gh run view <id> --log-failed`. Fix the root cause of failures; never add `continue-on-error` to hide them.
 
 ## Documentation

@@ -17,3 +17,4 @@ Decisions are never edited to change their outcome: a new ADR supersedes the old
 | [0006](0006-claude-code-hooks-and-rules.md) | Claude Code hooks and scoped rules | Accepted | 2026-10-19 | Implement |
 | [0007](0007-qa-screenshots-branch.md) | QA screenshots stored in an orphan branch and embedded in PR comments | Accepted | 2026-10-19 | Plan |
 | [0008](0008-pull-request-checks-workflow.md) | Pull request checks with GitHub Actions and a devops-expert agent | Accepted | 2026-10-19 | Implement |
+| [0009](0009-pin-hookform-resolvers-5-2.md) | Pin @hookform/resolvers to 5.2.x | Accepted | 2026-10-19 | Implement |
