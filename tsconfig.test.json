@@ -1,0 +1,11 @@
+{
+  // Type-checks unit/component tests and test helpers with Vitest globals and jest-dom
+  // matchers. Application code is checked without them by tsconfig.app.json.
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
+    "types": ["vite/client", "vitest/globals"]
+  },
+  "include": ["src"],
+  "exclude": []
+}

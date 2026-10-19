@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Edit(./.env)",
+      "Write(./.env)",
+      "Read(./.env.local)",
+      "Edit(./.env.local)",
+      "Write(./.env.local)",
+      "Read(./.env.*.local)",
+      "Edit(./.env.*.local)",
+      "Write(./.env.*.local)",
+      "Read(./.env.development)",
+      "Edit(./.env.development)",
+      "Write(./.env.development)",
+      "Read(./.env.production)",
+      "Edit(./.env.production)",
+      "Write(./.env.production)",
+      "Read(./.env.test)",
+      "Edit(./.env.test)",
+      "Write(./.env.test)",
+      "Read(~/.ssh/**)",
+      "Edit(~/.ssh/**)",
+      "Write(~/.ssh/**)",
+      "Read(~/.aws/**)",
+      "Edit(~/.aws/**)",
+      "Write(~/.aws/**)",
+      "Read(~/.gnupg/**)",
+      "Edit(~/.gnupg/**)",
+      "Write(~/.gnupg/**)",
+      "Read(~/.kube/**)",
+      "Edit(~/.kube/**)",
+      "Write(~/.kube/**)",
+      "Read(~/.docker/**)",
+      "Edit(~/.docker/**)",
+      "Write(~/.docker/**)",
+      "Read(~/.netrc)",
+      "Edit(~/.netrc)",
+      "Write(~/.netrc)",
+      "Read(./.envrc)",
+      "Edit(./.envrc)",
+      "Write(./.envrc)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|MultiEdit|NotebookEdit|Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/block-sensitive-files.mjs\""
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/lint-fix.mjs\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}

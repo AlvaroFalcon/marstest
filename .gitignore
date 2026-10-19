@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.omc
+
+# QA agent screenshots and reports
+qa-artifacts
+
+# Test outputs
+coverage
+playwright-report
+test-results
+
+# Environment files (only the documented example is committed)
+.env
+.env.*
+.envrc
+!.env.example
