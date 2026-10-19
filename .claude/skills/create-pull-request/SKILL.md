@@ -54,7 +54,7 @@ Fill [template.md](template.md):
 - **Description**: what the PR does and why, in 2–5 sentences, from the user's point of view. Link the plan and any ADRs.
 - **How to test**: numbered, reproducible steps starting from a clean checkout or the preview URL. Exact routes, data and clicks. A person (or `qa-reviewer`) who has never seen the feature must be able to follow them.
 - **Expected behaviour**: what should be observed after the steps, including states (loading, empty, error) and responsive/mobile behaviour when relevant.
-- **Acceptance criteria**: unchecked checklist (`- [ ]`) of verifiable, observable statements. One behaviour per item. Avoid vague wording ("works well", "is fast").
+- **Acceptance criteria**: unchecked checklist (`- [ ]`) of verifiable, observable statements about the app's behaviour. One behaviour per item. Avoid vague wording ("works well", "is fast"). Do not add "lint/build/tests pass" items: the CI workflow enforces them on every PR.
 - **Screenshots**: before/after for UI changes, otherwise remove the section.
 - **Notes**: deviations from the plan, follow-ups, risks. Remove if empty.
 

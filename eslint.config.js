@@ -11,7 +11,7 @@ import tseslint from 'typescript-eslint'
 export default defineConfig([
   globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results', 'qa-artifacts']),
   {
-    files: ['**/*.{ts,tsx,js}'],
+    files: ['**/*.{ts,tsx,js,mjs}'],
     extends: [
       js.configs.recommended,
       tseslint.configs.recommended,
@@ -57,7 +57,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['*.config.{ts,js}', 'e2e/**/*.ts'],
+    files: ['*.config.{ts,js}', 'e2e/**/*.ts', '.claude/hooks/**/*.mjs'],
     languageOptions: {
       globals: globals.node,
     },

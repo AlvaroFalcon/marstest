@@ -11,17 +11,18 @@ import { readFileSync } from 'node:fs'
 const SENSITIVE_PATH_PATTERNS = [
   /(^|\/)\.env(?!\.example$)(\.[^/]*)?$/,
   /(^|\/)\.netrc$/,
+  /(^|\/)\.envrc$/,
   /(^|\/)\.(ssh|aws|gnupg|kube|docker)(\/|$)/,
 ]
 
-const SENSITIVE_COMMAND_PATTERN = /(^|[\s'"=/])\.env(?!\.example)(\.[\w.-]+)?(\s|$|['"])|\.netrc|\/\.(ssh|aws|gnupg|kube|docker)\//
+const SENSITIVE_COMMAND_PATTERN = /(^|[\s'"=/])\.env(?!\.example)(\.[\w.-]+)?(\s|$|['"])|\.netrc|\.envrc|\/\.(ssh|aws|gnupg|kube|docker)\//
 
 const input = JSON.parse(readFileSync(0, 'utf8'))
 const toolInput = input.tool_input ?? {}
 
 const candidatePaths = [toolInput.file_path, toolInput.path, toolInput.notebook_path].filter(Boolean)
-const blockedPath = candidatePaths.find((candidate) =>
-  SENSITIVE_PATH_PATTERNS.some((pattern) => pattern.test(candidate)),
+const blockedPath = candidatePaths.find(candidate =>
+  SENSITIVE_PATH_PATTERNS.some(pattern => pattern.test(candidate)),
 )
 
 // Heredoc bodies are text written somewhere else, not file accesses: mentioning `.env.local`

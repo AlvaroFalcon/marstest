@@ -32,7 +32,7 @@ All installed (decided in `docs/decisions/0009-full-recommended-stack.md`).
 | Concern | Library |
 | --- | --- |
 | Framework | React 19, Vite 8, TypeScript 6, [React Compiler](https://react.dev/learn/react-compiler) (Babel preset) |
-| Components | [shadcn/ui](https://ui.shadcn.com/) — Radix base, Nova preset, Lucide icons (copied into `src/components/ui/`) |
+| Components | [shadcn/ui](https://ui.shadcn.com/) — Radix base, Nova preset, Lucide icons (copied into `src/components/ui/`). The `shadcn` package is a runtime dependency only because `src/index.css` imports `shadcn/tailwind.css`; class merging uses the `cn` package (shadcn's clsx + tailwind-merge replacement) through `@/lib/utils` |
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first config in `src/index.css`, no `tailwind.config.ts`) |
 | Routing | [react-router](https://reactrouter.com/) v7 |
 | Server state / fetching | [TanStack Query](https://tanstack.com/query) v5 |

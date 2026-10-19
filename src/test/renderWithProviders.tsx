@@ -3,6 +3,7 @@ import { render, type RenderOptions } from '@testing-library/react'
 import type { ReactElement } from 'react'
 import { IntlProvider } from 'react-intl'
 import { MemoryRouter } from 'react-router'
+import { config } from '@/config'
 import { messages } from '@/locales/en'
 
 export type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
@@ -22,7 +23,7 @@ export function renderWithProviders(
 
   return render(
     <QueryClientProvider client={queryClient}>
-      <IntlProvider locale="en" messages={messages}>
+      <IntlProvider locale={config.defaultLocale} messages={messages}>
         <MemoryRouter initialEntries={[initialPath]}>{ui}</MemoryRouter>
       </IntlProvider>
     </QueryClientProvider>,

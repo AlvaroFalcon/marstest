@@ -31,3 +31,9 @@ qa-artifacts
 coverage
 playwright-report
 test-results
+
+# Environment files (only the documented example is committed)
+.env
+.env.*
+.envrc
+!.env.example

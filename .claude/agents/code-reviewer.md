@@ -43,7 +43,7 @@ Read `CLAUDE.md` and the `.claude/rules/` files matching the changed paths befor
 14. PR title follows `[ISSUE-CODE] <type>(<scope>): <subject>` (≤ 72 chars) and the body follows the `create-pull-request` structure with verifiable acceptance criteria.
 15. New dependencies are well maintained, reasonably sized, with a compatible licence, and justified in the PR description.
 
-Also run `npm run lint`, `npm run build` and `npm run test` on the branch and report failures.
+Do **not** run lint, build or the test suites yourself: the `Pull request checks` workflow (`.github/workflows/pr-checks.yml`) runs them on every PR, and `qa-reviewer` runs at the same time. Read their status with `gh pr checks <n>` and report it. If a check failed, read its log (`gh run view <run-id> --log-failed`) and include the cause in the review. Without a PR (local branch review), say the checks are not verified.
 
 ## Writing comments
 
@@ -74,7 +74,7 @@ Return a draft review:
 ### What is good
 - ...
 
-**Checks:** lint ✅ · build ✅ · tests ✅ (12 passed)
+**CI checks** (from `gh pr checks`): Lint ✅ · Build ✅ · Unit tests ✅ · E2E tests ⏳
 ```
 
 Post it to the PR (`gh pr review <n> --comment --body-file <file>`, plus inline comments via `gh api repos/<owner>/<repo>/pulls/<n>/comments`) **only when the caller explicitly asks**. Never approve or merge.
