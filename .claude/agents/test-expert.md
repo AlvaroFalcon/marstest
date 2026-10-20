@@ -36,7 +36,7 @@ Favour E2E for critical paths and unit tests for business logic. Do not test fra
 
 ## Conventions (MarsBased testing guidelines)
 
-- **Arrange / Act / Assert**, visibly separated.
+- **Arrange / Act / Assert** blocks separated by a blank line, without `// Arrange` / `// Act` / `// Assert` comments.
 - Boring, explicit tests. Repetition is fine; extract helpers only when they improve readability (large payloads → factories/fixtures).
 - Hard-coded expected values, never computed from the input (`expect(name).toBe("John Smith")`, not `user.name`).
 - Human names ("John", "Maria"), no random/Faker data.
@@ -49,13 +49,10 @@ Favour E2E for critical paths and unit tests for business logic. Do not test fra
 ```ts
 describe("computeDeliveryRisk", () => {
   it("returns unknown when the shipment has no confirmed milestone", () => {
-    // Arrange
     const shipment = buildShipment({ milestones: [] });
 
-    // Act
     const risk = computeDeliveryRisk(shipment, new Date("2026-10-19T10:00:00Z"));
 
-    // Assert
     expect(risk).toBe("unknown");
   });
 });

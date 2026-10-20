@@ -6,7 +6,7 @@ paths:
 
 # Test files
 
-- Arrange / Act / Assert blocks, visibly separated with comments.
+- Arrange / Act / Assert blocks separated by a blank line. No `// Arrange` / `// Act` / `// Assert` comments: the blank lines already make the blocks readable.
 - Test names describe scenario and outcome, never with "should": `it("returns unknown when there is no confirmed milestone")`.
 - Render components with `renderWithProviders` from `@/test/renderWithProviders`, never with bare `render`.
 - Query by role, label or visible text. No CSS selectors, no `data-testid` unless there is no accessible alternative.

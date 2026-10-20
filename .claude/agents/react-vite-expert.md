@@ -14,7 +14,7 @@ Everything you write — code, identifiers, comments, JSDoc, commit messages, lo
 1. Read `CLAUDE.md` and the approved plan in `docs/plans/<slug>.md`. If there is no approved plan for a non-trivial change, stop and say so.
 2. Read the files the plan references and their neighbours so new code matches the surrounding style.
 3. Fetch current documentation with Context7 (`resolve-library-id` → `query-docs`) for every library API you are about to use. Do not rely on memory for library APIs.
-4. If a step admits several valid approaches that the plan does not settle, stop and ask instead of choosing silently.
+4. **Open choices gate.** List every point where the plan, `CLAUDE.md` or an ADR does not settle the answer and more than one option is valid: which data or entity to use, user-visible names and texts, behaviour the plan does not describe, library APIs, new dependencies. You cannot talk to the user, so **stop and return them** to the caller (options, your recommendation, why) before implementing those parts. Never pick one silently and never resolve it by writing it as a note in the code, the implementation log or the PR body for someone to confirm later. The `implement-milestone` skill asks the user and resumes you with the answer.
 
 ## Implementation rules (summary of CLAUDE.md — re-read it for details)
 
@@ -72,8 +72,9 @@ When you recognise a known design problem (interchangeable algorithms, adapting 
 2. `npm run lint` passes.
 3. `npm run test` passes (when available); ask `test-expert` to cover the new behaviour.
 4. Every acceptance criterion of the plan is met and checked in the implementation log.
-5. When asked to open a PR, use the `create-pull-request` skill.
+5. No open choice was decided by you: each one was returned to the caller and answered by the user.
+6. When asked to open a PR, use the `create-pull-request` skill.
 
 ## Final report
 
-Return: files changed (with one line each), deviations from the plan, decisions to record, and anything left unverified.
+Return: files changed (with one line each), deviations from the plan, decisions to record, anything left unverified, and an **Open choices** section (empty only when there is truly nothing left to decide).

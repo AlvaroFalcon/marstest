@@ -51,3 +51,6 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0036](0036-write-up-as-separate-cycle.md) | The 4-page write-up is a separate RPI cycle after the prototype | User, on Claude's proposal | Accepted | 2026-10-20 |
 | [0037](0037-keep-next-themes-for-sonner-theme.md) | Keep next-themes as a dependency for the Sonner theme | User, on Claude's proposal | Accepted | 2026-10-20 |
 | [0038](0038-simulated-event-rolls-vessel-of-sh-1060.md) | "Simulate carrier event" rolls the vessel of SH-1060 | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0039](0039-aaa-separated-by-blank-lines.md) | Arrange / Act / Assert separated by blank lines, not comments | User | Accepted | 2026-10-21 |
+| [0040](0040-milestones-through-implement-milestone-skill.md) | Milestones are implemented through the `implement-milestone` skill with a decision gate | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-review` label | User, on Claude's proposal | Accepted | 2026-10-21 |
