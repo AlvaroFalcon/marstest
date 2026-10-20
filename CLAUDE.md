@@ -37,6 +37,8 @@ All installed (decided in `docs/decisions/0009-full-recommended-stack.md`).
 | Routing | [react-router](https://reactrouter.com/) v7 |
 | Server state / fetching | [TanStack Query](https://tanstack.com/query) v5 |
 | Global client state | [zustand](https://github.com/pmndrs/zustand) (only if Context is not enough) |
+| Theme | [next-themes](https://github.com/pacocoursey/next-themes) — installed by the shadcn `sonner` primitive to read the current theme; also drives the dark-mode toggle (`docs/decisions/0037-keep-next-themes-for-sonner-theme.md`) |
+| Toasts | [sonner](https://sonner.emilkowal.ski/) through the shadcn `sonner` primitive |
 | Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to `~5.2.2`: from 5.4.3 its optional peer dependencies make npm write a lockfile that `npm ci` rejects) |
 | Validation | [zod](https://zod.dev/) v4 |
 | Tables | [TanStack Table](https://tanstack.com/table) v9 + shadcn `Data Table` |
