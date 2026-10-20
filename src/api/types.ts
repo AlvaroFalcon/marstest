@@ -80,8 +80,8 @@ const legBaseSchema = z.object({
 })
 
 /**
- * One carrier's part of the journey. Sea legs carry the vessel and voyage, which are what changes
- * when a vessel is rolled to the next sailing.
+ * One carrier's part of the journey. Sea legs carry the vessel and voyage of the current booking:
+ * when a vessel is rolled they change to the next sailing, and the raw events keep the history.
  */
 export const legSchema = z.discriminatedUnion('mode', [
   legBaseSchema.extend({ mode: z.literal('road') }),

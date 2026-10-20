@@ -31,14 +31,14 @@ const MILLISECONDS_PER_MINUTE = 60_000
 const DEFAULT_REPORT_LAG_MINUTES = 5
 
 /** Customers and subsidiaries available in the "Viewing as" switch. */
-export const customers: Customer[] = [
+const customers: Customer[] = [
   { id: 'nordwerk', name: 'Nordwerk GmbH', city: 'Hamburg', countryCode: 'DE' },
   { id: 'brenner-iberia', name: 'Brenner Iberia S.L.', city: 'Madrid', countryCode: 'ES' },
   { id: 'alpen-werkzeug', name: 'Alpen Werkzeug AG', city: 'Zurich', countryCode: 'CH' },
 ]
 
 /** Shipping sites. The three Spanish sites are the ops user's scope; Lyon is shown locked. */
-export const sites: Site[] = [
+const sites: Site[] = [
   { id: 'zaragoza-plant', name: 'Zaragoza plant', city: 'Zaragoza', countryCode: 'ES', inOpsScope: true },
   { id: 'bilbao-plant', name: 'Bilbao plant', city: 'Bilbao', countryCode: 'ES', inOpsScope: true },
   { id: 'barcelona-warehouse', name: 'Barcelona warehouse', city: 'Barcelona', countryCode: 'ES', inOpsScope: true },
@@ -46,7 +46,7 @@ export const sites: Site[] = [
 ]
 
 /** Road hauliers and ocean lines used by the seeded shipments. */
-export const carriers: Carrier[] = [
+const carriers: Carrier[] = [
   { id: 'transauto', name: 'Transauto', mode: 'road' },
   { id: 'mareline', name: 'Mareline', mode: 'sea' },
   { id: 'euroruta', name: 'EuroRuta', mode: 'road' },
@@ -57,7 +57,10 @@ export const carriers: Carrier[] = [
 /** Id of the shipment the "Simulate carrier event" demo action changes. */
 export const SIMULATED_EVENT_SHIPMENT_ID = 'SH-1047'
 
-/** Id of the scripted raw event, used to apply the simulation only once. */
+/**
+ * Id of the scripted raw event, used to apply the simulation only once. `E4` (and the `M4`
+ * milestone) follow the 3 tracking steps seeded on SH-1047; change them together.
+ */
 export const SIMULATED_EVENT_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-E4`
 
 /** Returns a function that turns an offset in hours from `demoNow` into an ISO date. */
@@ -257,7 +260,7 @@ function customsHoldShipment(at: (hours: number) => string): Shipment {
     },
     legs,
     ...tracking,
-    carrierEta: providedEta(at(8), 'nordsee-line', 'api', at(-0.2)),
+    carrierEta: providedEta(at(8), 'nordsee-line', 'edi', at(-0.2)),
     estimatedEta: {
       date: at(56),
       earliest: at(44),
@@ -280,8 +283,8 @@ function rolledVesselShipment(at: (hours: number) => string): Shipment {
   const id = 'SH-1060'
   const legs: Leg[] = [
     { id: `${id}-L1`, mode: 'road', carrierId: 'vascor-trans', origin: 'Barcelona warehouse', destination: 'Barcelona port', plannedDepartureAt: at(-30), plannedArrivalAt: at(-26) },
-    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Las Palmas port', plannedDepartureAt: at(-4), plannedArrivalAt: at(44), vessel: 'Mareline Levante', voyage: 'ML-0842' },
-    { id: `${id}-L3`, mode: 'road', carrierId: 'vascor-trans', origin: 'Las Palmas port', destination: 'Las Palmas de Gran Canaria', plannedDepartureAt: at(48), plannedArrivalAt: at(52) },
+    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Las Palmas port', plannedDepartureAt: at(68), plannedArrivalAt: at(116), vessel: 'Mareline Poniente', voyage: 'ML-0846' },
+    { id: `${id}-L3`, mode: 'road', carrierId: 'vascor-trans', origin: 'Las Palmas port', destination: 'Las Palmas de Gran Canaria', plannedDepartureAt: at(120), plannedArrivalAt: at(124) },
   ]
   const tracking = buildTracking(id, legs, [
     { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Barcelona warehouse', occurredAt: at(-30), channel: 'portal', rawText: 'Recogida realizada - Almacén Barcelona', mapping: rule('Recogida realizada → Picked up') },
@@ -554,7 +557,7 @@ function suspectedDelayShipment(at: (hours: number) => string): Shipment {
 function confidentDelayShipment(at: (hours: number) => string): Shipment {
   const id = 'SH-1035'
   const legs: Leg[] = [
-    { id: `${id}-L1`, mode: 'road', carrierId: 'transauto', origin: 'Zaragoza plant', destination: 'Munich', plannedDepartureAt: at(-26), plannedArrivalAt: at(16) },
+    { id: `${id}-L1`, mode: 'road', carrierId: 'transauto', origin: 'Zaragoza plant', destination: 'Munich', plannedDepartureAt: at(-26), plannedArrivalAt: at(8) },
   ]
   const tracking = buildTracking(id, legs, [
     { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Zaragoza plant', occurredAt: at(-26), channel: 'api', rawText: 'PICKUP CONFIRMED ZARAGOZA PLANT', mapping: rule('PICKUP CONFIRMED → Picked up') },
@@ -569,17 +572,17 @@ function confidentDelayShipment(at: (hours: number) => string): Shipment {
     destination: { name: 'Nordwerk GmbH Werk München', city: 'Munich', countryCode: 'DE' },
     cargo: 'Electric motor stators, 7 pallets',
     bookedAt: at(-48),
-    plannedDeliveryAt: at(16),
+    plannedDeliveryAt: at(8),
     erpOrder: { poNumber: '4500-1189', hsCode: '8503.00', grossWeightKg: 2100, requiredDocuments: EU_ROAD_DOCUMENTS },
     legs,
     ...tracking,
-    carrierEta: providedEta(at(16), 'transauto', 'api', at(-1)),
+    carrierEta: providedEta(at(8), 'transauto', 'api', at(-1)),
     estimatedEta: {
-      date: at(30),
-      earliest: at(27),
-      latest: at(34),
+      date: at(18),
+      earliest: at(17),
+      latest: at(21),
       confidence: 92,
-      reason: 'The driver started an 11 h mandatory rest 1 h ago, so the truck cannot reach Munich before tomorrow afternoon.',
+      reason: 'The driver started an 11 h mandatory rest 1 h ago, so with about 8 h of driving left the truck cannot reach Munich before early tomorrow morning.',
     },
     documents: euRoadDocuments(id, at(-27), '8503.00', 2100),
     exceptions: [
@@ -588,12 +591,12 @@ function confidentDelayShipment(at: (hours: number) => string): Shipment {
         type: 'predictedDelay',
         openedAt: at(-0.8),
         aiDiagnosis: {
-          summary: 'The driver is on an 11 h mandatory rest near Mâcon. With the remaining 6 h of driving, delivery is about 14 h later than the carrier ETA.',
+          summary: 'The driver started an 11 h mandatory rest near Mâcon 1 h ago. With 10 h of rest left and about 8 h of driving to Munich, delivery is about 10 h later than the carrier ETA, which has not changed.',
           basedOnEventIds: [`${id}-E2`, `${id}-E3`],
         },
         draft: {
           status: 'pending',
-          body: 'Hello Nordwerk team, shipment SH-1035 (PO 4500-1189) is running late because of a mandatory driver rest. We now expect delivery tomorrow afternoon instead of tomorrow morning.',
+          body: 'Hello Nordwerk team, shipment SH-1035 (PO 4500-1189) is running late because of a mandatory driver rest. We now expect delivery early tomorrow morning instead of this evening.',
         },
       },
     ],
@@ -674,14 +677,29 @@ function deliveredEarlyShipment(at: (hours: number) => string): Shipment {
   }
 }
 
+/** The sailing of the SH-1047 sea leg; the simulated event moves it to the next one. */
+type Sailing = {
+  vessel: string
+  voyage: string
+  /** Departure, in hours from `demoNow`. Sea and onward road times follow from it. */
+  departureHours: number
+}
+
+/** Legs of SH-1047 for a given sailing, shared by the seed and the simulated event. */
+function simulationTargetLegs(at: (hours: number) => string, sailing: Sailing): Leg[] {
+  const id = SIMULATED_EVENT_SHIPMENT_ID
+  const arrivalHours = sailing.departureHours + 24
+  return [
+    { id: `${id}-L1`, mode: 'road', carrierId: 'euroruta', origin: 'Zaragoza plant', destination: 'Barcelona port', plannedDepartureAt: at(-50), plannedArrivalAt: at(-44) },
+    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Genoa port', plannedDepartureAt: at(sailing.departureHours), plannedArrivalAt: at(arrivalHours), vessel: sailing.vessel, voyage: sailing.voyage },
+    { id: `${id}-L3`, mode: 'road', carrierId: 'euroruta', origin: 'Genoa port', destination: 'Zurich', plannedDepartureAt: at(arrivalHours + 4), plannedArrivalAt: at(arrivalHours + 14) },
+  ]
+}
+
 /** SH-1047 · on-track sea shipment; the "Simulate carrier event" action rolls its vessel. */
 function simulationTargetShipment(at: (hours: number) => string): Shipment {
   const id = SIMULATED_EVENT_SHIPMENT_ID
-  const legs: Leg[] = [
-    { id: `${id}-L1`, mode: 'road', carrierId: 'euroruta', origin: 'Zaragoza plant', destination: 'Barcelona port', plannedDepartureAt: at(-50), plannedArrivalAt: at(-44) },
-    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Genoa port', plannedDepartureAt: at(6), plannedArrivalAt: at(30), vessel: 'Mareline Tramontana', voyage: 'ML-0839' },
-    { id: `${id}-L3`, mode: 'road', carrierId: 'euroruta', origin: 'Genoa port', destination: 'Zurich', plannedDepartureAt: at(34), plannedArrivalAt: at(44) },
-  ]
+  const legs = simulationTargetLegs(at, { vessel: 'Mareline Tramontana', voyage: 'ML-0839', departureHours: 6 })
   const tracking = buildTracking(id, legs, [
     { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Zaragoza plant', occurredAt: at(-50), channel: 'api', rawText: 'PICKED_UP', mapping: rule('PICKED_UP → Picked up') },
     { kind: 'carrier', legId: `${id}-L1`, status: 'arrived', location: 'Barcelona port', occurredAt: at(-44), channel: 'api', rawText: 'DELIVERED_TO_TERMINAL BARCELONA', mapping: rule('DELIVERED_TO_TERMINAL → Arrived') },
@@ -953,6 +971,8 @@ export function createSeed(demoNow: Date = DEMO_NOW): DemoState {
 
 /** Changes the scripted "Simulate carrier event" applies to {@link SIMULATED_EVENT_SHIPMENT_ID}. */
 export type SimulatedCarrierEvent = {
+  /** Legs after the roll: the sea leg carries the new vessel, voyage and sailing times. */
+  legs: Leg[]
   rawEvent: RawCarrierEvent
   milestone: Milestone
   carrierEta: CarrierEta
@@ -971,6 +991,7 @@ export function createSimulatedCarrierEvent(receivedAt: Date, demoNow: Date = DE
   const receivedAtIso = receivedAt.toISOString()
 
   return {
+    legs: simulationTargetLegs(at, { vessel: 'Mareline Gregal', voyage: 'ML-0843', departureHours: 78 }),
     rawEvent: {
       id: SIMULATED_EVENT_ID,
       carrierId: 'mareline',

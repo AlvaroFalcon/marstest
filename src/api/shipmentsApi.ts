@@ -86,7 +86,7 @@ function findException(shipment: Shipment, exceptionId: string): ShipmentExcepti
 }
 
 /** Creates the fake API over `db`. The app uses the {@link shipmentsApi} instance. */
-export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = () => DEMO_NOW }: ShipmentsApiOptions): ShipmentsApi {
+export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = () => new Date(DEMO_NOW) }: ShipmentsApiOptions): ShipmentsApi {
   /**
    * Runs `operation` after the simulated latency. Reading or writing inside the delayed callback
    * means each call sees the state at the moment it "reaches the server", like a real backend.
@@ -141,6 +141,7 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
       const event = createSimulatedCarrierEvent(now())
       db.write((state) => {
         const shipment = findShipment(state, SIMULATED_EVENT_SHIPMENT_ID)
+        shipment.legs = event.legs
         shipment.rawEvents.push(event.rawEvent)
         shipment.milestones.push(event.milestone)
         shipment.carrierEta = event.carrierEta

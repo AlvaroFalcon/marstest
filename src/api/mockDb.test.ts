@@ -3,17 +3,17 @@ import type { DemoStorage } from '@/api/mockDb'
 import { createSeed } from '@/api/seed'
 import type { DemoState } from '@/api/types'
 
+/** Fake storage that also exposes its items so tests can inspect what was persisted. */
+type InspectableStorage = DemoStorage & { items: Map<string, string> }
+
 /** In-memory stand-in for `sessionStorage`, created per test. */
-function createFakeStorage(initialItems: Record<string, string> = {}): DemoStorage & { items: Map<string, string> } {
+function createFakeStorage(initialItems: Record<string, string> = {}): InspectableStorage {
   const items = new Map(Object.entries(initialItems))
   return {
     items,
     getItem: key => items.get(key) ?? null,
     setItem: (key, value) => {
       items.set(key, value)
-    },
-    removeItem: (key) => {
-      items.delete(key)
     },
   }
 }
@@ -23,7 +23,7 @@ function createFailingStorage(): DemoStorage {
   const fail = (): never => {
     throw new Error('SecurityError: storage is disabled')
   }
-  return { getItem: fail, setItem: fail, removeItem: fail }
+  return { getItem: fail, setItem: fail }
 }
 
 function renameFirstCustomer(name: string) {
@@ -33,6 +33,25 @@ function renameFirstCustomer(name: string) {
 }
 
 describe('createMockDb', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('falls back to memory when the browser blocks sessionStorage', () => {
+    // Arrange
+    vi.spyOn(window, 'sessionStorage', 'get').mockImplementation(() => {
+      throw new Error('SecurityError: access to sessionStorage is denied')
+    })
+
+    // Act
+    const db = createMockDb()
+    db.write(renameFirstCustomer('John Smith GmbH'))
+
+    // Assert
+    expect(db.read().customers[0].name).toBe('John Smith GmbH')
+    expect(db.read().shipments).toEqual(createSeed().shipments)
+  })
+
   it('starts from the seed when storage is empty', () => {
     // Arrange
     const storage = createFakeStorage()

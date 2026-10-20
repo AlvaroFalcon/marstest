@@ -7,7 +7,7 @@ import type { ShipmentsApiOptions } from '@/api/shipmentsApi'
 const APPROVAL_TIME = new Date('2026-10-20T10:30:00.000Z')
 
 /** Storage that keeps nothing, so every test starts from the seed. */
-const noopStorage: DemoStorage = { getItem: () => null, setItem: () => {}, removeItem: () => {} }
+const noopStorage: DemoStorage = { getItem: () => null, setItem: () => {} }
 
 function createTestApi(options: Partial<ShipmentsApiOptions> = {}) {
   return createShipmentsApi({
@@ -37,7 +37,6 @@ describe('createShipmentsApi', () => {
     await request
 
     // Assert
-    expect(DEFAULT_LATENCY_MS).toBe(200)
     expect(resolvedBeforeLatency).toBe(0)
     expect(onResolved).toHaveBeenCalledTimes(1)
   })
@@ -156,6 +155,9 @@ describe('createShipmentsApi', () => {
     expect(first.shipment.id).toBe('SH-1047')
     expect(first.shipment.rawEvents.at(-1)?.receivedAt).toBe('2026-10-20T10:30:00.000Z')
     expect(first.shipment.milestones.at(-1)?.status).toBe('vesselRolled')
+    expect(first.shipment.legs[1]).toMatchObject({ vessel: 'Mareline Gregal', voyage: 'ML-0843' })
+    expect(new Set(first.shipment.rawEvents.map(rawEvent => rawEvent.id)).size).toBe(first.shipment.rawEvents.length)
+    expect(new Set(first.shipment.milestones.map(milestone => milestone.id)).size).toBe(first.shipment.milestones.length)
     expect(first.shipment.carrierEta.status === 'provided' && first.shipment.carrierEta.updatedAt).toBe('2026-10-20T10:30:00.000Z')
     expect(first.shipment.exceptions.map(exception => exception.type)).toEqual(['vesselRolled'])
     expect(second.applied).toBe(false)

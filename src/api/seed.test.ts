@@ -18,8 +18,11 @@ function hoursBetween(from: Date, isoDate: string): number {
 
 describe('createSeed', () => {
   it('has 18 shipments, 3 customers, 3 in-scope sites plus 1 out of scope and 5 carriers', () => {
-    // Arrange / Act
-    const seed = createSeed()
+    // Arrange
+    const demoNow = DEMO_NOW
+
+    // Act
+    const seed = createSeed(demoNow)
 
     // Assert
     expect(seed.shipments).toHaveLength(18)
@@ -35,11 +38,11 @@ describe('createSeed', () => {
 
     // Act
     const stateResult = demoStateSchema.safeParse(seed)
-    const shipmentResults = seed.shipments.map(shipment => shipmentSchema.safeParse(shipment))
+    const shipmentErrors = seed.shipments.map(shipment => [shipment.id, shipmentSchema.safeParse(shipment).error])
 
     // Assert
-    expect(stateResult.success).toBe(true)
-    expect(shipmentResults.every(result => result.success)).toBe(true)
+    expect(stateResult.error).toBeUndefined()
+    expect(shipmentErrors).toEqual(seed.shipments.map(shipment => [shipment.id, undefined]))
   })
 
   it('uses unique shipment ids and only references existing customers, sites, carriers and events', () => {
@@ -129,13 +132,17 @@ describe('createSeed', () => {
     const suspected = shipmentById(seed, 'SH-1034')
     const predicted = shipmentById(seed, 'SH-1035')
 
-    // Act / Assert
+    // Act
+    const predictedCarrierEta = predicted.carrierEta.status === 'provided' ? predicted.carrierEta.date : ''
+
+    // Assert
     expect(onTrack.carrierEta.status === 'provided' && onTrack.carrierEta.date).toBe(onTrack.estimatedEta.date)
     expect(onTrack.exceptions).toEqual([])
     expect(suspected.estimatedEta.confidence).toBe(58)
     expect(suspected.exceptions).toEqual([])
     expect(predicted.estimatedEta.confidence).toBe(92)
     expect(predicted.exceptions).toHaveLength(1)
+    expect(hoursBetween(new Date(predictedCarrierEta), predicted.estimatedEta.date)).toBe(10)
   })
 
   it('has no carrier ETA on SH-1044 and delivers SH-1009 one day earlier than planned', () => {

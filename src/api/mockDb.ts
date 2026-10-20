@@ -3,11 +3,17 @@ import { createSeed } from '@/api/seed'
 import { demoStateSchema } from '@/api/types'
 import type { DemoState } from '@/api/types'
 
-/** `sessionStorage` key of the demo state. Bump the version when the schema changes. */
+/**
+ * `sessionStorage` key of the demo state. Bump the version when the schema or the seed changes:
+ * a tab holding an older but still valid state would otherwise keep stale data until "Reset demo".
+ */
 export const DEMO_STATE_STORAGE_KEY = 'marstest:demo-state:v1'
 
 /** The part of the Web Storage API the mock database needs, so tests can pass a fake. */
-export type DemoStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
+export type DemoStorage = Pick<Storage, 'getItem' | 'setItem'>
+
+/** Result of reading the persisted state: found and valid, or not usable. */
+export type PersistedStateLookup = { found: true, state: DemoState } | { found: false }
 
 /** Options of {@link createMockDb}. */
 export type MockDbOptions = {
@@ -36,7 +42,7 @@ function resolveSessionStorage(): DemoStorage {
     return window.sessionStorage
   }
   catch {
-    return { getItem: () => null, setItem: () => {}, removeItem: () => {} }
+    return { getItem: () => null, setItem: () => {} }
   }
 }
 
@@ -44,7 +50,7 @@ function resolveSessionStorage(): DemoStorage {
  * Reads the persisted state. Stored data is untrusted (an older schema, a manual edit), so it is
  * validated with zod and ignored when invalid or unreadable.
  */
-function loadPersistedState(storage: DemoStorage): { found: true, state: DemoState } | { found: false } {
+function loadPersistedState(storage: DemoStorage): PersistedStateLookup {
   try {
     const serialised = storage.getItem(DEMO_STATE_STORAGE_KEY)
     if (serialised === null) {
