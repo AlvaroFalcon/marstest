@@ -50,3 +50,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0035](0035-small-feature-milestones-one-pr-each.md) | Delivery in small feature milestones, one branch and one pull request each | User | Accepted | 2026-10-20 |
 | [0036](0036-write-up-as-separate-cycle.md) | The 4-page write-up is a separate RPI cycle after the prototype | User, on Claude's proposal | Accepted | 2026-10-20 |
 | [0037](0037-keep-next-themes-for-sonner-theme.md) | Keep next-themes as a dependency for the Sonner theme | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0038](0038-simulated-event-rolls-vessel-of-sh-1060.md) | "Simulate carrier event" rolls the vessel of SH-1060 | User, on Claude's proposal | Accepted | 2026-10-21 |
