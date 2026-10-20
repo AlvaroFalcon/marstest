@@ -25,6 +25,16 @@
     --color-input: var(--input);
     --color-border: var(--border);
     --color-destructive: var(--destructive);
+    --color-success: var(--success);
+    --color-success-foreground: var(--success-foreground);
+    --color-success-subtle: var(--success-subtle);
+    --color-warning: var(--warning);
+    --color-warning-foreground: var(--warning-foreground);
+    --color-warning-subtle: var(--warning-subtle);
+    --color-info: var(--info);
+    --color-info-foreground: var(--info-foreground);
+    --color-info-subtle: var(--info-subtle);
+    --color-overlay: var(--overlay);
     --color-accent-foreground: var(--accent-foreground);
     --color-accent: var(--accent);
     --color-muted-foreground: var(--muted-foreground);
@@ -49,7 +59,8 @@
 }
 
 :root {
-    --background: oklch(1 0 0);
+    /* Off-white page so white cards stand out from it, as in the mockups. */
+    --background: oklch(0.985 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -64,6 +75,22 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
+
+    /*
+     * Status roles. The base colour is used for text, icons and solid fills
+     * (with its -foreground on top); -subtle is the tinted background behind
+     * base-coloured text. Info is the accent blue of AI content and estimates.
+     */
+    --success: oklch(0.527 0.154 150.069);
+    --success-foreground: oklch(0.985 0 0);
+    --success-subtle: oklch(0.962 0.044 156.743);
+    --warning: oklch(0.555 0.163 48.998);
+    --warning-foreground: oklch(0.985 0 0);
+    --warning-subtle: oklch(0.987 0.022 95.277);
+    --info: oklch(0.546 0.245 262.881);
+    --info-foreground: oklch(0.985 0 0);
+    --info-subtle: oklch(0.97 0.014 254.604);
+    --overlay: oklch(0 0 0 / 10%);
     --border: oklch(0.922 0 0);
     --input: oklch(0.922 0 0);
     --ring: oklch(0.708 0 0);
@@ -99,6 +126,16 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    --success: oklch(0.792 0.209 151.711);
+    --success-foreground: oklch(0.205 0 0);
+    --success-subtle: oklch(0.266 0.065 152.934);
+    --warning: oklch(0.828 0.189 84.429);
+    --warning-foreground: oklch(0.205 0 0);
+    --warning-subtle: oklch(0.279 0.077 45.635);
+    --info: oklch(0.707 0.165 254.624);
+    --info-foreground: oklch(0.205 0 0);
+    --info-subtle: oklch(0.282 0.091 267.935);
+    --overlay: oklch(0 0 0 / 50%);
     --border: oklch(1 0 0 / 10%);
     --input: oklch(1 0 0 / 15%);
     --ring: oklch(0.556 0 0);

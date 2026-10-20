@@ -49,3 +49,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0034](0034-demo-state-kept-in-session-storage.md) | Demo state kept in sessionStorage with a Reset demo action | User | Accepted | 2026-10-20 |
 | [0035](0035-small-feature-milestones-one-pr-each.md) | Delivery in small feature milestones, one branch and one pull request each | User | Accepted | 2026-10-20 |
 | [0036](0036-write-up-as-separate-cycle.md) | The 4-page write-up is a separate RPI cycle after the prototype | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0037](0037-keep-next-themes-for-sonner-theme.md) | Keep next-themes as a dependency for the Sonner theme | User, on Claude's proposal | Accepted | 2026-10-20 |
