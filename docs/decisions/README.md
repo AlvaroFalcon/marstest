@@ -30,3 +30,22 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0015](0015-screenshots-are-qa-only.md) | Visual evidence is the QA agent's responsibility only | User | Accepted | 2026-10-19 |
 | [0016](0016-separate-tsconfig-for-tests.md) | Separate TypeScript project for tests | User, on Claude's proposal | Accepted | 2026-10-19 |
 | [0017](0017-claude-md-is-the-only-source.md) | CLAUDE.md is the only source of conventions | User | Accepted | 2026-10-19 |
+| [0018](0018-prototype-ai-feature-set.md) | Prototype AI feature set for shipment visibility | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0019](0019-model-computes-eta-llm-explains.md) | The model computes the ETA and the LLM only explains it | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0020](0020-document-validation-ops-only-no-incoterms.md) | Document validation is for operations only; Incoterms modelling is left out | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0021](0021-langgraph-only-in-write-up.md) | LangGraph is mentioned only in the written document | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0022](0022-prototype-screen-set-and-demo-interactions.md) | Prototype screen set and demo interactions | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0023](0023-customer-list-table-desktop-cards-mobile.md) | Customer shipment list is a table on desktop and cards on mobile | User | Accepted | 2026-10-20 |
+| [0024](0024-visual-journey-with-arrows.md) | Shipment journey shown as arrow-linked nodes | User | Accepted | 2026-10-20 |
+| [0025](0025-ops-all-shipments-and-unified-detail.md) | Operations keep an "All shipments" view and one shipment detail component | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0026](0026-carrier-eta-always-visible-and-estimate-confidence.md) | Carrier ETA is always visible and our estimate always shows a date and confidence | User | Accepted | 2026-10-20 |
+| [0027](0027-seventy-five-percent-confidence-threshold.md) | 75 % confidence threshold separates watching from predicted delay | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0028](0028-provenance-labels-only-for-derived-dates.md) | Provenance labels only where a date is not plain carrier data | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0029](0029-single-visual-style-for-ai-content.md) | One blue visual style for all AI-generated content | User | Accepted | 2026-10-20 |
+| [0030](0030-ui-audit-adjustments-and-inbox-card-styling.md) | UI audit adjustments and inbox card styling | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0031](0031-keep-agreed-mock-data-volume.md) | Keep the agreed mock data volume; mockup counts are illustrative | User | Accepted | 2026-10-20 |
+| [0032](0032-geofence-milestone-only-in-write-up.md) | Geofence-detected milestone only in the written document | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0033](0033-in-memory-fake-api-for-runtime-data.md) | Runtime data served by an in-memory fake API | User, on Claude's proposal | Accepted | 2026-10-20 |
+| [0034](0034-demo-state-kept-in-session-storage.md) | Demo state kept in sessionStorage with a Reset demo action | User | Accepted | 2026-10-20 |
+| [0035](0035-small-feature-milestones-one-pr-each.md) | Delivery in small feature milestones, one branch and one pull request each | User | Accepted | 2026-10-20 |
+| [0036](0036-write-up-as-separate-cycle.md) | The 4-page write-up is a separate RPI cycle after the prototype | User, on Claude's proposal | Accepted | 2026-10-20 |
