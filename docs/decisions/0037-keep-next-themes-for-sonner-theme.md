@@ -21,10 +21,10 @@ Reason the user gave: "Keep next-themes (Recommended)". No further reason stated
 
 ## Decision
 
-Keep `next-themes` as a dependency and leave the generated `sonner.tsx` unchanged.
+Keep `next-themes` as a dependency and keep the generated `sonner.tsx` reading the theme through `next-themes`.
 
 ## Consequences
 
-- The upstream shadcn `sonner.tsx` is used without local edits.
+- The upstream shadcn `sonner.tsx` keeps its theme logic; the only local edit removes the unused `toaster` class, which the Tailwind lint rules reject as unknown.
 - `next-themes` is an extra dependency outside the stack listed in `CLAUDE.md` §2. It must be added there; this ADR does not change `CLAUDE.md`.
 - The dark-mode toggle milestone should use `next-themes`' `ThemeProvider` rather than a hand-written hook.

@@ -72,7 +72,7 @@ function TabsTrigger({
       className={cn(
         `
           relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border
-          border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition
+          border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap text-foreground/60 transition-colors
           group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start
           hover:text-foreground
           focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1
@@ -119,7 +119,7 @@ function TabsContent({
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
-      className={cn('flex-1 text-sm outline-none', className)}
+      className={cn('flex-1 text-sm outline-hidden', className)}
       {...props}
     />
   )
