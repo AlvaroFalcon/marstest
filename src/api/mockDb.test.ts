@@ -26,7 +26,7 @@ function createFailingStorage(): DemoStorage {
   return { getItem: fail, setItem: fail }
 }
 
-function renameFirstCustomer(name: string) {
+function renameFirstCustomer(name: string): (state: DemoState) => void {
   return (state: DemoState) => {
     state.customers[0].name = name
   }
@@ -38,114 +38,87 @@ describe('createMockDb', () => {
   })
 
   it('falls back to memory when the browser blocks sessionStorage', () => {
-    // Arrange
     vi.spyOn(window, 'sessionStorage', 'get').mockImplementation(() => {
       throw new Error('SecurityError: access to sessionStorage is denied')
     })
 
-    // Act
     const db = createMockDb()
     db.write(renameFirstCustomer('John Smith GmbH'))
 
-    // Assert
     expect(db.read().customers[0].name).toBe('John Smith GmbH')
     expect(db.read().shipments).toEqual(createSeed().shipments)
   })
 
   it('starts from the seed when storage is empty', () => {
-    // Arrange
     const storage = createFakeStorage()
 
-    // Act
     const db = createMockDb({ storage })
 
-    // Assert
     expect(db.read()).toEqual(createSeed())
   })
 
   it('persists every write so a new database on the same storage keeps the change', () => {
-    // Arrange
     const storage = createFakeStorage()
     const db = createMockDb({ storage })
 
-    // Act
     db.write(renameFirstCustomer('John Smith GmbH'))
     const reloadedDb = createMockDb({ storage })
 
-    // Assert
     expect(storage.items.has(DEMO_STATE_STORAGE_KEY)).toBe(true)
     expect(reloadedDb.read().customers[0].name).toBe('John Smith GmbH')
   })
 
   it('ignores stored state that does not match the schema', () => {
-    // Arrange
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify({ shipments: 'broken' }) })
 
-    // Act
     const db = createMockDb({ storage })
 
-    // Assert
     expect(db.read()).toEqual(createSeed())
   })
 
   it('ignores stored state that is not valid JSON', () => {
-    // Arrange
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: '{not json' })
 
-    // Act
     const db = createMockDb({ storage })
 
-    // Assert
     expect(db.read()).toEqual(createSeed())
   })
 
   it('keeps working in memory when storage throws', () => {
-    // Arrange
     const db = createMockDb({ storage: createFailingStorage() })
 
-    // Act
     db.write(renameFirstCustomer('John Smith GmbH'))
 
-    // Assert
     expect(db.read().customers[0].name).toBe('John Smith GmbH')
   })
 
   it('restores and persists the seed on reset', () => {
-    // Arrange
     const storage = createFakeStorage()
     const db = createMockDb({ storage })
     db.write(renameFirstCustomer('John Smith GmbH'))
 
-    // Act
     db.reset()
 
-    // Assert
     expect(db.read()).toEqual(createSeed())
     expect(createMockDb({ storage }).read()).toEqual(createSeed())
   })
 
   it('returns copies, so changing a read value does not change the store', () => {
-    // Arrange
     const db = createMockDb({ storage: createFakeStorage() })
 
-    // Act
     db.read().customers[0].name = 'John Smith GmbH'
 
-    // Assert
     expect(db.read().customers[0].name).toBe('Nordwerk GmbH')
   })
 
   it('leaves the state unchanged when a write throws', () => {
-    // Arrange
     const db = createMockDb({ storage: createFakeStorage() })
 
-    // Act
     const write = () => db.write((state) => {
       state.customers[0].name = 'John Smith GmbH'
       throw new Error('Rejected change')
     })
 
-    // Assert
     expect(write).toThrow('Rejected change')
     expect(db.read().customers[0].name).toBe('Nordwerk GmbH')
   })

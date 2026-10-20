@@ -22,7 +22,7 @@ import type {
  * The moment the demo story happens. Every seeded date is relative to it, so the seed is
  * deterministic and tests can inject another value instead of reading the clock.
  */
-export const DEMO_NOW = new Date('2026-10-20T10:00:00.000Z')
+export const DEMO_NOW_ISO = '2026-10-20T10:00:00.000Z'
 
 const MILLISECONDS_PER_HOUR = 3_600_000
 const MILLISECONDS_PER_MINUTE = 60_000
@@ -55,13 +55,23 @@ const carriers: Carrier[] = [
 ]
 
 /** Id of the shipment the "Simulate carrier event" demo action changes. */
-export const SIMULATED_EVENT_SHIPMENT_ID = 'SH-1047'
+export const SIMULATED_EVENT_SHIPMENT_ID = 'SH-1060'
 
 /**
- * Id of the scripted raw event, used to apply the simulation only once. `E4` (and the `M4`
- * milestone) follow the 3 tracking steps seeded on SH-1047; change them together.
+ * Position of the scripted step in the SH-1060 tracking: it follows the steps seeded on that
+ * shipment. The raw event, milestone and exception ids below derive from it, and a seed test
+ * checks it still matches the seeded array lengths.
  */
-export const SIMULATED_EVENT_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-E4`
+export const SIMULATED_EVENT_SEQUENCE = 4
+
+/** Id of the scripted raw event, used to apply the simulation only once. */
+export const SIMULATED_EVENT_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-E${SIMULATED_EVENT_SEQUENCE}`
+
+/** Id of the milestone the scripted event creates. */
+export const SIMULATED_MILESTONE_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-M${SIMULATED_EVENT_SEQUENCE}`
+
+/** Id of the exception the scripted event opens: the first one on a shipment seeded without any. */
+export const SIMULATED_EXCEPTION_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-X1`
 
 /** Returns a function that turns an offset in hours from `demoNow` into an ISO date. */
 function createClock(demoNow: Date): (hoursFromNow: number) => string {
@@ -278,60 +288,46 @@ function customsHoldShipment(at: (hours: number) => string): Shipment {
   }
 }
 
-/** SH-1060 · container rolled to the next sailing in Barcelona. */
-function rolledVesselShipment(at: (hours: number) => string): Shipment {
-  const id = 'SH-1060'
+/** SH-1047 · sea shipment waiting at the Barcelona terminal, no carrier update for 20 h. */
+function quietTerminalShipment(at: (hours: number) => string): Shipment {
+  const id = 'SH-1047'
   const legs: Leg[] = [
-    { id: `${id}-L1`, mode: 'road', carrierId: 'vascor-trans', origin: 'Barcelona warehouse', destination: 'Barcelona port', plannedDepartureAt: at(-30), plannedArrivalAt: at(-26) },
-    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Las Palmas port', plannedDepartureAt: at(68), plannedArrivalAt: at(116), vessel: 'Mareline Poniente', voyage: 'ML-0846' },
-    { id: `${id}-L3`, mode: 'road', carrierId: 'vascor-trans', origin: 'Las Palmas port', destination: 'Las Palmas de Gran Canaria', plannedDepartureAt: at(120), plannedArrivalAt: at(124) },
+    { id: `${id}-L1`, mode: 'road', carrierId: 'euroruta', origin: 'Zaragoza plant', destination: 'Barcelona port', plannedDepartureAt: at(-50), plannedArrivalAt: at(-44) },
+    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Genoa port', plannedDepartureAt: at(6), plannedArrivalAt: at(30), vessel: 'Mareline Tramontana', voyage: 'ML-0839' },
+    { id: `${id}-L3`, mode: 'road', carrierId: 'euroruta', origin: 'Genoa port', destination: 'Zurich', plannedDepartureAt: at(34), plannedArrivalAt: at(44) },
   ]
   const tracking = buildTracking(id, legs, [
-    { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Barcelona warehouse', occurredAt: at(-30), channel: 'portal', rawText: 'Recogida realizada - Almacén Barcelona', mapping: rule('Recogida realizada → Picked up') },
-    { kind: 'carrier', legId: `${id}-L1`, status: 'arrived', location: 'Barcelona port', occurredAt: at(-26), channel: 'portal', rawText: 'Entregado en terminal BCN', mapping: rule('Entregado en terminal → Arrived') },
-    { kind: 'carrier', legId: `${id}-L2`, status: 'arrived', location: 'Barcelona port terminal', occurredAt: at(-25), channel: 'edi', rawText: 'CODECO GATE IN FULL BARCELONA', mapping: rule('CODECO GATE IN → Arrived') },
-    { kind: 'carrier', legId: `${id}-L2`, status: 'vesselRolled', location: 'Barcelona port', occurredAt: at(-3), channel: 'edi', rawText: 'CODECO ROLLED - NOT LOADED ML-0842 / NEXT VSL MARELINE PONIENTE ML-0846', mapping: rule('CODECO ROLLED → Vessel rolled') },
+    { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Zaragoza plant', occurredAt: at(-50), channel: 'api', rawText: 'PICKED_UP', mapping: rule('PICKED_UP → Picked up') },
+    { kind: 'carrier', legId: `${id}-L1`, status: 'arrived', location: 'Barcelona port', occurredAt: at(-44), channel: 'api', rawText: 'DELIVERED_TO_TERMINAL BARCELONA', mapping: rule('DELIVERED_TO_TERMINAL → Arrived') },
+    { kind: 'carrier', legId: `${id}-L2`, status: 'arrived', location: 'Barcelona port terminal', occurredAt: at(-20), channel: 'edi', rawText: 'CODECO GATE IN FULL BARCELONA', mapping: rule('CODECO GATE IN → Arrived') },
   ])
 
   return {
     id,
-    customerId: 'brenner-iberia',
-    originSiteId: 'barcelona-warehouse',
-    destination: { name: 'Brenner Iberia Canarias', city: 'Las Palmas de Gran Canaria', countryCode: 'ES' },
-    cargo: 'Hydraulic press spare parts, 2 crates',
-    bookedAt: at(-72),
-    plannedDeliveryAt: at(52),
-    erpOrder: { poNumber: '4500-1203', hsCode: '8466.94', grossWeightKg: 960, requiredDocuments: ['commercialInvoice', 'packingList', 'billOfLading'] },
+    customerId: 'alpen-werkzeug',
+    originSiteId: 'zaragoza-plant',
+    destination: { name: 'Alpen Werkzeug AG', city: 'Zurich', countryCode: 'CH' },
+    cargo: 'Pneumatic tool sets, 9 pallets',
+    bookedAt: at(-80),
+    plannedDeliveryAt: at(44),
+    erpOrder: {
+      poNumber: '4500-1185',
+      hsCode: '8467.11',
+      grossWeightKg: 2480,
+      requiredDocuments: [...SWISS_ROAD_DOCUMENTS, 'billOfLading'],
+    },
     legs,
     ...tracking,
-    carrierEta: providedEta(at(124), 'mareline', 'edi', at(-3)),
+    carrierEta: providedEta(at(44), 'mareline', 'edi', at(-20)),
     estimatedEta: {
-      date: at(124),
-      earliest: at(118),
-      latest: at(134),
-      confidence: 86,
-      reason: 'Mareline moved the container to the next sailing, Mareline Poniente, which departs in about 3 days.',
+      date: at(46),
+      earliest: at(42),
+      latest: at(52),
+      confidence: 78,
+      reason: 'The container entered the Barcelona terminal 20 h ago and Mareline Tramontana is on schedule; no update since.',
     },
-    documents: [
-      receivedDocument(id, 'commercialInvoice', at(-30), { hsCode: '8466.94', grossWeightKg: 960 }),
-      receivedDocument(id, 'packingList', at(-30), { grossWeightKg: 960 }),
-      pendingDocument(id, 'billOfLading'),
-    ],
-    exceptions: [
-      {
-        id: `${id}-X1`,
-        type: 'vesselRolled',
-        openedAt: at(-2.9),
-        aiDiagnosis: {
-          summary: 'Mareline did not load the container on Mareline Levante (ML-0842) and moved it to Mareline Poniente (ML-0846). Delivery moves about 3 days later than planned.',
-          basedOnEventIds: [`${id}-E3`, `${id}-E4`],
-        },
-        draft: {
-          status: 'pending',
-          body: 'Hello Brenner Iberia team, the vessel carrying shipment SH-1060 (PO 4500-1203) left Barcelona without your container. It is booked on the next sailing and we now expect delivery about 3 days later than planned.',
-        },
-      },
-    ],
+    documents: [...swissRoadDocuments(id, at(-51), '8467.11', 2480), pendingDocument(id, 'billOfLading')],
+    exceptions: [],
   }
 }
 
@@ -677,7 +673,7 @@ function deliveredEarlyShipment(at: (hours: number) => string): Shipment {
   }
 }
 
-/** The sailing of the SH-1047 sea leg; the simulated event moves it to the next one. */
+/** The sailing of the SH-1060 sea leg; the simulated event moves it to the next one. */
 type Sailing = {
   vessel: string
   voyage: string
@@ -685,52 +681,54 @@ type Sailing = {
   departureHours: number
 }
 
-/** Legs of SH-1047 for a given sailing, shared by the seed and the simulated event. */
+/** Legs of SH-1060 for a given sailing, shared by the seed and the simulated event. */
 function simulationTargetLegs(at: (hours: number) => string, sailing: Sailing): Leg[] {
   const id = SIMULATED_EVENT_SHIPMENT_ID
-  const arrivalHours = sailing.departureHours + 24
+  const arrivalHours = sailing.departureHours + 36
   return [
-    { id: `${id}-L1`, mode: 'road', carrierId: 'euroruta', origin: 'Zaragoza plant', destination: 'Barcelona port', plannedDepartureAt: at(-50), plannedArrivalAt: at(-44) },
-    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Barcelona port', destination: 'Genoa port', plannedDepartureAt: at(sailing.departureHours), plannedArrivalAt: at(arrivalHours), vessel: sailing.vessel, voyage: sailing.voyage },
-    { id: `${id}-L3`, mode: 'road', carrierId: 'euroruta', origin: 'Genoa port', destination: 'Zurich', plannedDepartureAt: at(arrivalHours + 4), plannedArrivalAt: at(arrivalHours + 14) },
+    { id: `${id}-L1`, mode: 'road', carrierId: 'vascor-trans', origin: 'Bilbao plant', destination: 'Bilbao port', plannedDepartureAt: at(-8), plannedArrivalAt: at(-6) },
+    { id: `${id}-L2`, mode: 'sea', carrierId: 'mareline', origin: 'Bilbao port', destination: 'Le Havre port', plannedDepartureAt: at(sailing.departureHours), plannedArrivalAt: at(arrivalHours), vessel: sailing.vessel, voyage: sailing.voyage },
+    { id: `${id}-L3`, mode: 'road', carrierId: 'transauto', origin: 'Le Havre port', destination: 'Le Havre', plannedDepartureAt: at(arrivalHours + 4), plannedArrivalAt: at(arrivalHours + 8) },
   ]
 }
 
-/** SH-1047 · on-track sea shipment; the "Simulate carrier event" action rolls its vessel. */
+/**
+ * SH-1060 · on-track sea shipment from Bilbao to Le Havre. The "Simulate carrier event" demo
+ * action rolls its vessel, which is how the seed covers the rolled-vessel scenario.
+ */
 function simulationTargetShipment(at: (hours: number) => string): Shipment {
   const id = SIMULATED_EVENT_SHIPMENT_ID
-  const legs = simulationTargetLegs(at, { vessel: 'Mareline Tramontana', voyage: 'ML-0839', departureHours: 6 })
+  const legs = simulationTargetLegs(at, { vessel: 'Mareline Levante', voyage: 'ML-0842', departureHours: 6 })
   const tracking = buildTracking(id, legs, [
-    { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Zaragoza plant', occurredAt: at(-50), channel: 'api', rawText: 'PICKED_UP', mapping: rule('PICKED_UP → Picked up') },
-    { kind: 'carrier', legId: `${id}-L1`, status: 'arrived', location: 'Barcelona port', occurredAt: at(-44), channel: 'api', rawText: 'DELIVERED_TO_TERMINAL BARCELONA', mapping: rule('DELIVERED_TO_TERMINAL → Arrived') },
-    { kind: 'carrier', legId: `${id}-L2`, status: 'arrived', location: 'Barcelona port terminal', occurredAt: at(-43), channel: 'edi', rawText: 'CODECO GATE IN FULL BARCELONA', mapping: rule('CODECO GATE IN → Arrived') },
+    { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Bilbao plant', occurredAt: at(-8), channel: 'portal', rawText: 'Recogida realizada - Planta Bilbao', mapping: rule('Recogida realizada → Picked up') },
+    { kind: 'carrier', legId: `${id}-L1`, status: 'arrived', location: 'Bilbao port', occurredAt: at(-6), channel: 'portal', rawText: 'Entregado en terminal BIO', mapping: rule('Entregado en terminal → Arrived') },
+    { kind: 'carrier', legId: `${id}-L2`, status: 'arrived', location: 'Bilbao port terminal', occurredAt: at(-5), channel: 'edi', rawText: 'CODECO GATE IN FULL BILBAO', mapping: rule('CODECO GATE IN → Arrived') },
   ])
 
   return {
     id,
-    customerId: 'alpen-werkzeug',
-    originSiteId: 'zaragoza-plant',
-    destination: { name: 'Alpen Werkzeug AG', city: 'Zurich', countryCode: 'CH' },
-    cargo: 'Pneumatic tool sets, 9 pallets',
-    bookedAt: at(-80),
-    plannedDeliveryAt: at(44),
-    erpOrder: {
-      poNumber: '4500-1185',
-      hsCode: '8467.11',
-      grossWeightKg: 2480,
-      requiredDocuments: [...SWISS_ROAD_DOCUMENTS, 'billOfLading'],
-    },
+    customerId: 'brenner-iberia',
+    originSiteId: 'bilbao-plant',
+    destination: { name: 'Brenner Iberia France', city: 'Le Havre', countryCode: 'FR' },
+    cargo: 'Hydraulic press spare parts, 2 crates',
+    bookedAt: at(-72),
+    plannedDeliveryAt: at(50),
+    erpOrder: { poNumber: '4500-1203', hsCode: '8466.94', grossWeightKg: 960, requiredDocuments: ['commercialInvoice', 'packingList', 'billOfLading'] },
     legs,
     ...tracking,
-    carrierEta: providedEta(at(44), 'mareline', 'edi', at(-6)),
+    carrierEta: providedEta(at(50), 'mareline', 'edi', at(-5)),
     estimatedEta: {
-      date: at(44),
-      earliest: at(41),
-      latest: at(48),
-      confidence: 85,
-      reason: 'The container is at the Barcelona terminal and Mareline Tramontana is on schedule.',
+      date: at(50),
+      earliest: at(47),
+      latest: at(54),
+      confidence: 87,
+      reason: 'The container is at the Bilbao terminal and Mareline Levante is on schedule.',
     },
-    documents: [...swissRoadDocuments(id, at(-51), '8467.11', 2480), pendingDocument(id, 'billOfLading')],
+    documents: [
+      receivedDocument(id, 'commercialInvoice', at(-8), { hsCode: '8466.94', grossWeightKg: 960 }),
+      receivedDocument(id, 'packingList', at(-8), { grossWeightKg: 960 }),
+      pendingDocument(id, 'billOfLading'),
+    ],
     exceptions: [],
   }
 }
@@ -944,7 +942,7 @@ function outOfScopeShipments(at: (hours: number) => string): Shipment[] {
  * shipments covering every state of the demo story. Returns a fresh object on every call, so
  * callers may mutate it freely.
  */
-export function createSeed(demoNow: Date = DEMO_NOW): DemoState {
+export function createSeed(demoNow: Date = new Date(DEMO_NOW_ISO)): DemoState {
   const at = createClock(demoNow)
 
   return {
@@ -953,7 +951,7 @@ export function createSeed(demoNow: Date = DEMO_NOW): DemoState {
     carriers: structuredClone(carriers),
     shipments: [
       customsHoldShipment(at),
-      rolledVesselShipment(at),
+      quietTerminalShipment(at),
       predictedDelayShipment(at),
       staleShipment(at),
       incidentShipment(at),
@@ -981,55 +979,55 @@ export type SimulatedCarrierEvent = {
 }
 
 /**
- * The scripted carrier event of the demo: Mareline rolls the SH-1047 container to the next
+ * The scripted carrier event of the demo: Mareline rolls the SH-1060 container to the next
  * sailing. `receivedAt` is the moment the demo action is triggered; the ETAs are relative to
  * `demoNow` so they stay consistent with the rest of the seed.
  */
-export function createSimulatedCarrierEvent(receivedAt: Date, demoNow: Date = DEMO_NOW): SimulatedCarrierEvent {
+export function createSimulatedCarrierEvent(receivedAt: Date, demoNow: Date = new Date(DEMO_NOW_ISO)): SimulatedCarrierEvent {
   const at = createClock(demoNow)
   const id = SIMULATED_EVENT_SHIPMENT_ID
   const receivedAtIso = receivedAt.toISOString()
 
   return {
-    legs: simulationTargetLegs(at, { vessel: 'Mareline Gregal', voyage: 'ML-0843', departureHours: 78 }),
+    legs: simulationTargetLegs(at, { vessel: 'Mareline Poniente', voyage: 'ML-0846', departureHours: 78 }),
     rawEvent: {
       id: SIMULATED_EVENT_ID,
       carrierId: 'mareline',
       channel: 'edi',
       receivedAt: receivedAtIso,
-      rawText: 'CODECO ROLLED - NOT LOADED ML-0839 / NEXT VSL MARELINE GREGAL ML-0843',
+      rawText: 'CODECO ROLLED - NOT LOADED ML-0842 / NEXT VSL MARELINE PONIENTE ML-0846',
       normalizedStatus: 'vesselRolled',
       mapping: rule('CODECO ROLLED → Vessel rolled'),
     },
     milestone: {
-      id: `${id}-M4`,
+      id: SIMULATED_MILESTONE_ID,
       legId: `${id}-L2`,
       status: 'vesselRolled',
-      location: 'Barcelona port',
+      location: 'Bilbao port',
       occurredAt: receivedAtIso,
       receivedAt: receivedAtIso,
       source: 'carrier',
       rawEventIds: [SIMULATED_EVENT_ID],
     },
-    carrierEta: providedEta(at(116), 'mareline', 'edi', receivedAtIso),
+    carrierEta: providedEta(at(122), 'mareline', 'edi', receivedAtIso),
     estimatedEta: {
-      date: at(118),
-      earliest: at(112),
-      latest: at(128),
-      confidence: 87,
-      reason: 'Mareline moved the container to the next sailing, Mareline Gregal, which departs in about 3 days.',
+      date: at(124),
+      earliest: at(118),
+      latest: at(134),
+      confidence: 86,
+      reason: 'Mareline moved the container to the next sailing, Mareline Poniente, which departs in about 3 days.',
     },
     exception: {
-      id: `${id}-X1`,
+      id: SIMULATED_EXCEPTION_ID,
       type: 'vesselRolled',
       openedAt: receivedAtIso,
       aiDiagnosis: {
-        summary: 'Mareline will not load the container on Mareline Tramontana (ML-0839) and moved it to Mareline Gregal (ML-0843). Delivery to Zurich moves about 3 days later than planned.',
+        summary: 'Mareline did not load the container on Mareline Levante (ML-0842) and moved it to Mareline Poniente (ML-0846). Delivery to Le Havre moves about 3 days later than planned.',
         basedOnEventIds: [`${id}-E3`, SIMULATED_EVENT_ID],
       },
       draft: {
         status: 'pending',
-        body: 'Hello Alpen Werkzeug team, shipment SH-1047 (PO 4500-1185) was moved to the next sailing from Barcelona. We now expect delivery about 3 days later than planned and will keep you updated.',
+        body: 'Hello Brenner Iberia team, the vessel carrying shipment SH-1060 (PO 4500-1203) will leave Bilbao without your container. It is booked on the next sailing and we now expect delivery about 3 days later than planned.',
       },
     },
   }

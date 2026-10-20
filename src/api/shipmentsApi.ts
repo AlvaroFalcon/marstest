@@ -1,7 +1,7 @@
 import { delay } from 'es-toolkit'
 import { createMockDb } from '@/api/mockDb'
 import type { MockDb } from '@/api/mockDb'
-import { createSimulatedCarrierEvent, DEMO_NOW, SIMULATED_EVENT_ID, SIMULATED_EVENT_SHIPMENT_ID } from '@/api/seed'
+import { createSimulatedCarrierEvent, DEMO_NOW_ISO, SIMULATED_EVENT_ID, SIMULATED_EVENT_SHIPMENT_ID } from '@/api/seed'
 import type { DemoState, ReferenceData, Shipment, ShipmentException } from '@/api/types'
 
 /** Simulated network latency, so loading states are visible in the demo (ADR 0033). */
@@ -30,7 +30,7 @@ export type ShipmentsApiOptions = {
   latencyMs?: number
   /**
    * Clock used for `notifiedAt`, `discardedAt` and the simulated event. Defaults to the fixed demo
-   * time so new data stays consistent with the seed, whose dates are relative to `DEMO_NOW`.
+   * time so new data stays consistent with the seed, whose dates are relative to `DEMO_NOW_ISO`.
    */
   now?: () => Date
 }
@@ -63,7 +63,7 @@ export type ShipmentsApi = {
   approveDraft: (shipmentId: string, exceptionId: string, body: string) => Promise<Shipment>
   /** Discards a pending customer notice. Rejects with {@link ConflictError} when it is not pending. */
   discardDraft: (shipmentId: string, exceptionId: string) => Promise<Shipment>
-  /** Applies the scripted demo event (vessel rolled on SH-1047) once; later calls change nothing. */
+  /** Applies the scripted demo event (vessel rolled on SH-1060) once; later calls change nothing. */
   simulateCarrierEvent: () => Promise<SimulateCarrierEventResult>
   /** Restores the seed. */
   resetDemo: () => Promise<void>
@@ -86,7 +86,7 @@ function findException(shipment: Shipment, exceptionId: string): ShipmentExcepti
 }
 
 /** Creates the fake API over `db`. The app uses the {@link shipmentsApi} instance. */
-export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = () => new Date(DEMO_NOW) }: ShipmentsApiOptions): ShipmentsApi {
+export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = () => new Date(DEMO_NOW_ISO) }: ShipmentsApiOptions): ShipmentsApi {
   /**
    * Runs `operation` after the simulated latency. Reading or writing inside the delayed callback
    * means each call sees the state at the moment it "reaches the server", like a real backend.
