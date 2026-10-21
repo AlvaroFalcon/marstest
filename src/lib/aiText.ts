@@ -1,6 +1,7 @@
 import type { Customer, DocumentType, ExceptionType, MilestoneStatus, Shipment } from '@/api/types'
 import { classifyDelay } from '@/lib/delayClassification'
 import { checkDocuments } from '@/lib/documentCheck'
+import type { DocumentFinding } from '@/lib/documentCheck'
 import { listExceptionsByUrgency } from '@/lib/exceptionPriority'
 import { getShipmentStatus } from '@/lib/shipmentStatus'
 import { STALE_AFTER_HOURS } from '@/lib/thresholds'
@@ -12,11 +13,11 @@ import { STALE_AFTER_HOURS } from '@/lib/thresholds'
  * only from values present in the shipment, so the texts cannot invent dates or numbers.
  */
 
-/** Customer-facing summary of a shipment plus the events it is based on ("Based on N events"). */
+/** Customer-facing summary of a shipment plus the events it is based on. */
 export type ShipmentSummary = {
   text: string
+  /** Raw events the text is based on; their count is the "Based on N events" label. */
   basedOnEventIds: string[]
-  basedOnEventCount: number
 }
 
 /** Predicate that follows "Shipment SH-1000" and reads naturally with the milestone location. */
@@ -55,6 +56,8 @@ const DOCUMENT_LABELS: Record<DocumentType, string> = {
   proofOfDelivery: 'proof of delivery',
 }
 
+const listFormatter = new Intl.ListFormat('en-GB', { style: 'long', type: 'conjunction' })
+
 const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })
 
 function formatDate(isoDate: string): string {
@@ -65,7 +68,7 @@ function formatDate(isoDate: string): string {
  * Summarises where a shipment is for the customer: current status and location, our estimate
  * with its confidence, and the open exception if there is one.
  *
- * @returns The text and the raw events it is based on, for the "Based on N events" label.
+ * @returns The text and the ids of the raw events it is based on.
  */
 export function summarizeShipmentForCustomer(shipment: Shipment): ShipmentSummary {
   const status = getShipmentStatus(shipment)
@@ -92,15 +95,37 @@ export function summarizeShipmentForCustomer(shipment: Shipment): ShipmentSummar
   }
 
   const basedOnEventIds = shipment.rawEvents.map(rawEvent => rawEvent.id)
-  return { text: sentences.join(' '), basedOnEventIds, basedOnEventCount: basedOnEventIds.length }
+  return { text: sentences.join(' '), basedOnEventIds }
+}
+
+const FIELD_LABELS: Record<'hsCode' | 'grossWeightKg', string> = {
+  hsCode: 'HS code',
+  grossWeightKg: 'gross weight',
+}
+
+/** Wording of one document finding as a step to release a customs hold; `null` for findings that need no step. */
+function describeCustomsStep(finding: DocumentFinding): string | null {
+  if (finding.kind !== 'mismatch') {
+    return null
+  }
+  const unit = finding.field === 'grossWeightKg' ? ' kg' : ''
+  return `correct the ${FIELD_LABELS[finding.field]} on the ${DOCUMENT_LABELS[finding.documentType]} (${finding.actual}${unit} vs ${finding.expected}${unit} in the ERP order)`
 }
 
 function suggestActionForException(shipment: Shipment, type: ExceptionType): string {
   switch (type) {
     case 'customsHold': {
-      const missing = checkDocuments(shipment).findings.flatMap(finding => finding.kind === 'missing' ? [DOCUMENT_LABELS[finding.documentType]] : [])
-      return missing.length > 0
-        ? `Provide the missing ${missing.join(' and ')} to release the customs hold.`
+      const { findings } = checkDocuments(shipment)
+      const missingLabels = findings.flatMap(finding => finding.kind === 'missing' ? [DOCUMENT_LABELS[finding.documentType]] : [])
+      const steps = [
+        ...(missingLabels.length > 0 ? [`provide the missing ${listFormatter.format(missingLabels)}`] : []),
+        ...findings.flatMap((finding) => {
+          const step = describeCustomsStep(finding)
+          return step === null ? [] : [step]
+        }),
+      ]
+      return steps.length > 0
+        ? `To release the customs hold, ${listFormatter.format(steps)}.`
         : 'Ask the customs broker what the authority is waiting for.'
     }
     case 'vesselRolled':
@@ -131,7 +156,7 @@ export function suggestNextAction(shipment: Shipment): string {
     case 'watching':
       return 'Ask the carrier to confirm the ETA.'
     case 'predictedDelay':
-      return 'Review the new estimate and notify the customer.'
+      return 'Review the new estimate and send the customer notice.'
   }
 }
 

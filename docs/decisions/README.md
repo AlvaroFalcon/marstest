@@ -65,3 +65,5 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0050](0050-current-status-from-latest-milestone.md) | Current status comes from the latest milestone by occurrence time | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0051](0051-out-of-scope-site-visible-to-operations-only.md) | The out-of-scope Lyon site is visible to operations only | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0052](0052-rule-label-uses-seed-format.md) | Status rule labels use the seed format "pattern → status label" | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0053](0053-simulated-ai-date-format-en-gb-utc.md) | Dates in simulated AI texts use the "22 Oct 2026" format | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0054](0054-customs-hold-next-action-lists-mismatches.md) | Customs-hold next-action suggestion lists document mismatches as well as missing documents | User, on Claude's proposal | Accepted | 2026-10-21 |

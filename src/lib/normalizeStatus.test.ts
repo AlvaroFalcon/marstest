@@ -3,6 +3,14 @@ import type { EventMapping, MilestoneStatus, RawCarrierEvent } from '@/api/types
 import { normalizeStatus } from '@/lib/normalizeStatus'
 
 const seededRawEvents = createSeed().shipments.flatMap(shipment => shipment.rawEvents)
+function getSeedRawEvent(predicate: (rawEvent: RawCarrierEvent) => boolean): RawCarrierEvent {
+  const rawEvent = seededRawEvents.find(predicate)
+  if (!rawEvent) {
+    throw new Error('Seed raw event not found')
+  }
+  return rawEvent
+}
+
 const seededRuleEvents = seededRawEvents.filter(rawEvent => rawEvent.mapping.method === 'rule')
 
 function buildRawEvent(overrides: Partial<RawCarrierEvent>): RawCarrierEvent {
@@ -160,23 +168,21 @@ describe('normalizeStatus', () => {
   })
 
   describe('AI fallback', () => {
-    const seededAiEvents = seededRawEvents.filter(rawEvent => rawEvent.mapping.method === 'ai')
-
     it('uses the seeded AI status and confidence when no rule matches', () => {
-      const rawEvent = seededAiEvents.find(candidate => candidate.id === 'SH-1051-E3')
+      const rawEvent = getSeedRawEvent(candidate => candidate.id === 'SH-1051-E3')
 
-      const result = rawEvent && normalizeStatus(rawEvent)
+      const result = normalizeStatus(rawEvent)
 
       expect(result).toEqual({ status: 'incident', mapping: { method: 'ai', confidence: 88 }, needsReview: false })
     })
 
     it('flags the seeded 54 % AI mapping for review', () => {
-      const rawEvent = seededAiEvents.find(candidate => candidate.mapping.method === 'ai' && candidate.mapping.confidence === 54)
+      const rawEvent = getSeedRawEvent(candidate => candidate.mapping.method === 'ai' && candidate.mapping.confidence === 54)
 
-      const result = rawEvent && normalizeStatus(rawEvent)
+      const result = normalizeStatus(rawEvent)
 
-      expect(result?.status).toBe('inTransit')
-      expect(result?.needsReview).toBe(true)
+      expect(result.status).toBe('inTransit')
+      expect(result.needsReview).toBe(true)
     })
 
     it.each([

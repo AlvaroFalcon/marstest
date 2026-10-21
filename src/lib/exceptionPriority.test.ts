@@ -11,7 +11,10 @@ function getSeedShipment(shipmentId: string): Shipment {
   return shipment
 }
 
-/** SH-1033 (no exceptions in the seed) with one open exception of the given type. */
+/**
+ * Builds a shipment with the given id and exactly one open exception of the given type and
+ * `openedAt`, copied from SH-1033 (no exceptions in the seed) plus the exception shape of SH-1042.
+ */
 function buildShipmentWithException(shipmentId: string, type: ExceptionType, openedAt: string): Shipment {
   const base = getSeedShipment('SH-1042')
   return {
@@ -51,7 +54,9 @@ describe('listExceptionsByUrgency', () => {
       buildShipmentWithException('SH-E', 'customsHold', '2026-10-05T00:00:00.000Z'),
     ]
 
-    expect(listIds(shipments)).toEqual(['SH-E', 'SH-D', 'SH-C', 'SH-B', 'SH-A'])
+    const ids = listIds(shipments)
+
+    expect(ids).toEqual(['SH-E', 'SH-D', 'SH-C', 'SH-B', 'SH-A'])
   })
 
   it('puts the exception open for longest first within the same type', () => {

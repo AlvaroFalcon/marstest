@@ -18,6 +18,12 @@ function getSeedCustomer(customerId: string): Customer {
   return customer
 }
 
+/** SH-1042 with the ERP HS code corrected to the one on its documents, so only the certificate of origin is missing. */
+function buildCustomsHoldShipment(): Shipment {
+  const shipment = getSeedShipment('SH-1042')
+  return { ...shipment, erpOrder: { ...shipment.erpOrder, hsCode: '8467.29' } }
+}
+
 describe('summarizeShipmentForCustomer', () => {
   it('summarises a shipment with an open customs hold', () => {
     const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
@@ -99,7 +105,7 @@ describe('summarizeShipmentForCustomer', () => {
   it('reports the raw events it is based on', () => {
     const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
 
-    expect(summary.basedOnEventCount).toBe(6)
+    expect(summary.basedOnEventIds).toHaveLength(6)
     expect(summary.basedOnEventIds).toEqual(['SH-1042-E1', 'SH-1042-E2', 'SH-1042-E3', 'SH-1042-E4', 'SH-1042-E5', 'SH-1042-E6'])
   })
 
@@ -108,31 +114,60 @@ describe('summarizeShipmentForCustomer', () => {
 
     const summary = summarizeShipmentForCustomer(shipment)
 
-    expect(summary.basedOnEventCount).toBe(0)
     expect(summary.basedOnEventIds).toEqual([])
   })
 })
 
 describe('suggestNextAction', () => {
-  it('asks for the missing certificate of origin on a customs hold', () => {
-    expect(suggestNextAction(getSeedShipment('SH-1042'))).toBe('Provide the missing certificate of origin to release the customs hold.')
+  it('lists the missing certificate and both HS code corrections on the SH-1042 customs hold', () => {
+    const action = suggestNextAction(getSeedShipment('SH-1042'))
+
+    expect(action).toBe(
+      'To release the customs hold, provide the missing certificate of origin, correct the HS code on the commercial invoice (8467.29 vs 8467.21 in the ERP order) and correct the HS code on the customs declaration (8467.29 vs 8467.21 in the ERP order).',
+    )
   })
 
-  it('asks the customs broker when a customs hold has no missing document', () => {
-    const shipment = getSeedShipment('SH-1042')
-    const complete: Shipment = { ...shipment, erpOrder: { ...shipment.erpOrder, requiredDocuments: ['commercialInvoice'] } }
+  it('asks only for the missing certificate when the documents have no mismatch', () => {
+    const action = suggestNextAction(buildCustomsHoldShipment())
 
-    expect(suggestNextAction(complete)).toBe('Ask the customs broker what the authority is waiting for.')
+    expect(action).toBe('To release the customs hold, provide the missing certificate of origin.')
   })
 
   it('joins several missing documents', () => {
-    const shipment = getSeedShipment('SH-1042')
+    const shipment = buildCustomsHoldShipment()
     const twoMissing: Shipment = {
       ...shipment,
       documents: shipment.documents.filter(document => document.type !== 'packingList'),
     }
 
-    expect(suggestNextAction(twoMissing)).toBe('Provide the missing packing list and certificate of origin to release the customs hold.')
+    const action = suggestNextAction(twoMissing)
+
+    expect(action).toBe('To release the customs hold, provide the missing packing list and certificate of origin.')
+  })
+
+  it('adds a gross weight correction step when a document weight is off by more than 1 %', () => {
+    const shipment = buildCustomsHoldShipment()
+    const heavyPackingList: Shipment = {
+      ...shipment,
+      documents: shipment.documents.map(document =>
+        document.status === 'received' && document.type === 'packingList' ? { ...document, extracted: { grossWeightKg: 2000 } } : document),
+    }
+
+    const action = suggestNextAction(heavyPackingList)
+
+    expect(action).toBe('To release the customs hold, provide the missing certificate of origin and correct the gross weight on the packing list (2000 kg vs 1840 kg in the ERP order).')
+  })
+
+  it('asks the customs broker when a customs hold has nothing to provide or correct', () => {
+    const shipment = buildCustomsHoldShipment()
+    const nothingToFix: Shipment = {
+      ...shipment,
+      erpOrder: { ...shipment.erpOrder, requiredDocuments: ['commercialInvoice', 'packingList', 'billOfLading', 'customsDeclaration'] },
+    }
+
+    const action = suggestNextAction(nothingToFix)
+
+    expect(action).toBe('Ask the customs broker what the authority is waiting for.')
   })
 
   it('asks for a revised ETA and the cargo condition after an incident', () => {
@@ -166,7 +201,7 @@ describe('suggestNextAction', () => {
     const shipment = getSeedShipment('SH-1035')
     const withoutException: Shipment = { ...shipment, exceptions: [] }
 
-    expect(suggestNextAction(withoutException)).toBe('Review the new estimate and notify the customer.')
+    expect(suggestNextAction(withoutException)).toBe('Review the new estimate and send the customer notice.')
   })
 })
 
