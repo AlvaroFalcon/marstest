@@ -7,18 +7,18 @@ export type ExceptionEntry = {
   exception: ShipmentException
 }
 
-/** Exception types from most to least urgent. */
-const URGENCY_ORDER: readonly ExceptionType[] = [
-  'customsHold',
-  'incident',
-  'vesselRolled',
-  'predictedDelay',
-  'staleTracking',
-]
+/** Urgency rank per exception type; 0 is the most urgent. Exhaustive, so a new type must be ranked. */
+const URGENCY_RANK: Record<ExceptionType, number> = {
+  customsHold: 0,
+  incident: 1,
+  vesselRolled: 2,
+  predictedDelay: 3,
+  staleTracking: 4,
+}
 
 /** Position of an exception type in the urgency order; 0 is the most urgent. */
 export function getExceptionUrgencyRank(type: ExceptionType): number {
-  return URGENCY_ORDER.indexOf(type)
+  return URGENCY_RANK[type]
 }
 
 /**

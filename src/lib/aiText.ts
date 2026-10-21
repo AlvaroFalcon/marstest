@@ -3,6 +3,7 @@ import { classifyDelay } from '@/lib/delayClassification'
 import { checkDocuments } from '@/lib/documentCheck'
 import { listExceptionsByUrgency } from '@/lib/exceptionPriority'
 import { getShipmentStatus } from '@/lib/shipmentStatus'
+import { STALE_AFTER_HOURS } from '@/lib/thresholds'
 
 /**
  * Simulated AI texts for content the seed does not already hold: the customer summary, the
@@ -40,8 +41,8 @@ const EXCEPTION_PHRASES: Record<ExceptionType, string> = {
   customsHold: 'is held at customs',
   vesselRolled: 'was not loaded on its vessel and moves to the next sailing',
   predictedDelay: 'is expected to arrive later than the carrier ETA',
-  staleTracking: 'has had no tracking update for more than 24 hours',
-  incident: 'was affected by an incident on the road',
+  staleTracking: `has had no tracking update for more than ${STALE_AFTER_HOURS} hours`,
+  incident: 'was affected by an incident on its way',
 }
 
 const DOCUMENT_LABELS: Record<DocumentType, string> = {

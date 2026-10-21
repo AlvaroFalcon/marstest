@@ -83,6 +83,19 @@ function toComparableText(text: string): string {
 }
 
 /**
+ * True when `text` starts with `pattern` as a whole word: the pattern must be followed by the end
+ * of the text or a character that is not a letter, digit or underscore. This keeps `DELIVERED`
+ * from matching `DELIVERED_TO_TERMINAL`.
+ */
+function startsWithWholePattern(text: string, pattern: string): boolean {
+  if (!text.startsWith(pattern)) {
+    return false
+  }
+  const rest = text.slice(pattern.length)
+  return rest === '' || /^[^\p{L}\p{N}_]/u.test(rest)
+}
+
+/**
  * Maps a raw carrier message onto the normalised status list.
  *
  * The carrier's own rule table is tried first (deterministic, case and accent insensitive, longest
@@ -96,7 +109,7 @@ function toComparableText(text: string): string {
 export function normalizeStatus(event: RawCarrierEvent): NormalizedEvent {
   const text = toComparableText(event.rawText)
   const rules = RULES_BY_CARRIER.get(event.carrierId) ?? []
-  const matchedRule = rules.find(rule => text.startsWith(toComparableText(rule.pattern)))
+  const matchedRule = rules.find(rule => startsWithWholePattern(text, toComparableText(rule.pattern)))
 
   if (matchedRule) {
     return {

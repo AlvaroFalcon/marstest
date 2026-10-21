@@ -108,13 +108,37 @@ describe('normalizeStatus', () => {
       expect(result).toEqual({ status: 'incident', mapping: { method: 'ai', confidence: 82 }, needsReview: false })
     })
 
-    it('does not match the text of one carrier in the table of another with similar wording', () => {
+    it('falls back to the stored AI mapping when the pattern is only a prefix of a longer word', () => {
       const rawEvent = buildRawEvent({
         carrierId: 'transauto',
         rawText: 'DELIVERED_TO_TERMINAL BILBAO',
         normalizedStatus: 'delayed',
         mapping: { method: 'ai', confidence: 90 },
       })
+
+      const result = normalizeStatus(rawEvent)
+
+      expect(result).toEqual({ status: 'delayed', mapping: { method: 'ai', confidence: 90 }, needsReview: false })
+    })
+
+    it('matches a pattern followed by a space', () => {
+      const rawEvent = buildRawEvent({ carrierId: 'transauto', rawText: 'DELIVERED BILBAO', normalizedStatus: 'delayed' })
+
+      const result = normalizeStatus(rawEvent)
+
+      expect(result.status).toBe('delivered')
+    })
+
+    it('matches a pattern followed by punctuation', () => {
+      const rawEvent = buildRawEvent({ carrierId: 'transauto', rawText: 'DELIVERED, signed by Maria', normalizedStatus: 'delayed' })
+
+      const result = normalizeStatus(rawEvent)
+
+      expect(result.status).toBe('delivered')
+    })
+
+    it('matches a pattern that is the whole text', () => {
+      const rawEvent = buildRawEvent({ carrierId: 'transauto', rawText: 'DELIVERED', normalizedStatus: 'delayed' })
 
       const result = normalizeStatus(rawEvent)
 

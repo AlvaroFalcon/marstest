@@ -72,6 +72,14 @@ describe('summarizeShipmentForCustomer', () => {
     expect(summary.text).not.toContain('no tracking update for more than 24 hours')
   })
 
+  it('summarises a shipment with an open incident', () => {
+    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1051'))
+
+    expect(summary.text).toBe(
+      'Shipment SH-1051 was affected by an incident at A10 near Poitiers. We estimate delivery on 22 Oct 2026 (77 % confidence). Open issue: this shipment was affected by an incident on its way.',
+    )
+  })
+
   it('contains only the numbers present in the shipment', () => {
     const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
 
@@ -172,6 +180,18 @@ describe('draftCustomerNotice', () => {
 
     expect(notice).toBe(
       'Hello Brenner Iberia S.L. team, shipment SH-1060 (PO 4500-1203) was not loaded on its vessel and moves to the next sailing. Last reported location: Bilbao port terminal. We now expect delivery on 22 Oct 2026.',
+    )
+  })
+
+  it('drafts an incident notice for SH-1051', () => {
+    const notice = draftCustomerNotice({
+      shipment: getSeedShipment('SH-1051'),
+      customer: getSeedCustomer('nordwerk'),
+      exceptionType: 'incident',
+    })
+
+    expect(notice).toBe(
+      'Hello Nordwerk GmbH team, shipment SH-1051 (PO 4500-1195) was affected by an incident on its way. Last reported location: A10 near Poitiers. We now expect delivery on 22 Oct 2026.',
     )
   })
 
