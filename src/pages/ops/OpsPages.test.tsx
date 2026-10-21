@@ -4,11 +4,10 @@ import { OpsShipmentsPage } from '@/pages/ops/OpsShipmentsPage'
 import { renderWithProviders } from '@/test/renderWithProviders'
 
 describe('OpsExceptionsPage', () => {
-  it('shows the inbox heading with a coming soon note', () => {
+  it('shows the inbox heading', () => {
     renderWithProviders(<OpsExceptionsPage />)
 
-    expect(screen.getByRole('heading', { name: 'Exceptions inbox' })).toBeInTheDocument()
-    expect(screen.getByText('Coming soon')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Exceptions/ })).toBeInTheDocument()
   })
 })
 

@@ -1,0 +1,52 @@
+import { screen } from '@testing-library/react'
+import { ExceptionCard, type ExceptionCardProps } from '@/components/exceptions/ExceptionCard'
+import { renderWithProviders } from '@/test/renderWithProviders'
+
+function buildProps(overrides: Partial<ExceptionCardProps> = {}): ExceptionCardProps {
+  return {
+    shipmentId: 'SH-1042',
+    route: 'Zaragoza → Birmingham',
+    reason: 'UK customs is holding the container at Southampton.',
+    status: { type: 'customsHold' },
+    href: '/ops/exceptions/SH-1042?site=zaragoza-plant',
+    isOpen: false,
+    ...overrides,
+  }
+}
+
+describe('ExceptionCard', () => {
+  it('shows the shipment, route, reason and status badge in one link', () => {
+    renderWithProviders(<ExceptionCard {...buildProps()} />)
+
+    const card = screen.getByRole('link', {
+      name: /SH-1042 · Zaragoza → Birmingham.*UK customs is holding the container at Southampton\..*Customs hold/,
+    })
+    expect(card).toBeInTheDocument()
+  })
+
+  it('links to the detail URL it was given', () => {
+    renderWithProviders(<ExceptionCard {...buildProps()} />)
+
+    expect(screen.getByRole('link')).toHaveAttribute('href', '/ops/exceptions/SH-1042?site=zaragoza-plant')
+  })
+
+  it('shows the hours without news for a stale tracking exception', () => {
+    renderWithProviders(
+      <ExceptionCard {...buildProps({ shipmentId: 'SH-1029', status: { type: 'staleTracking', staleHours: 52 } })} />,
+    )
+
+    expect(screen.getByText('No update 52 h')).toBeInTheDocument()
+  })
+
+  it('marks the open card as the current page', () => {
+    renderWithProviders(<ExceptionCard {...buildProps({ isOpen: true })} />)
+
+    expect(screen.getByRole('link')).toHaveAttribute('aria-current', 'page')
+  })
+
+  it('does not mark a closed card as the current page', () => {
+    renderWithProviders(<ExceptionCard {...buildProps({ isOpen: false })} />)
+
+    expect(screen.getByRole('link')).not.toHaveAttribute('aria-current')
+  })
+})

@@ -1,15 +1,113 @@
-import { FormattedMessage } from 'react-intl'
+import { useLocation, useParams } from 'react-router'
+import { ExceptionInbox, type ExceptionInboxContent } from '@/components/exceptions/ExceptionInbox'
+import type { ExceptionInboxItem as ExceptionInboxCard } from '@/components/exceptions/ExceptionInbox'
+import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
+import { ExceptionsDetailPlaceholder } from '@/components/exceptions/ExceptionsDetailPlaceholder'
+import { useExceptions } from '@/hooks/useExceptions'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
+import type { ExceptionInboxItem } from '@/lib/exceptionInbox'
+import routes from '@/routes'
 
-/** Ops exceptions inbox. Placeholder until the inbox milestone; also serves the detail route. */
+/**
+ * Viewport at which the inbox and the detail sit side by side. One value drives both the layout
+ * and the site filter presentation (popover vs bottom sheet), so the two can never disagree; a
+ * container query could not do that because the filter renders in a portal.
+ */
+const DESKTOP_QUERY = '(min-width: 64rem)'
+
+function toStatus(item: ExceptionInboxItem): ExceptionStatus {
+  switch (item.exception.type) {
+    case 'staleTracking':
+      return { type: 'staleTracking', staleHours: item.hoursSinceUpdate }
+    case 'customsHold':
+      return { type: 'customsHold' }
+    case 'incident':
+      return { type: 'incident' }
+    case 'vesselRolled':
+      return { type: 'vesselRolled' }
+    case 'predictedDelay':
+      return { type: 'predictedDelay' }
+  }
+}
+
+/**
+ * Ops exceptions inbox. Wide viewports show the inbox next to the detail panel; narrow ones show
+ * the inbox, or only the detail when the URL names an exception, with a link back that keeps the
+ * `?site=` filter. The route serves both `/ops/exceptions` and `/ops/exceptions/:shipmentId`.
+ */
 export function OpsExceptionsPage() {
-  return (
-    <main className="flex flex-col gap-2">
-      <h1 className="text-2xl font-semibold">
-        <FormattedMessage id="opsExceptions.title" />
-      </h1>
-      <p className="text-muted-foreground">
-        <FormattedMessage id="page.comingSoon" />
-      </p>
-    </main>
+  const { shipmentId } = useParams()
+  const { search } = useLocation()
+  const isDesktop = useMediaQuery(DESKTOP_QUERY)
+  const exceptions = useExceptions()
+
+  const hasSelection = shipmentId !== undefined
+  const selectedSiteId = exceptions.status === 'ready' ? exceptions.selectedSiteId : null
+  const options = exceptions.status === 'ready'
+    ? [
+        ...exceptions.inbox.siteCounts,
+        ...exceptions.inbox.outOfScopeSites.map(site => ({ site, exceptionCount: 0 })),
+      ]
+    : []
+
+  let content: ExceptionInboxContent
+  switch (exceptions.status) {
+    case 'loading':
+      content = { status: 'loading' }
+      break
+    case 'error':
+      content = { status: 'error', onRetry: exceptions.retry }
+      break
+    case 'ready':
+      content = {
+        status: 'ready',
+        items: exceptions.inbox.items.map((item): ExceptionInboxCard => ({
+          shipmentId: item.shipmentId,
+          route: item.routeLabel,
+          reason: item.reason,
+          status: toStatus(item),
+          href: `${routes.ops.exception(item.shipmentId)}${search}`,
+          isOpen: item.shipmentId === shipmentId,
+        })),
+        kpis: {
+          needAttention: exceptions.inbox.kpis.needAttention,
+          staleOverDay: exceptions.inbox.kpis.staleOver24h,
+          onTime: exceptions.inbox.kpis.onTime,
+          total: exceptions.inbox.kpis.total,
+        },
+      }
+      break
+  }
+
+  const inbox = (
+    <ExceptionInbox
+      content={content}
+      siteFilter={{
+        options,
+        selectedSiteId,
+        totalExceptionCount: exceptions.status === 'ready' ? exceptions.inbox.totalExceptionCount : 0,
+        onSelect: exceptions.status === 'ready' ? exceptions.setSelectedSiteId : () => {},
+        isDesktop,
+      }}
+    />
   )
+
+  if (isDesktop) {
+    return (
+      <main className="grid grid-cols-[33.5rem_1fr] items-start gap-6">
+        {inbox}
+        <ExceptionsDetailPlaceholder hasSelection={hasSelection} />
+      </main>
+    )
+  }
+
+  if (hasSelection) {
+    return (
+      <main>
+        <ExceptionsDetailPlaceholder hasSelection backHref={`${routes.ops.exceptions()}${search}`} />
+      </main>
+    )
+  }
+
+  return <main>{inbox}</main>
 }

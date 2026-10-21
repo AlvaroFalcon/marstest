@@ -78,3 +78,7 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0063](0063-final-node-carrier-eta-or-estimate-range.md) | Final delivery node shows the carrier ETA when in line, otherwise our estimate range | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0064](0064-future-node-colour-follows-written-rule-not-ops-mockup.md) | Future journey nodes use the written colour rule, not the Ops 5 mockup | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0065](0065-overdue-future-nodes-show-overdue-since.md) | Overdue future journey nodes show "Overdue since <date>" | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0066](0066-on-time-kpi-counts-all-scoped-shipments.md) | The "On time" inbox KPI counts all scoped shipments, delivered included | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0067](0067-inbox-kpis-follow-site-filter.md) | Inbox KPIs follow the site filter | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0068](0068-inbox-card-reason-from-ai-summary-first-sentence.md) | Inbox card reason line is the first sentence of the AI diagnosis summary | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0069](0069-viewport-media-query-for-site-filter-presentation.md) | Site filter presentation switches by viewport media query | User, on Claude's proposal | Accepted | 2026-10-21 |

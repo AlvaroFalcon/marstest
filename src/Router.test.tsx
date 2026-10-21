@@ -38,7 +38,7 @@ describe('Router', () => {
     it('redirects "/" to the ops exceptions page', async () => {
       renderRouterAt('/')
 
-      expect(await screen.findByRole('heading', { name: 'Exceptions inbox' })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: /Exceptions/ })).toBeInTheDocument()
       expectPath('/ops/exceptions')
     })
   })
@@ -142,7 +142,7 @@ describe('Router', () => {
 
       await chooseViewer('Ops · Spain sites')
 
-      expect(await screen.findByRole('heading', { name: 'Exceptions inbox' })).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { name: /Exceptions/ })).toBeInTheDocument()
       expectPath('/ops/exceptions')
     })
 
