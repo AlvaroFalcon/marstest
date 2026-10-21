@@ -1,6 +1,6 @@
 # Decision log
 
-Architecture Decision Records of the decisions **taken by the user** during the project, maintained by the `decision-recorder` agent.
+Architecture Decision Records of the high-impact decisions **taken by the user** during the project, maintained by the `decision-recorder` agent. From [0059](0059-decision-log-records-only-high-impact-decisions.md) on, smaller choices (UI placement, copy, accepted small details, review suggestions) are noted in the implementation log instead.
 
 - `Decided by: User` — the user's own decision.
 - `Decided by: User, on Claude's proposal` — Claude proposed the idea or the options, and the user decided to adopt it.
@@ -71,3 +71,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0056](0056-pause-m4-and-rebuild-lost-design.md) | Pause M4 and rebuild the lost Pencil design first | User | Accepted | 2026-10-21 |
 | [0057](0057-simulate-event-present-without-effect-until-m15.md) | "Simulate carrier event" is shown without effect until M15 | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0058](0058-shipments-api-provided-through-react-context.md) | Shipments API provided through a React context | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0059](0059-decision-log-records-only-high-impact-decisions.md) | The decision log records only high-impact user decisions | User, on Claude's proposal | Accepted | 2026-10-21 |

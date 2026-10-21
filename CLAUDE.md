@@ -64,7 +64,7 @@ Each phase runs in a fresh context window and produces a document. All three doc
 | **Plan** | `docs/plans/` | Numbered steps referencing specific files, acceptance criteria, test strategy. Ask the user when a decision has several valid options. | Is the approach sound? |
 | **Implement** | `docs/implementation/` | Follow the plan step by step. Log progress and **every deviation with its reason**. Verify against acceptance criteria. | Does it match the requirements? |
 
-Cross-cutting: `docs/decisions/` is the log of the user's decisions, written by the `decision-recorder` agent during every phase. Claude's own technical choices are explained in commit messages, code comments or this file, not there.
+Cross-cutting: `docs/decisions/` is the log of the user's high-impact decisions (technology swaps, architecture, scope, real trade-offs, workflow conventions, business rules, reversals), written by the `decision-recorder` agent during every phase. Smaller user choices are one line in the implementation log. Claude's own technical choices are explained in commit messages, code comments or this file, not there.
 
 Templates live in each folder as `_TEMPLATE.md`. Split large implementations into chunks, each in its own context window.
 
@@ -233,7 +233,7 @@ Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with 
 | `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review, citing a `CLAUDE.md` section or `.claude/rules/` file for every comment. Reads CI results instead of re-running checks. Never deals with screenshots. Read-only; never posts. | Inside `review-pull-request` on every PR, or manually with a PR number or on the current branch. | Checks PRs against the `create-pull-request` structure. |
 | `qa-reviewer` | Runs the real app, takes screenshots (stored in the `qa-screenshots` branch), validates the PR's acceptance criteria and returns the report with screenshots embedded. Never posts. | Inside `review-pull-request` (routine on the `ready-to-test` label), or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
 | `devops-expert` | Implements and maintains GitHub Actions workflows and CI/CD setup: SHA-pinned actions, least-privilege permissions, caching, parallel jobs. | Whenever the user asks for a new workflow (checks, deploys, scheduled jobs) or a CI run fails for infrastructure reasons. | — |
-| `decision-recorder` | Records in `docs/decisions/` the decisions **the user** takes (choices, scope cuts, preferences) and the ideas proposed by Claude that the user adopts, with the user's reasons. Claude's own decisions are never recorded. | In the background right after the user decides something and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
+| `decision-recorder` | Records in `docs/decisions/` the high-impact decisions **the user** takes (technology swaps, architecture, scope, real trade-offs, workflow conventions, business rules, reversals) and the ideas proposed by Claude that the user adopts, with the user's reasons. Small choices and Claude's own decisions are never recorded. | In the background right after the user takes a high-impact decision and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
 
 ## 12. Skills
 
