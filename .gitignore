@@ -26,6 +26,7 @@ dist-ssr
 
 # QA agent screenshots and reports
 qa-artifacts
+review-artifacts
 
 # Test outputs
 coverage

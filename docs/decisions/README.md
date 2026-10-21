@@ -19,12 +19,12 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0004](0004-shadcn-ui-for-components.md) | shadcn/ui as the component library | User | Accepted | 2026-10-19 |
 | [0005](0005-meaningful-jsdoc.md) | Meaningful JSDoc on exported code | User | Accepted | 2026-10-19 |
 | [0006](0006-standard-pull-request-body.md) | One fixed structure for every pull request | User | Accepted | 2026-10-19 |
-| [0007](0007-qa-agent-on-pull-requests.md) | QA agent validates every pull request from a Claude Code routine | User | Accepted | 2026-10-19 |
+| [0007](0007-qa-agent-on-pull-requests.md) | QA agent validates every pull request from a Claude Code routine | User | Accepted · partially superseded by [0041](0041-single-coordinated-review-on-ready-label.md) | 2026-10-19 |
 | [0008](0008-qa-screenshots-branch.md) | QA screenshots stored in an orphan branch and embedded in PR comments | User, on Claude's proposal | Accepted | 2026-10-19 |
 | [0009](0009-full-recommended-stack.md) | Adopt the full recommended stack from the handbook | User, on Claude's proposal | Accepted | 2026-10-19 |
 | [0010](0010-linting-and-formatting.md) | ESLint Stylistic, Tailwind class sorting and Stylelint | User, on Claude's proposal | Accepted | 2026-10-19 |
 | [0011](0011-claude-code-hooks-and-rules.md) | Claude Code hooks and scoped rules | User, on Claude's proposal | Accepted | 2026-10-19 |
-| [0012](0012-code-reviewer-agent.md) | Code reviewer agent | User, on Claude's proposal | Accepted | 2026-10-19 |
+| [0012](0012-code-reviewer-agent.md) | Code reviewer agent | User, on Claude's proposal | Accepted · partially superseded by [0041](0041-single-coordinated-review-on-ready-label.md) | 2026-10-19 |
 | [0013](0013-pull-request-checks-workflow.md) | Pull request checks workflow and a DevOps agent | User | Accepted | 2026-10-19 |
 | [0014](0014-decision-log-records-user-decisions.md) | The decision log records only the user's decisions | User | Accepted | 2026-10-19 |
 | [0015](0015-screenshots-are-qa-only.md) | Visual evidence is the QA agent's responsibility only | User | Accepted | 2026-10-19 |
@@ -51,3 +51,6 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0036](0036-write-up-as-separate-cycle.md) | The 4-page write-up is a separate RPI cycle after the prototype | User, on Claude's proposal | Accepted | 2026-10-20 |
 | [0037](0037-keep-next-themes-for-sonner-theme.md) | Keep next-themes as a dependency for the Sonner theme | User, on Claude's proposal | Accepted | 2026-10-20 |
 | [0038](0038-simulated-event-rolls-vessel-of-sh-1060.md) | "Simulate carrier event" rolls the vessel of SH-1060 | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0039](0039-aaa-separated-by-blank-lines.md) | Arrange / Act / Assert separated by blank lines, not comments | User | Accepted | 2026-10-21 |
+| [0040](0040-milestones-through-implement-milestone-skill.md) | Milestones are implemented through the `implement-milestone` skill with a decision gate | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted | 2026-10-21 |

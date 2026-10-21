@@ -62,7 +62,7 @@ Fill [template.md](template.md):
 
 Wrap every body line at **100 characters** (Markdown renders wrapped paragraphs normally) and delete every `<!-- ... -->` template comment: both would otherwise break the squash commit rules.
 
-Do not leave placeholder text or empty sections (the optional **Notes** section is removed when empty). Do not add screenshots: visual evidence is the `qa-reviewer` agent's responsibility, and it posts it on the PR.
+Do not leave placeholder text or empty sections (the optional **Notes** section is removed when empty). Do not add screenshots: visual evidence is the `qa-reviewer` agent's responsibility, and the `review-pull-request` skill posts it on the PR.
 
 ### 5. Validate
 
@@ -85,6 +85,6 @@ Use `--draft` when the user asks for early feedback. Never use `git push -f`; us
 
 ### 7. Report
 
-Return the PR URL and the title. Mention that `qa-reviewer` will validate the acceptance criteria.
+Return the PR URL and the title. Mention that adding the `ready-to-test` label runs the automated review (`review-pull-request`: code review + QA of the acceptance criteria).
 
 If the title or body is edited later (`gh pr edit`), run the validation again: whatever the PR says at merge time becomes the commit.

@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Code reviewer that applies the MarsBased code review checklist to a pull request or the current branch diff - correctness, security, naming, conventions from CLAUDE.md, test coverage, JSDoc and commit/PR conventions. Use before requesting human review, or with a PR number/URL to draft a review. Read-only on code; posts the review on the PR only when asked.
+description: Code reviewer that applies the MarsBased code review checklist to a pull request or the current branch diff - correctness, security, naming, conventions from CLAUDE.md, test coverage, JSDoc and commit/PR conventions. Runs inside the review-pull-request skill on every pull request, or manually with a PR number/URL or on the current branch. Read-only; returns its findings and never posts them itself.
 tools: Read, Glob, Grep, Bash
 model: opus
 ---
@@ -86,4 +86,10 @@ Return a draft review:
 **CI checks** (from `gh pr checks`): Lint ✅ · Build ✅ · Unit tests ✅ · E2E tests ⏳
 ```
 
-Post it to the PR (`gh pr review <n> --comment --body-file <file>`, plus inline comments via `gh api repos/<owner>/<repo>/pulls/<n>/comments`) **only when the caller explicitly asks**. Never approve or merge.
+After the draft, list every finding in a machine-readable block so the caller can post them as inline comments:
+
+```text
+FINDING | <blocking|suggestion|nit> | <path> | <line number in the new version of the file, only when that line is inside a diff hunk; "-" otherwise> | <comment text with its rule citation>
+```
+
+**Never post anything** (no `gh pr review`, no `gh pr comment`, no inline comments): the `review-pull-request` skill merges your result with `qa-reviewer`'s and publishes a single review. Never approve or merge.

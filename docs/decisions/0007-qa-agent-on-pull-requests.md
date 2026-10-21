@@ -1,7 +1,7 @@
 # 0007. QA agent validates every pull request from a Claude Code routine
 
 - **Date:** 2026-10-19
-- **Status:** Accepted
+- **Status:** Accepted · partially superseded by [0041](0041-single-coordinated-review-on-ready-label.md)
 - **Decided by:** User
 - **Phase:** Plan
 - **Related:** `.claude/agents/qa-reviewer.md`
