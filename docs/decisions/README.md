@@ -70,10 +70,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0055](0055-branch-names-use-slash.md) | Branch names use a slash after the type (`feat/`, `fix/`) | User | Accepted | 2026-10-21 |
 | [0056](0056-pause-m4-and-rebuild-lost-design.md) | Pause M4 and rebuild the lost Pencil design first | User | Accepted | 2026-10-21 |
 | [0057](0057-simulate-event-present-without-effect-until-m15.md) | "Simulate carrier event" is shown without effect until M15 | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0058](0058-viewing-as-select-on-all-viewports.md) | "Viewing as" role switch is a select on desktop and mobile | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0059](0059-reset-demo-and-theme-toggle-in-demo-strip.md) | "Reset demo" and the theme toggle sit on the right of the demo strip | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0060](0060-theme-toggle-two-state-from-system.md) | Theme toggle switches between light and dark, starting from the system setting | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0061](0061-ops-tab-counts-ignore-site-filter.md) | Ops tabs show two counts that ignore the site filter | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0062](0062-page-stubs-with-coming-soon.md) | Pages not yet built show their heading and a "Coming soon" line | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0063](0063-reset-demo-refreshes-data-and-stays-on-page.md) | "Reset demo" refreshes the data in place and stays on the current page | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0064](0064-accept-app-shell-technical-recommendations.md) | Four app-shell technical recommendations accepted together | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0058](0058-shipments-api-provided-through-react-context.md) | Shipments API provided through a React context | User, on Claude's proposal | Accepted | 2026-10-21 |
