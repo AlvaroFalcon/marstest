@@ -1,6 +1,6 @@
 # Decision log
 
-Architecture Decision Records of the decisions **taken by the user** during the project, maintained by the `decision-recorder` agent.
+Architecture Decision Records of the high-impact decisions **taken by the user** during the project, maintained by the `decision-recorder` agent. From [0059](0059-decision-log-records-only-high-impact-decisions.md) on, smaller choices (UI placement, copy, accepted small details, review suggestions) are noted in the implementation log instead.
 
 - `Decided by: User` — the user's own decision.
 - `Decided by: User, on Claude's proposal` — Claude proposed the idea or the options, and the user decided to adopt it.
@@ -53,7 +53,7 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0038](0038-simulated-event-rolls-vessel-of-sh-1060.md) | "Simulate carrier event" rolls the vessel of SH-1060 | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0039](0039-aaa-separated-by-blank-lines.md) | Arrange / Act / Assert separated by blank lines, not comments | User | Accepted | 2026-10-21 |
 | [0040](0040-milestones-through-implement-milestone-skill.md) | Milestones are implemented through the `implement-milestone` skill with a decision gate | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted · partially superseded by [0060](0060-no-review-before-pushing-pr.md) | 2026-10-21 |
 | [0042](0042-eta-in-line-within-two-hours.md) | Our ETA is in line with the carrier within a fixed ±2 hours | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0043](0043-freshness-two-levels-by-receipt-time.md) | Tracking freshness has two levels, measured from the last received event | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0044](0044-watching-when-carrier-eta-missing.md) | Shipments without a carrier ETA are always "watching" | User | Accepted | 2026-10-21 |
@@ -69,3 +69,7 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0054](0054-customs-hold-next-action-lists-mismatches.md) | Customs-hold next-action suggestion lists document mismatches as well as missing documents | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0055](0055-branch-names-use-slash.md) | Branch names use a slash after the type (`feat/`, `fix/`) | User | Accepted | 2026-10-21 |
 | [0056](0056-pause-m4-and-rebuild-lost-design.md) | Pause M4 and rebuild the lost Pencil design first | User | Accepted | 2026-10-21 |
+| [0057](0057-simulate-event-present-without-effect-until-m15.md) | "Simulate carrier event" is shown without effect until M15 | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0058](0058-shipments-api-provided-through-react-context.md) | Shipments API provided through a React context | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0059](0059-decision-log-records-only-high-impact-decisions.md) | The decision log records only high-impact user decisions | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0060](0060-no-review-before-pushing-pr.md) | Pull requests are opened after verification, without a review stop before pushing | User | Accepted | 2026-10-21 |

@@ -1,12 +1,31 @@
 /**
  * English messages for react-intl. Keys are namespaced by page or component
- * (`home.title`) so unused or duplicated messages are easy to spot.
+ * (`notFound.title`) so unused or duplicated messages are easy to spot.
  */
 export const messages = {
-  'home.title': 'Marstest',
-  'home.subtitle': 'Project scaffold ready.',
   'notFound.title': 'Page not found',
   'notFound.backHome': 'Back to home',
+  'shell.brand': 'Shipment visibility',
+  'shell.theme.switchToDark': 'Switch to dark theme',
+  'shell.theme.switchToLight': 'Switch to light theme',
+  'viewer.label': 'Viewing as',
+  'opsTabs.label': 'Ops views',
+  'opsTabs.exceptions': 'Exceptions',
+  'opsTabs.shipments': 'All shipments',
+  'opsTabs.loadingCount': 'Loading count',
+  'demo.banner': 'Demo mode · synthetic data, no real login',
+  'demo.bannerShort': 'Demo mode',
+  'demo.simulate': 'Simulate carrier event',
+  'demo.simulateShort': 'Simulate event',
+  'demo.reset': 'Reset demo',
+  'demo.resetDone': 'Demo reset',
+  'demo.resetFailed': 'Could not reset the demo. Try again.',
+  'viewer.ops': 'Ops · Spain sites',
+  'page.comingSoon': 'Coming soon',
+  'opsExceptions.title': 'Exceptions inbox',
+  'opsShipments.title': 'All shipments',
+  'customerShipments.title': 'Your shipments',
+  'customerShipments.loadFailed': 'Could not load this page. Try again later.',
 } satisfies Record<string, string>
 
 /** Every message id the application can use; unknown ids fail type-checking. */

@@ -1,6 +1,6 @@
 ---
 name: decision-recorder
-description: Background documentation agent that records the decisions the user takes during development - choices between options, scope cuts, approvals or rejections of proposals, preferences and constraints - as concise Architecture Decision Records in docs/decisions/. Ideas proposed by Claude are recorded only when the user decides to adopt them. Decisions Claude takes on its own are never recorded. Use right after the user decides something and at the end of every RPI phase, passing the decision, the options and the user's words in the prompt.
+description: Background documentation agent that records the high-impact decisions the user takes during development - technology swaps, architecture, scope, real trade-offs, workflow conventions, business rules and reversals - as concise Architecture Decision Records in docs/decisions/. Small choices (UI placement, copy, accepted small details, review suggestions) are not recorded. Ideas proposed by Claude are recorded only when the user decides to adopt them. Decisions Claude takes on its own are never recorded. Use right after the user takes a high-impact decision and at the end of every RPI phase, passing the decision, the options and the user's words in the prompt.
 tools: Read, Write, Edit, Glob, Grep, Bash
 model: haiku
 ---
@@ -11,15 +11,27 @@ Everything you write is in **English**, concise and factual. You never modify so
 
 ## What gets recorded
 
+Only **high-impact** decisions taken by the user get an ADR. The test: *would a newcomer need it to understand why the project is the way it is, and would undoing it take more than a small PR?*
+
+A user decision passes the test when it is one of:
+
+- a technology, library or service added, removed or swapped;
+- architecture or structure that later work depends on (data source, state approach, routing strategy, folder conventions);
+- scope added or cut;
+- a real trade-off between options with different cost or risk;
+- a workflow or convention change (branching, review flow, documentation rules);
+- a business rule (thresholds, who sees what);
+- a reversal of an earlier ADR.
+
 | Situation | Record? | `Decided by` |
 | --- | --- | --- |
-| The user picks one option among several, cuts or adds scope, sets a preference or constraint, or overrides a recommendation. | **Yes** | `User` |
-| Claude proposes an idea or presents options, and the user decides to adopt one. | **Yes** | `User, on Claude's proposal` |
-| The user rejects a proposal from Claude. | **Yes**, when the rejection shapes the project | `User` |
+| The user takes a high-impact decision on their own, or overrides a recommendation on one. | **Yes** | `User` |
+| Claude proposes options on a high-impact topic and the user adopts one. | **Yes** | `User, on Claude's proposal` |
+| The user rejects a proposal from Claude and the rejection shapes the project. | **Yes** | `User` |
+| UI placement, copy, styling, stub content; accepting Claude's recommended option on a small implementation detail; review suggestions and nits; values that are easy to change later. | **No** — one line in the implementation log instead | — |
 | Claude takes a technical decision on its own (a version pin, a config detail, a workaround), even a significant one. | **No** | — |
-| Trivial choices by anyone (names, an obviously fitting component). | **No** | — |
 
-Technical details Claude chose while implementing a user decision may appear in the **Consequences** of that ADR, but never as the decision itself.
+Technical details Claude chose while implementing a user decision may appear in the **Consequences** of that ADR, but never as the decision itself. When the caller passes a decision that does not pass the test, do not record it: list it in your report as "not recorded (below the impact bar)" so the caller can note it in the implementation log.
 
 ## Inputs
 

@@ -1,7 +1,7 @@
 # 0041. One coordinated automated review per pull request, triggered by the `ready-to-test` label
 
 - **Date:** 2026-10-21
-- **Status:** Accepted
+- **Status:** Accepted · partially superseded by [0060](0060-no-review-before-pushing-pr.md)
 - **Decided by:** User, on Claude's proposal
 - **Phase:** Implement
 - **Related:** PR #4 (review that surfaced the issue), `.claude/skills/review-pull-request/`, `.claude/agents/code-reviewer.md`, `.claude/agents/qa-reviewer.md`. Partially supersedes [0007](0007-qa-agent-on-pull-requests.md) and [0012](0012-code-reviewer-agent.md).

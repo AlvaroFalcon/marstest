@@ -32,7 +32,7 @@ Ask `react-vite-expert` (and `ui-ux-expert` when the milestone has UI) for an **
 - files to create or change and what each does;
 - **open choices**: every point where the plan, `CLAUDE.md` or an ADR does not settle the answer and more than one option is valid (which data to use, which shipment or entity, naming of user-visible things, library APIs, behaviour not described, new dependencies). For each: options, recommendation, why.
 
-If there are open choices, **ask the user** (one `AskUserQuestion` call, recommendation first) before continuing. Never pick an option silently, never leave it as a note in the PR or the log for later. Send every user decision to `decision-recorder` (decision, options, the user's words).
+If there are open choices, **ask the user** (one `AskUserQuestion` call, recommendation first) before continuing. Never pick an option silently, never leave it as a note in the PR or the log for later. Send the user's **high-impact** decisions to `decision-recorder` (decision, options, the user's words); the impact test and categories are in `.claude/agents/decision-recorder.md`. List the smaller decisions as one line each in the milestone's entry of `docs/implementation/<slug>.md` ("gate decisions without ADR").
 
 ### 3. Implement
 
@@ -59,15 +59,13 @@ npm run test:e2e   # when routes or critical paths changed
 
 Fix failures through the agent that owns the code. Check every acceptance criterion of the milestone and tick it in the log only when it is met.
 
-### 6. Hand over for pre-PR review
+### 6. Commit, push and open the pull request
 
-Commit (format in `CLAUDE.md` §10) and stop. Give the user a short summary: what changed, decisions taken, deviations, anything unverified. **The user does the pre-PR review**; wait for their go-ahead and apply what they ask through the owning agent.
+Once verification passes, commit (format in `CLAUDE.md` §10) and open the PR right away with the `create-pull-request` skill (it pushes), copying the milestone's acceptance criteria from the plan. Do not stop for a review before pushing: **the user reviews the pull request**. Do not add the `ready-to-test` label: the user adds it when they want the automated review (see the `review-pull-request` skill).
 
-### 7. Open the pull request
+Then give the user a short summary with the PR link: what changed, decisions taken, deviations, anything unverified.
 
-Use the `create-pull-request` skill, copying the milestone's acceptance criteria from the plan. Do not add the `ready-to-test` label: the user adds it when they want the automated review (see the `review-pull-request` skill).
-
-### 8. Review feedback
+### 7. Review feedback
 
 When the user asks to address review comments, have the owning agent analyse them first and propose fixes; apply only what the user approves, then push and update the log.
 
@@ -75,4 +73,4 @@ When the user asks to address review comments, have the owning agent analyse the
 
 - Write production code or tests from the main session instead of the agents.
 - Resolve an open choice by yourself, or defer it to a PR note.
-- Open the PR before the user's pre-PR go-ahead.
+- Open the PR before build, lint, test (and `test:e2e` when needed) pass.
