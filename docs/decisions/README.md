@@ -68,3 +68,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0053](0053-simulated-ai-date-format-en-gb-utc.md) | Dates in simulated AI texts use the "22 Oct 2026" format | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0054](0054-customs-hold-next-action-lists-mismatches.md) | Customs-hold next-action suggestion lists document mismatches as well as missing documents | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0055](0055-branch-names-use-slash.md) | Branch names use a slash after the type (`feat/`, `fix/`) | User | Accepted | 2026-10-21 |
+| [0056](0056-pause-m4-and-rebuild-lost-design.md) | Pause M4 and rebuild the lost Pencil design first | User | Accepted | 2026-10-21 |
