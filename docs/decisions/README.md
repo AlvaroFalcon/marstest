@@ -67,3 +67,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0052](0052-rule-label-uses-seed-format.md) | Status rule labels use the seed format "pattern → status label" | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0053](0053-simulated-ai-date-format-en-gb-utc.md) | Dates in simulated AI texts use the "22 Oct 2026" format | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0054](0054-customs-hold-next-action-lists-mismatches.md) | Customs-hold next-action suggestion lists document mismatches as well as missing documents | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0055](0055-branch-names-use-slash.md) | Branch names use a slash after the type (`feat/`, `fix/`) | User | Accepted | 2026-10-21 |

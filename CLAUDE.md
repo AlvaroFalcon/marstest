@@ -204,7 +204,7 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 
 ## 10. Git and pull requests
 
-- Branches: `feat-<short-description>` or `fix-<short-description>` (or the issue-tracker ID when one exists).
+- Branches: `feat/<short-description>` or `fix/<short-description>` (or `feat/<ISSUE-ID>` when an issue-tracker ID exists).
 - Squashed commit format: `[ISSUE-CODE] <type>(<scope>): <subject>` — types: `feat`, `fix`, `chore`, `docs`, `test`, `deploy`. Header ≤ 72 chars, body lines ≤ 100. Issue code may be omitted when there is no issue.
 - Squash and merge feature branches. Never `git push -f` on shared branches; use `--force-with-lease`.
 - Every milestone of an approved plan is implemented with the `implement-milestone` skill: the main session coordinates, the agents implement, and every choice the plan does not settle is asked to the user, never decided silently.

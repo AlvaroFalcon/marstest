@@ -32,26 +32,26 @@ Build the frontend-only shipment visibility prototype agreed in research: an ope
 
 ## Steps
 
-Each step is one milestone: one branch `feat-<name>`, one PR. Order follows dependencies.
+Each step is one milestone: one branch `feat/<name>`, one PR. Order follows dependencies. M1–M3 were delivered as `feat-<name>` before the branch convention changed to `feat/<name>`.
 
 1. **M1 · Design tokens and primitives** — `feat-design-tokens` — `src/index.css`, `src/components/ui/*`
    - Semantic `success`, `warning`, `info` tokens and `-subtle` backgrounds in oklch for `:root` / `.dark`, off-white page background; shadcn `badge`, `card`, `sheet`, `select`, `tabs`, `table`, `textarea`, `sonner`, `popover`, `tooltip`, `skeleton`, `separator`.
 2. **M2 · Domain model, seed and fake API** — `feat-mock-data` — `src/api/types.ts`, `seed.ts`, `mockDb.ts`, `shipmentsApi.ts`
 3. **M3 · Business logic and simulated AI** — `feat-domain-logic` — `src/lib/*.ts`
-4. **M4 · App shell and role switch** — `feat-app-shell` — `src/routes.ts`, `src/Router.tsx`, page stubs, `src/components/layout/AppHeader.tsx`, `OpsTabs.tsx`, `src/hooks/useViewer.ts`, `src/locales/en.ts`, `e2e/home.spec.ts` (replaces the scaffold `HomePage`)
-5. **M5 · Provenance components** — `feat-provenance-components` — `src/components/provenance/ProvenanceBadge.tsx`, `EtaPair.tsx`, `FreshnessIndicator.tsx`, `AiBlock.tsx`
-6. **M6 · Journey component** — `feat-journey` — `src/components/journey/Journey.tsx`
-7. **M7 · Exceptions inbox** — `feat-exceptions-inbox` — `src/pages/ops/OpsExceptionsPage.tsx`, `src/components/exceptions/ExceptionInbox.tsx`, `ExceptionCard.tsx`, `src/components/shipments/SiteFilter.tsx`, `src/hooks/useExceptions.ts`
-8. **M8 · Exception detail** — `feat-exception-detail` — `src/components/shipments/ShipmentDetail.tsx` (exception layer), `src/components/exceptions/DocumentCheck.tsx`, `src/hooks/useShipment.ts`
-9. **M9 · Recommended action and approval** — `feat-recommended-action` — `src/components/exceptions/RecommendedAction.tsx`, `src/hooks/useApproveDraft.ts`, `useDiscardDraft.ts`
-10. **M10 · Source events sheet** — `feat-source-events` — `src/components/shipments/SourceEventsSheet.tsx`
-11. **M11 · All shipments** — `feat-ops-shipments-list` — `src/pages/ops/OpsShipmentsPage.tsx`, `src/components/shipments/ShipmentsTable.tsx`, `ShipmentCard.tsx`, `src/hooks/useShipments.ts`
-12. **M12 · Ops shipment detail states** — `feat-ops-shipment-detail` — `src/pages/ops/OpsShipmentPage.tsx`, `ShipmentDetail.tsx`
-13. **M13 · Customer shipments list** — `feat-customer-shipments` — `src/pages/customers/CustomerShipmentsPage.tsx`, `src/components/customer/ProactiveAlert.tsx`
-14. **M14 · Customer shipment detail** — `feat-customer-shipment-detail` — `src/pages/customers/CustomerShipmentPage.tsx`, `src/components/customer/CustomerDocuments.tsx`
-15. **M15 · Simulate carrier event** — `feat-simulate-event` — `src/hooks/useSimulateCarrierEvent.ts`, `AppHeader.tsx`, `ExceptionCard.tsx`
-16. **M16 · Demo story and accessibility pass** — `feat-demo-story` — `e2e/*.spec.ts`, fixes found
-17. **M17 · Vercel deployment** — `feat-vercel-deploy` — Vercel SPA config (via `devops-expert`), `README.md`
+4. **M4 · App shell and role switch** — `feat/app-shell` — `src/routes.ts`, `src/Router.tsx`, page stubs, `src/components/layout/AppHeader.tsx`, `OpsTabs.tsx`, `src/hooks/useViewer.ts`, `src/locales/en.ts`, `e2e/home.spec.ts` (replaces the scaffold `HomePage`)
+5. **M5 · Provenance components** — `feat/provenance-components` — `src/components/provenance/ProvenanceBadge.tsx`, `EtaPair.tsx`, `FreshnessIndicator.tsx`, `AiBlock.tsx`
+6. **M6 · Journey component** — `feat/journey` — `src/components/journey/Journey.tsx`
+7. **M7 · Exceptions inbox** — `feat/exceptions-inbox` — `src/pages/ops/OpsExceptionsPage.tsx`, `src/components/exceptions/ExceptionInbox.tsx`, `ExceptionCard.tsx`, `src/components/shipments/SiteFilter.tsx`, `src/hooks/useExceptions.ts`
+8. **M8 · Exception detail** — `feat/exception-detail` — `src/components/shipments/ShipmentDetail.tsx` (exception layer), `src/components/exceptions/DocumentCheck.tsx`, `src/hooks/useShipment.ts`
+9. **M9 · Recommended action and approval** — `feat/recommended-action` — `src/components/exceptions/RecommendedAction.tsx`, `src/hooks/useApproveDraft.ts`, `useDiscardDraft.ts`
+10. **M10 · Source events sheet** — `feat/source-events` — `src/components/shipments/SourceEventsSheet.tsx`
+11. **M11 · All shipments** — `feat/ops-shipments-list` — `src/pages/ops/OpsShipmentsPage.tsx`, `src/components/shipments/ShipmentsTable.tsx`, `ShipmentCard.tsx`, `src/hooks/useShipments.ts`
+12. **M12 · Ops shipment detail states** — `feat/ops-shipment-detail` — `src/pages/ops/OpsShipmentPage.tsx`, `ShipmentDetail.tsx`
+13. **M13 · Customer shipments list** — `feat/customer-shipments` — `src/pages/customers/CustomerShipmentsPage.tsx`, `src/components/customer/ProactiveAlert.tsx`
+14. **M14 · Customer shipment detail** — `feat/customer-shipment-detail` — `src/pages/customers/CustomerShipmentPage.tsx`, `src/components/customer/CustomerDocuments.tsx`
+15. **M15 · Simulate carrier event** — `feat/simulate-event` — `src/hooks/useSimulateCarrierEvent.ts`, `AppHeader.tsx`, `ExceptionCard.tsx`
+16. **M16 · Demo story and accessibility pass** — `feat/demo-story` — `e2e/*.spec.ts`, fixes found
+17. **M17 · Vercel deployment** — `feat/vercel-deploy` — Vercel SPA config (via `devops-expert`), `README.md`
 
 ## Acceptance criteria
 
