@@ -27,6 +27,11 @@ export function formatUtcDayAndTimeWithComma(intl: IntlShape, iso: string): stri
   })
 }
 
+/** UTC calendar day of an instant, e.g. "Oct 22". */
+export function formatUtcDay(intl: IntlShape, iso: string): string {
+  return intl.formatDate(iso, UTC_DAY_OPTIONS)
+}
+
 /**
  * Single instant at the precision of the estimate shown next to it: date only for multi-day
  * estimates, otherwise date and time ("Oct 21 · 10:00").

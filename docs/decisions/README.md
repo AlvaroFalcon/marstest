@@ -73,3 +73,8 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0058](0058-shipments-api-provided-through-react-context.md) | Shipments API provided through a React context | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0059](0059-decision-log-records-only-high-impact-decisions.md) | The decision log records only high-impact user decisions | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0060](0060-no-review-before-pushing-pr.md) | Pull requests are opened after verification, without a review stop before pushing | User | Accepted | 2026-10-21 |
+| [0061](0061-journey-one-node-per-place-plus-latest-mid-leg-milestone.md) | Journey shows one node per place plus the latest mid-leg milestone | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0062](0062-intermediate-future-nodes-estimated-without-percent.md) | Intermediate future journey nodes show "Estimated" without a percentage | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0063](0063-final-node-carrier-eta-or-estimate-range.md) | Final delivery node shows the carrier ETA when in line, otherwise our estimate range | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0064](0064-future-node-colour-follows-written-rule-not-ops-mockup.md) | Future journey nodes use the written colour rule, not the Ops 5 mockup | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0065](0065-overdue-future-nodes-show-overdue-since.md) | Overdue future journey nodes show "Overdue since <date>" | User, on Claude's proposal | Accepted | 2026-10-21 |
