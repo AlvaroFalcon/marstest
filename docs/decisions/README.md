@@ -53,7 +53,7 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0038](0038-simulated-event-rolls-vessel-of-sh-1060.md) | "Simulate carrier event" rolls the vessel of SH-1060 | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0039](0039-aaa-separated-by-blank-lines.md) | Arrange / Act / Assert separated by blank lines, not comments | User | Accepted | 2026-10-21 |
 | [0040](0040-milestones-through-implement-milestone-skill.md) | Milestones are implemented through the `implement-milestone` skill with a decision gate | User, on Claude's proposal | Accepted | 2026-10-21 |
-| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted · partially superseded by [0060](0060-no-review-before-pushing-pr.md) | 2026-10-21 |
 | [0042](0042-eta-in-line-within-two-hours.md) | Our ETA is in line with the carrier within a fixed ±2 hours | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0043](0043-freshness-two-levels-by-receipt-time.md) | Tracking freshness has two levels, measured from the last received event | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0044](0044-watching-when-carrier-eta-missing.md) | Shipments without a carrier ETA are always "watching" | User | Accepted | 2026-10-21 |
@@ -72,3 +72,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0057](0057-simulate-event-present-without-effect-until-m15.md) | "Simulate carrier event" is shown without effect until M15 | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0058](0058-shipments-api-provided-through-react-context.md) | Shipments API provided through a React context | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0059](0059-decision-log-records-only-high-impact-decisions.md) | The decision log records only high-impact user decisions | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0060](0060-no-review-before-pushing-pr.md) | Pull requests are opened after verification, without a review stop before pushing | User | Accepted | 2026-10-21 |

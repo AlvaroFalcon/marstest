@@ -208,7 +208,7 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 - Squashed commit format: `[ISSUE-CODE] <type>(<scope>): <subject>` — types: `feat`, `fix`, `chore`, `docs`, `test`, `deploy`. Header ≤ 72 chars, body lines ≤ 100. Issue code may be omitted when there is no issue.
 - Squash and merge feature branches. Never `git push -f` on shared branches; use `--force-with-lease`.
 - Every milestone of an approved plan is implemented with the `implement-milestone` skill: the main session coordinates, the agents implement, and every choice the plan does not settle is asked to the user, never decided silently.
-- The user reviews the changes before the PR is opened. Every PR is created with the `create-pull-request` skill so the body always follows the same structure.
+- Once the checks pass, changes are pushed and the PR is opened without a separate review step; the user reviews the PR. Every PR is created with the `create-pull-request` skill so the body always follows the same structure.
 - Automated review: adding the `ready-to-test` label triggers a Claude Code routine that runs the `review-pull-request` skill. It runs `code-reviewer` and `qa-reviewer` in parallel, posts **one** combined GitHub review and removes the label (add it again to re-run).
 - Review comments use "we", give an objective reason and propose an alternative.
 
@@ -243,7 +243,7 @@ Located in `.claude/skills/`. Loaded on demand.
 | --- | --- | --- | --- |
 | `design-patterns` | Catalogue of classic design patterns (GoF + React-specific) with TypeScript/React examples, when to use them and when not to. | During Plan or Implement when facing a known problem: varying algorithms, adapting external data, composing behaviour, notifying changes, building complex objects. | `react-vite-expert`, `ui-ux-expert`, `test-expert` |
 | `create-pull-request` | Creates a PR with a fixed body: concise title, description, steps to test, expected behaviour and acceptance criteria. | Every time a pull request is opened. | `implement-milestone`, `react-vite-expert`, main session; `qa-reviewer` and `code-reviewer` rely on its structure |
-| `implement-milestone` | Runs the Implement phase of one plan milestone: decision gate with the user, delegation to `react-vite-expert` / `ui-ux-expert` / `test-expert`, implementation log, verification, user pre-PR review, PR. | Every milestone of an approved plan. | Main session |
+| `implement-milestone` | Runs the Implement phase of one plan milestone: decision gate with the user, delegation to `react-vite-expert` / `ui-ux-expert` / `test-expert`, implementation log, verification, PR (the user reviews the PR). | Every milestone of an approved plan. | Main session |
 | `review-pull-request` | Runs `code-reviewer` and `qa-reviewer` in parallel, merges their results into one GitHub review (summary, acceptance criteria with screenshots, CI, inline comments) and removes the `ready-to-test` label. Runs in the main session because agents cannot launch other agents. | From the routine on the `ready-to-test` label, or manually with a PR number. | Main session (routine) |
 
 ## 13. Claude Code guardrails
