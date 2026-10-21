@@ -197,7 +197,7 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 - Vitest + React Testing Library for unit/component tests, Playwright for E2E, msw for network mocks (unhandled requests fail the test).
 - Render components with `renderWithProviders` (`src/test/renderWithProviders.tsx`); override network responses per test with `server.use(...)`.
 - Favour E2E for critical user paths; unit-test pure business logic in `lib/`.
-- Arrange / Act / Assert, separated by a blank line (no `// Arrange` comments). Boring, explicit tests; hard-coded expected values; human names ("John"), no random data.
+- Arrange / Act / Assert, separated by a blank line (no `// Arrange` / `// Act` / `// Assert` comments). Boring, explicit tests; hard-coded expected values; human names ("John"), no random data.
 - Test behaviour through the public interface (queries by role/label, not CSS classes or internals).
 - Test names without "should": `it("returns only the first name when last name is missing")`.
 - No shared state between tests. Fix or delete flaky tests immediately.
@@ -209,7 +209,7 @@ export function ShipmentStatusBadge({ status, isEstimated }: ShipmentStatusBadge
 - Squash and merge feature branches. Never `git push -f` on shared branches; use `--force-with-lease`.
 - Every milestone of an approved plan is implemented with the `implement-milestone` skill: the main session coordinates, the agents implement, and every choice the plan does not settle is asked to the user, never decided silently.
 - The user reviews the changes before the PR is opened. Every PR is created with the `create-pull-request` skill so the body always follows the same structure.
-- Automated review: adding the `ready-to-review` label triggers a Claude Code routine that runs the `review-pull-request` skill. It runs `code-reviewer` and `qa-reviewer` in parallel, posts **one** combined GitHub review and removes the label (add it again to re-run).
+- Automated review: adding the `ready-to-test` label triggers a Claude Code routine that runs the `review-pull-request` skill. It runs `code-reviewer` and `qa-reviewer` in parallel, posts **one** combined GitHub review and removes the label (add it again to re-run).
 - Review comments use "we", give an objective reason and propose an alternative.
 
 ### Continuous integration
@@ -231,7 +231,7 @@ Located in `.claude/agents/`. Invoke them for isolated, well-defined tasks with 
 | `ui-ux-expert` | Designs and builds accessible, responsive UI using shadcn/ui + Tailwind tokens. | Any new screen, component, layout, visual state (loading/empty/error) or UX review. | `design-patterns` (Composite, Strategy, Adapter for UI variants). |
 | `test-expert` | Writes Vitest/RTL unit and component tests and Playwright E2E tests for implemented features. | After each implemented feature or bug fix, and before opening a PR. | `design-patterns` (to recognise seams worth testing). |
 | `code-reviewer` | Applies the MarsBased code review checklist (correctness, security, conventions, tests, JSDoc, commit/PR format) and drafts a review, citing a `CLAUDE.md` section or `.claude/rules/` file for every comment. Reads CI results instead of re-running checks. Never deals with screenshots. Read-only; never posts. | Inside `review-pull-request` on every PR, or manually with a PR number or on the current branch. | Checks PRs against the `create-pull-request` structure. |
-| `qa-reviewer` | Runs the real app, takes screenshots (stored in the `qa-screenshots` branch), validates the PR's acceptance criteria and returns the report with screenshots embedded. Never posts. | Inside `review-pull-request` (routine on the `ready-to-review` label), or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
+| `qa-reviewer` | Runs the real app, takes screenshots (stored in the `qa-screenshots` branch), validates the PR's acceptance criteria and returns the report with screenshots embedded. Never posts. | Inside `review-pull-request` (routine on the `ready-to-test` label), or manually with a PR number. | Reads the structure defined by `create-pull-request`. |
 | `devops-expert` | Implements and maintains GitHub Actions workflows and CI/CD setup: SHA-pinned actions, least-privilege permissions, caching, parallel jobs. | Whenever the user asks for a new workflow (checks, deploys, scheduled jobs) or a CI run fails for infrastructure reasons. | — |
 | `decision-recorder` | Records in `docs/decisions/` the decisions **the user** takes (choices, scope cuts, preferences) and the ideas proposed by Claude that the user adopts, with the user's reasons. Claude's own decisions are never recorded. | In the background right after the user decides something and at the end of every RPI phase. It does not see the conversation: pass it the decision, the options and the user's words. | — |
 
@@ -244,7 +244,7 @@ Located in `.claude/skills/`. Loaded on demand.
 | `design-patterns` | Catalogue of classic design patterns (GoF + React-specific) with TypeScript/React examples, when to use them and when not to. | During Plan or Implement when facing a known problem: varying algorithms, adapting external data, composing behaviour, notifying changes, building complex objects. | `react-vite-expert`, `ui-ux-expert`, `test-expert` |
 | `create-pull-request` | Creates a PR with a fixed body: concise title, description, steps to test, expected behaviour and acceptance criteria. | Every time a pull request is opened. | `implement-milestone`, `react-vite-expert`, main session; `qa-reviewer` and `code-reviewer` rely on its structure |
 | `implement-milestone` | Runs the Implement phase of one plan milestone: decision gate with the user, delegation to `react-vite-expert` / `ui-ux-expert` / `test-expert`, implementation log, verification, user pre-PR review, PR. | Every milestone of an approved plan. | Main session |
-| `review-pull-request` | Runs `code-reviewer` and `qa-reviewer` in parallel, merges their results into one GitHub review (summary, acceptance criteria with screenshots, CI, inline comments) and removes the `ready-to-review` label. Runs in the main session because agents cannot launch other agents. | From the routine on the `ready-to-review` label, or manually with a PR number. | Main session (routine) |
+| `review-pull-request` | Runs `code-reviewer` and `qa-reviewer` in parallel, merges their results into one GitHub review (summary, acceptance criteria with screenshots, CI, inline comments) and removes the `ready-to-test` label. Runs in the main session because agents cannot launch other agents. | From the routine on the `ready-to-test` label, or manually with a PR number. | Main session (routine) |
 
 ## 13. Claude Code guardrails
 

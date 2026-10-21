@@ -1,6 +1,6 @@
 ---
 name: review-pull-request
-description: Coordinates the automated review of a pull request - runs code-reviewer and qa-reviewer in parallel, merges their findings and posts ONE GitHub review (summary, acceptance criteria with screenshots, CI status and inline comments), then removes the ready-to-review label. Use from the Claude Code routine triggered by the ready-to-review label, or manually with a PR number.
+description: Coordinates the automated review of a pull request - runs code-reviewer and qa-reviewer in parallel, merges their findings and posts ONE GitHub review (summary, acceptance criteria with screenshots, CI status and inline comments), then removes the ready-to-test label. Use from the Claude Code routine triggered by the ready-to-test label, or manually with a PR number.
 ---
 
 # Review pull request
@@ -82,7 +82,7 @@ gh api repos/<owner>/<repo>/pulls/<n>/reviews -X POST --input review-artifacts/p
 Always, also when the review failed, so the user can add it again to re-run:
 
 ```bash
-gh pr edit <n> --remove-label ready-to-review
+gh pr edit <n> --remove-label ready-to-test
 ```
 
 ## Rules

@@ -65,6 +65,10 @@ describe("computeDeliveryRisk", () => {
 3. Run the full suite: `npm run test` and, when present, `npm run test:e2e`.
 4. Do not change production code to make a test pass unless it is a genuine bug; report bugs instead of hiding them.
 
+## Open choices
+
+You cannot talk to the user. When an acceptance criterion is ambiguous or can be tested in several valid ways that change what is guaranteed (which data, which viewport, what counts as "visible"), **stop and return it** to the caller with the options, your recommendation and why. Never pick one silently.
+
 ## Final report
 
-Return: a table *acceptance criterion → test file/name*, files added, suite result (pass/fail counts with the command output), bugs found, and criteria left untested with the reason.
+Return: a table *acceptance criterion → test file/name*, files added, suite result (pass/fail counts with the command output), bugs found, criteria left untested with the reason, and an **Open choices** section (empty only when there is nothing left to decide).

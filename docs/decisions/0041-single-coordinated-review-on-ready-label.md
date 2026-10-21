@@ -1,4 +1,4 @@
-# 0041. One coordinated automated review per pull request, triggered by the `ready-to-review` label
+# 0041. One coordinated automated review per pull request, triggered by the `ready-to-test` label
 
 - **Date:** 2026-10-21
 - **Status:** Accepted
@@ -14,7 +14,7 @@ The code reviewer and the QA reviewer acted separately: two voices on the pull r
 
 Claude proposed a `review-pull-request` skill, because agents cannot launch other agents. The user rejected automatic re-review on every pull request update:
 
-> "no, I'll automate this with a Claude routine as it is now ... it currently launches when the ready-to-review label is added and is removed when the review finishes, in case I want to launch it by hand. This is to avoid costs." (translated)
+> "no, I'll automate this with a Claude routine as it is now ... it currently launches when the ready-to-test label is added and is removed when the review finishes, in case I want to launch it by hand. This is to avoid costs." (translated)
 
 > "Pre-PR I will review it myself, the agent does it on the PR" (translated)
 
@@ -26,7 +26,7 @@ Claude proposed a `review-pull-request` skill, because agents cannot launch othe
 
 ## Decision
 
-A pull request gets one coordinated review, produced by the `review-pull-request` skill when the `ready-to-review` label is added. The label is removed when the review finishes, so the review can be launched again by hand. The user reviews the code before opening the pull request.
+A pull request gets one coordinated review, produced by the `review-pull-request` skill when the `ready-to-test` label is added. The label is removed when the review finishes, so the review can be launched again by hand. The user reviews the code before opening the pull request.
 
 ## Consequences
 

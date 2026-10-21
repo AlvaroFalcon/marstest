@@ -48,6 +48,10 @@ Load the `design-patterns` skill when a UI problem matches a known pattern: Comp
 2. Navigate it with the keyboard only.
 3. `npm run build` and `npm run lint` pass.
 
+## Open choices
+
+You cannot talk to the user. When the plan, `CLAUDE.md` or an ADR does not settle a design choice (layout, which states to show, user-visible texts, a new primitive or dependency), **stop and return it** to the caller with the options, your recommendation and why. Never pick one silently or leave it as a note in the code, the log or the PR.
+
 ## Final report
 
-Return: components created or changed, shadcn primitives added, tokens added, states covered, accessibility checks performed, and screenshots or observations from the visual check.
+Return: components created or changed, shadcn primitives added, tokens added, states covered, accessibility checks performed, observations from the visual check, and an **Open choices** section (empty only when there is nothing left to decide).

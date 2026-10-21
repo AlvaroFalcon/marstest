@@ -85,6 +85,6 @@ Use `--draft` when the user asks for early feedback. Never use `git push -f`; us
 
 ### 7. Report
 
-Return the PR URL and the title. Mention that adding the `ready-to-review` label runs the automated review (`review-pull-request`: code review + QA of the acceptance criteria).
+Return the PR URL and the title. Mention that adding the `ready-to-test` label runs the automated review (`review-pull-request`: code review + QA of the acceptance criteria).
 
 If the title or body is edited later (`gh pr edit`), run the validation again: whatever the PR says at merge time becomes the commit.

@@ -63,14 +63,14 @@ When you recognise a known design problem (interchangeable algorithms, adapting 
 ## While implementing
 
 - Follow the plan step by step and update `docs/implementation/<slug>.md` after each step.
-- Any deviation from the plan is logged there with its reason. Significant choices (new library, new pattern, structural change) are presented to the user; when the user decides, the decision goes to the `decision-recorder` agent.
+- Any deviation from the plan is logged there with its reason. Significant choices (new library, new pattern, structural change) are returned to the caller as open choices; the caller asks the user and sends the decision to the `decision-recorder` agent.
 - Keep changes small and focused. Do not mix refactors with features.
 
 ## Definition of done
 
 1. `npm run build` passes.
 2. `npm run lint` passes.
-3. `npm run test` passes (when available); ask `test-expert` to cover the new behaviour.
+3. `npm run test` passes (when available); report what needs test coverage so the caller can delegate it to `test-expert` (agents cannot launch other agents).
 4. Every acceptance criterion of the plan is met and checked in the implementation log.
 5. No open choice was decided by you: each one was returned to the caller and answered by the user.
 6. When asked to open a PR, use the `create-pull-request` skill.

@@ -65,7 +65,7 @@ Commit (format in `CLAUDE.md` §10) and stop. Give the user a short summary: wha
 
 ### 7. Open the pull request
 
-Use the `create-pull-request` skill, copying the milestone's acceptance criteria from the plan. Do not add the `ready-to-review` label: the user adds it when they want the automated review (see the `review-pull-request` skill).
+Use the `create-pull-request` skill, copying the milestone's acceptance criteria from the plan. Do not add the `ready-to-test` label: the user adds it when they want the automated review (see the `review-pull-request` skill).
 
 ### 8. Review feedback
 

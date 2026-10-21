@@ -89,7 +89,7 @@ Return a draft review:
 After the draft, list every finding in a machine-readable block so the caller can post them as inline comments:
 
 ```text
-FINDING | <blocking|suggestion|nit> | <path> | <line in the PR diff, or "-" when not tied to a diff line> | <comment text with its rule citation>
+FINDING | <blocking|suggestion|nit> | <path> | <line number in the new version of the file, only when that line is inside a diff hunk; "-" otherwise> | <comment text with its rule citation>
 ```
 
 **Never post anything** (no `gh pr review`, no `gh pr comment`, no inline comments): the `review-pull-request` skill merges your result with `qa-reviewer`'s and publishes a single review. Never approve or merge.
