@@ -27,10 +27,11 @@ export function useViewerSwitch() {
   ]
 
   function onViewerChange(value: string) {
-    const target = parseViewerValue(value)
-    if (!target) {
+    const parsed = parseViewerValue(value)
+    if (!parsed.ok) {
       return
     }
+    const target = parsed.viewer
     void navigate(target.role === 'ops' ? routes.ops.exceptions() : routes.customer.shipments(target.customerId))
   }
 

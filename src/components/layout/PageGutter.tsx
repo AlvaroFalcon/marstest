@@ -7,9 +7,10 @@ export type PageGutterProps = {
 }
 
 /**
- * Owns the horizontal page gutter so pages set no outer padding. It must sit inside an `@container` ancestor (`AppLayout`). It matches the header's brand
- * bar (1rem narrow, 2.5rem wide) and follows the width of the shell's size container rather than
- * the viewport. It is separate from `AppLayout` because the ops tabs need to span the full width.
+ * Owns the horizontal page gutter so pages set no outer padding. It matches the header's brand
+ * bar (1rem narrow, 2.5rem wide) and follows the width of the nearest `@container` ancestor
+ * (`AppLayout`) rather than the viewport. It is separate from `AppLayout` because the ops tabs
+ * need to span the full width.
  */
 export function PageGutter({ children, className }: PageGutterProps) {
   return (

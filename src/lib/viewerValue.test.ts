@@ -22,38 +22,38 @@ describe('viewerToValue', () => {
 
 describe('parseViewerValue', () => {
   it('decodes "ops" as the ops viewer', () => {
-    const viewer = parseViewerValue('ops')
+    const result = parseViewerValue('ops')
 
-    expect(viewer).toEqual({ role: 'ops' })
+    expect(result).toEqual({ ok: true, viewer: { role: 'ops' } })
   })
 
   it('decodes a prefixed value as that customer', () => {
-    const viewer = parseViewerValue('customer:brenner-iberia')
+    const result = parseViewerValue('customer:brenner-iberia')
 
-    expect(viewer).toEqual({ role: 'customer', customerId: 'brenner-iberia' })
+    expect(result).toEqual({ ok: true, viewer: { role: 'customer', customerId: 'brenner-iberia' } })
   })
 
-  it('returns null when the customer id is empty', () => {
-    const viewer = parseViewerValue('customer:')
+  it('fails when the customer id is empty', () => {
+    const result = parseViewerValue('customer:')
 
-    expect(viewer).toBeNull()
+    expect(result).toEqual({ ok: false })
   })
 
-  it('returns null for an unknown value', () => {
-    const viewer = parseViewerValue('admin')
+  it('fails for an unknown value', () => {
+    const result = parseViewerValue('admin')
 
-    expect(viewer).toBeNull()
+    expect(result).toEqual({ ok: false })
   })
 
-  it('returns null for an empty string', () => {
-    const viewer = parseViewerValue('')
+  it('fails for an empty string', () => {
+    const result = parseViewerValue('')
 
-    expect(viewer).toBeNull()
+    expect(result).toEqual({ ok: false })
   })
 
   it('round-trips a customer id that contains a colon', () => {
-    const viewer = parseViewerValue(viewerToValue({ role: 'customer', customerId: 'acme:eu' }))
+    const result = parseViewerValue(viewerToValue({ role: 'customer', customerId: 'acme:eu' }))
 
-    expect(viewer).toEqual({ role: 'customer', customerId: 'acme:eu' })
+    expect(result).toEqual({ ok: true, viewer: { role: 'customer', customerId: 'acme:eu' } })
   })
 })

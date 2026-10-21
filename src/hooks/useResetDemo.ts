@@ -5,7 +5,7 @@ import { useShipmentsApi } from '@/hooks/useShipmentsApi'
 
 /**
  * Restores the seed data and refreshes everything on screen. Invalidates every query because the
- * whole demo state changes, then confirms with a toast. It does not navigate: the viewer stays on
+ * whole demo state changes, then confirms with a toast (or reports the failure with an error toast). It does not navigate: the viewer stays on
  * the current route. `isPending` stays true until the refetch finishes.
  */
 export function useResetDemo() {
@@ -18,6 +18,9 @@ export function useResetDemo() {
     onSuccess: async () => {
       await queryClient.invalidateQueries()
       toast.success(intl.formatMessage({ id: 'demo.resetDone' }))
+    },
+    onError: () => {
+      toast.error(intl.formatMessage({ id: 'demo.resetFailed' }))
     },
   })
 }

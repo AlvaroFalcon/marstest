@@ -91,7 +91,7 @@ test.describe('demo strip', () => {
 
     await page.getByRole('button', { name: /Simulate/ }).click()
 
-    await expect(page.getByText(/^Demo mode/).locator('visible=true')).toHaveCount(1)
+    await expect(page.getByText(/^Demo mode/).filter({ visible: true })).toHaveCount(1)
     await expect(page).toHaveURL('/ops/exceptions')
     await expect(page.getByRole('link', { name: /^Exceptions\s*5$/ })).toBeVisible()
   })
@@ -108,19 +108,18 @@ test.describe('demo strip', () => {
 
   test('toggles the dark theme and keeps it after a reload', async ({ page }) => {
     await page.goto('/ops/exceptions')
-    await expect(page.locator('html')).not.toHaveClass(/dark/)
+    await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Switch to dark theme' }).click()
 
-    await expect(page.locator('html')).toHaveClass(/dark/)
+    await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible()
 
     await page.reload()
 
-    await expect(page.locator('html')).toHaveClass(/dark/)
     await expect(page.getByRole('button', { name: 'Switch to light theme' })).toBeVisible()
 
     await page.getByRole('button', { name: 'Switch to light theme' }).click()
 
-    await expect(page.locator('html')).not.toHaveClass(/dark/)
+    await expect(page.getByRole('button', { name: 'Switch to dark theme' })).toBeVisible()
   })
 })

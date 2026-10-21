@@ -2,12 +2,7 @@ import { Link } from 'react-router'
 import { useIntl } from 'react-intl'
 import { cn } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/skeleton'
-
-/** Count shown next to a tab: never `null`, so each state is handled explicitly. */
-export type OpsTabCount
-  = | { status: 'loading' }
-    | { status: 'error' }
-    | { status: 'ready', value: number }
+import type { OpsTabCount } from '@/lib/opsTabCounts'
 
 export type OpsTabsProps = {
   exceptionsHref: string
@@ -36,16 +31,14 @@ function TabCount({ count, tone }: TabCountProps) {
   }
 
   return (
-    <>
-      <span
-        className={cn(
-          'rounded-full px-1.5 text-sm tabular-nums',
-          tone === 'danger' ? 'bg-destructive/10 text-destructive' : 'text-muted-foreground',
-        )}
-      >
-        {intl.formatNumber(count.value)}
-      </span>
-    </>
+    <span
+      className={cn(
+        'rounded-full px-1.5 text-sm tabular-nums',
+        tone === 'danger' ? 'bg-destructive/10 text-destructive' : 'text-muted-foreground',
+      )}
+    >
+      {intl.formatNumber(count.value)}
+    </span>
   )
 }
 
@@ -95,7 +88,7 @@ export function OpsTabs({
           aria-current={active === 'exceptions' ? 'page' : undefined}
         >
           {intl.formatMessage({ id: 'opsTabs.exceptions' })}
-          {/* Trailing space: invisible in the flex row, but makes the accessible name read "Exceptions 5". */}
+          {/* The space between label and count is invisible in the flex row, but makes the accessible name read "Exceptions 5". */}
           {' '}
           <TabCount count={exceptionCount} tone="danger" />
         </Link>
@@ -105,7 +98,6 @@ export function OpsTabs({
           aria-current={active === 'shipments' ? 'page' : undefined}
         >
           {intl.formatMessage({ id: 'opsTabs.shipments' })}
-          {/* Trailing space: invisible in the flex row, but makes the accessible name read "Exceptions 5". */}
           {' '}
           <TabCount count={shipmentCount} tone="neutral" />
         </Link>

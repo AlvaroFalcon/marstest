@@ -1,7 +1,6 @@
 import { MoonIcon, SunIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useIntl } from 'react-intl'
-import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 
 export type ThemeToggleProps = {
@@ -24,7 +23,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       type="button"
       variant="outline"
       size="icon-sm"
-      className={cn(className)}
+      className={className}
       aria-label={intl.formatMessage({ id: isDark ? 'shell.theme.switchToLight' : 'shell.theme.switchToDark' })}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >

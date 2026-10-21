@@ -19,11 +19,13 @@ export const messages = {
   'demo.simulateShort': 'Simulate event',
   'demo.reset': 'Reset demo',
   'demo.resetDone': 'Demo reset',
+  'demo.resetFailed': 'Could not reset the demo. Try again.',
   'viewer.ops': 'Ops · Spain sites',
   'page.comingSoon': 'Coming soon',
   'opsExceptions.title': 'Exceptions inbox',
   'opsShipments.title': 'All shipments',
   'customerShipments.title': 'Your shipments',
+  'customerShipments.loadFailed': 'Could not load this page. Try again later.',
 } satisfies Record<string, string>
 
 /** Every message id the application can use; unknown ids fail type-checking. */

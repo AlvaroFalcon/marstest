@@ -1,5 +1,10 @@
 import type { Viewer } from '@/lib/scope'
 
+/** Result of decoding a select value: the viewer, or a failure when the value names none. */
+export type ParsedViewer
+  = | { ok: true, viewer: Viewer }
+    | { ok: false }
+
 const OPS_VALUE = 'ops'
 const CUSTOMER_PREFIX = 'customer:'
 
@@ -14,16 +19,16 @@ export function viewerToValue(viewer: Viewer): string {
 /**
  * Decodes a value produced by {@link viewerToValue}.
  *
- * @returns `null` when the value does not name a viewer.
+ * @returns `{ ok: false }` when the value does not name a viewer.
  * @example
- * parseViewerValue('customer:nordwerk') // { role: 'customer', customerId: 'nordwerk' }
+ * parseViewerValue('customer:nordwerk') // { ok: true, viewer: { role: 'customer', customerId: 'nordwerk' } }
  */
-export function parseViewerValue(value: string): Viewer | null {
+export function parseViewerValue(value: string): ParsedViewer {
   if (value === OPS_VALUE) {
-    return { role: 'ops' }
+    return { ok: true, viewer: { role: 'ops' } }
   }
   if (value.startsWith(CUSTOMER_PREFIX) && value.length > CUSTOMER_PREFIX.length) {
-    return { role: 'customer', customerId: value.slice(CUSTOMER_PREFIX.length) }
+    return { ok: true, viewer: { role: 'customer', customerId: value.slice(CUSTOMER_PREFIX.length) } }
   }
-  return null
+  return { ok: false }
 }

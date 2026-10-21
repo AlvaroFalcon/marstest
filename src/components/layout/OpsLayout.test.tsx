@@ -1,16 +1,9 @@
 import { screen } from '@testing-library/react'
 import { Route, Routes } from 'react-router'
-import { createMockDb } from '@/api/mockDb'
-import { createShipmentsApi, type ShipmentsApi } from '@/api/shipmentsApi'
+import type { ShipmentsApi } from '@/api/shipmentsApi'
 import { OpsLayout } from '@/components/layout/OpsLayout'
+import { createTestApi } from '@/test/createTestApi'
 import { renderWithProviders } from '@/test/renderWithProviders'
-
-function createSeededApi(): ShipmentsApi {
-  return createShipmentsApi({
-    db: createMockDb({ storage: { getItem: () => null, setItem: () => {} } }),
-    latencyMs: 0,
-  })
-}
 
 function renderOpsLayout(api: ShipmentsApi, initialPath = '/ops/exceptions') {
   return renderWithProviders(
@@ -26,14 +19,14 @@ function renderOpsLayout(api: ShipmentsApi, initialPath = '/ops/exceptions') {
 
 describe('OpsLayout', () => {
   it('shows the open exceptions of the ops scope and the shipments of the ops scope', async () => {
-    renderOpsLayout(createSeededApi())
+    renderOpsLayout(createTestApi())
 
     expect(await screen.findByRole('link', { name: /^Exceptions\s*5$/ })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^All shipments\s*16$/ })).toBeInTheDocument()
   })
 
   it('renders the page below the tabs', async () => {
-    renderOpsLayout(createSeededApi(), '/ops/shipments')
+    renderOpsLayout(createTestApi(), '/ops/shipments')
 
     expect(await screen.findByText('Shipments page')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /^All shipments/ })).toHaveAttribute('aria-current', 'page')
@@ -42,7 +35,7 @@ describe('OpsLayout', () => {
   it('shows a loading placeholder while the counts are pending', () => {
     const neverResolves = new Promise<never>(() => {})
     const api: ShipmentsApi = {
-      ...createSeededApi(),
+      ...createTestApi(),
       listExceptions: () => neverResolves,
       listShipments: () => neverResolves,
     }
@@ -55,7 +48,7 @@ describe('OpsLayout', () => {
 
   it('shows no number for the exceptions tab when its request fails', async () => {
     const api: ShipmentsApi = {
-      ...createSeededApi(),
+      ...createTestApi(),
       listExceptions: () => Promise.reject(new Error('Network down')),
     }
 
@@ -68,7 +61,7 @@ describe('OpsLayout', () => {
 
   it('shows no number for either tab when the reference data fails to load', async () => {
     const api: ShipmentsApi = {
-      ...createSeededApi(),
+      ...createTestApi(),
       getReferenceData: () => Promise.reject(new Error('Network down')),
     }
 

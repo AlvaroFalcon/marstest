@@ -5,24 +5,16 @@ import type { ReactElement } from 'react'
 import { IntlProvider } from 'react-intl'
 import { MemoryRouter } from 'react-router'
 import { ShipmentsApiProvider } from '@/api/ShipmentsApiProvider'
-import { createMockDb } from '@/api/mockDb'
-import { createShipmentsApi, type ShipmentsApi } from '@/api/shipmentsApi'
+import type { ShipmentsApi } from '@/api/shipmentsApi'
 import { config } from '@/config'
 import { messages } from '@/locales/en'
+import { createTestApi } from '@/test/createTestApi'
 
 export type RenderWithProvidersOptions = Omit<RenderOptions, 'wrapper'> & {
   /** Initial URL of the in-memory router, e.g. `/shipments?page=2`. */
   initialPath?: string
   /** API instance for this render; defaults to a fresh seeded one with no latency and no storage. */
   api?: ShipmentsApi
-}
-
-/** Fresh in-memory API per render so tests never share demo state or touch `sessionStorage`. */
-function createTestApi(): ShipmentsApi {
-  return createShipmentsApi({
-    db: createMockDb({ storage: { getItem: () => null, setItem: () => {} } }),
-    latencyMs: 0,
-  })
 }
 
 /**
