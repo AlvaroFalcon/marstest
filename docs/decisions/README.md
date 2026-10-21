@@ -54,3 +54,14 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0039](0039-aaa-separated-by-blank-lines.md) | Arrange / Act / Assert separated by blank lines, not comments | User | Accepted | 2026-10-21 |
 | [0040](0040-milestones-through-implement-milestone-skill.md) | Milestones are implemented through the `implement-milestone` skill with a decision gate | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0041](0041-single-coordinated-review-on-ready-label.md) | One coordinated automated review per pull request, triggered by the `ready-to-test` label | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0042](0042-eta-in-line-within-two-hours.md) | Our ETA is in line with the carrier within a fixed ±2 hours | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0043](0043-freshness-two-levels-by-receipt-time.md) | Tracking freshness has two levels, measured from the last received event | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0044](0044-watching-when-carrier-eta-missing.md) | Shipments without a carrier ETA are always "watching" | User | Accepted | 2026-10-21 |
+| [0045](0045-exception-urgency-by-type-then-age.md) | Exceptions are ordered by type rank, then by age, then by shipment id | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0046](0046-status-rules-per-carrier.md) | Raw carrier status text is normalised with rule tables per carrier | User | Accepted | 2026-10-21 |
+| [0047](0047-document-check-normalised-hs-and-one-percent-weight.md) | Document check compares HS codes by digits and gross weight within 1 % | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0048](0048-ai-text-only-for-new-texts.md) | Simulated AI text covers only new texts, not seeded strings | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0049](0049-lib-returns-data-and-english-ai-text.md) | Business logic returns structured data; only simulated AI text is plain English | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0050](0050-current-status-from-latest-milestone.md) | Current status comes from the latest milestone by occurrence time | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0051](0051-out-of-scope-site-visible-to-operations-only.md) | The out-of-scope Lyon site is visible to operations only | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0052](0052-rule-label-uses-seed-format.md) | Status rule labels use the seed format "pattern → status label" | User, on Claude's proposal | Accepted | 2026-10-21 |
