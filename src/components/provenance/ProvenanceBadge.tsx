@@ -21,10 +21,11 @@ export type ProvenanceBadgeProps = {
   /**
    * What the data is. `estimated` with `compact` shows only the percentage (ops screens, where the
    * card label already says "Our estimate"); the word "Estimated" stays for screen readers.
+   * `estimated` without `confidence` is a plain "Estimated" (a planned date has no precision).
    */
   kind:
     | { type: 'carrierEta' }
-    | { type: 'estimated', confidence: number, compact?: boolean }
+    | { type: 'estimated', confidence?: number, compact?: boolean }
     | { type: 'derivedFromGps' }
     | { type: 'noUpdate', hours: number }
   className?: string
@@ -48,6 +49,10 @@ function useBadgeContent(kind: ProvenanceBadgeProps['kind']): BadgeContent {
     case 'noUpdate':
       return { icon: ClockAlert, tone: 'neutral', label: intl.formatMessage({ id: 'provenance.badge.noUpdate' }, { hours: kind.hours }) }
     case 'estimated': {
+      if (kind.confidence === undefined) {
+        return { icon: ChartLine, tone: 'info', label: intl.formatMessage({ id: 'provenance.badge.estimatedNoPercent' }) }
+      }
+
       const percent = intl.formatNumber(kind.confidence / 100, { style: 'percent' })
       if (kind.compact) {
         return {

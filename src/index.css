@@ -25,6 +25,7 @@
     --color-input: var(--input);
     --color-border: var(--border);
     --color-destructive: var(--destructive);
+    --color-destructive-subtle: var(--destructive-subtle);
     --color-success: var(--success);
     --color-success-foreground: var(--success-foreground);
     --color-success-subtle: var(--success-subtle);
@@ -75,6 +76,7 @@
     --accent: oklch(0.97 0 0);
     --accent-foreground: oklch(0.205 0 0);
     --destructive: oklch(0.577 0.245 27.325);
+    --destructive-subtle: oklch(0.971 0.013 17.38);
 
     /*
      * Status roles. The base colour is used for text, icons and solid fills
@@ -126,6 +128,7 @@
     --accent: oklch(0.269 0 0);
     --accent-foreground: oklch(0.985 0 0);
     --destructive: oklch(0.704 0.191 22.216);
+    --destructive-subtle: oklch(0.258 0.092 26.042);
     --success: oklch(0.792 0.209 151.711);
     --success-foreground: oklch(0.205 0 0);
     --success-subtle: oklch(0.266 0.065 152.934);
@@ -169,6 +172,31 @@
     --text-ai-body--line-height: 1.5;
     --text-ai-footer: clamp(0.8125rem, 2.5cqi, 0.9375rem);
     --text-ai-footer--line-height: 1.5;
+}
+
+@theme {
+    /* Journey node diameter: 28 px in the vertical timeline (matches the mobile mockup), 52 px in the horizontal row. */
+    --spacing-journey-node: 1.75rem;
+    --spacing-journey-node-wide: 3.25rem;
+}
+
+/*
+ * The journey switches from a vertical timeline to a horizontal row when its card is wide enough
+ * for every step. The card sets data-density: a journey with many steps needs more width.
+ * Breakpoints: 46rem fits up to 5 steps (leg labels wrap under their arrow), 80rem for the rest.
+ */
+@custom-variant journey-row {
+    &:where([data-density="regular"] *) {
+        @container journey (min-width: 46rem) {
+            @slot;
+        }
+    }
+
+    &:where([data-density="dense"] *) {
+        @container journey (min-width: 80rem) {
+            @slot;
+        }
+    }
 }
 
 @layer base {

@@ -15,6 +15,13 @@ describe('ProvenanceBadge', () => {
     expect(screen.getByText('Estimated · 78%')).toBeInTheDocument()
   })
 
+  it('shows only the word Estimated when there is no confidence', () => {
+    renderWithProviders(<ProvenanceBadge kind={{ type: 'estimated' }} />)
+
+    expect(screen.getByText('Estimated')).toBeInTheDocument()
+    expect(screen.queryByText('%', { exact: false })).not.toBeInTheDocument()
+  })
+
   it('shows only the percentage for a compact estimate and keeps Estimated for screen readers', () => {
     renderWithProviders(<ProvenanceBadge kind={{ type: 'estimated', confidence: 94, compact: true }} />)
 
