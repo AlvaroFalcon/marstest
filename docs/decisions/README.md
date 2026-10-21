@@ -68,6 +68,7 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0053](0053-simulated-ai-date-format-en-gb-utc.md) | Dates in simulated AI texts use the "22 Oct 2026" format | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0054](0054-customs-hold-next-action-lists-mismatches.md) | Customs-hold next-action suggestion lists document mismatches as well as missing documents | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0055](0055-branch-names-use-slash.md) | Branch names use a slash after the type (`feat/`, `fix/`) | User | Accepted | 2026-10-21 |
+| [0056](0056-pause-m4-and-rebuild-lost-design.md) | Pause M4 and rebuild the lost Pencil design first | User | Accepted | 2026-10-21 |
 | [0057](0057-simulate-event-present-without-effect-until-m15.md) | "Simulate carrier event" is shown without effect until M15 | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0058](0058-viewing-as-select-on-all-viewports.md) | "Viewing as" role switch is a select on desktop and mobile | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0059](0059-reset-demo-and-theme-toggle-in-demo-strip.md) | "Reset demo" and the theme toggle sit on the right of the demo strip | User, on Claude's proposal | Accepted | 2026-10-21 |
