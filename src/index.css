@@ -154,6 +154,23 @@
     --sidebar-ring: oklch(0.556 0 0);
 }
 
+@theme {
+    /*
+     * Provenance component type scale. Sizes follow the width of the nearest container (cqi), so
+     * the same component reads at mobile sizes in a narrow column without breakpoint chains.
+     */
+    --text-caption: 0.8125rem;
+    --text-caption--line-height: 1.5;
+    --text-eta: clamp(1.25rem, 4cqi, 1.75rem);
+    --text-eta--line-height: 1.2;
+    --text-ai-title: 0.9375rem;
+    --text-ai-title--line-height: 1.5;
+    --text-ai-body: clamp(0.9375rem, 3cqi, 1.0625rem);
+    --text-ai-body--line-height: 1.5;
+    --text-ai-footer: clamp(0.8125rem, 2.5cqi, 0.9375rem);
+    --text-ai-footer--line-height: 1.5;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
