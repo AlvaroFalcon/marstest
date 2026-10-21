@@ -3,7 +3,7 @@
 - **Date:** YYYY-MM-DD
 - **Slug:** `<feature-slug>`
 - **Plan:** [`../plans/YYYY-MM-DD-<feature-slug>.md`](../plans/)
-- **Branch / PR:** `feat-<short-description>` / #
+- **Branch / PR:** `feat/<short-description>` / #
 - **Status:** In progress | Done
 
 ## Progress
