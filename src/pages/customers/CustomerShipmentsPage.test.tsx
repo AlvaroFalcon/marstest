@@ -18,7 +18,6 @@ function renderPageAt(initialPath: string, api: ShipmentsApi = createTestApi()) 
     <>
       <Routes>
         <Route path="/customers/:customerId/shipments" element={<CustomerShipmentsPage />} />
-        <Route path="/customers/:customerId/shipments/:shipmentId" element={<CustomerShipmentsPage />} />
       </Routes>
       <LocationProbe />
     </>,
@@ -310,28 +309,6 @@ describe('CustomerShipmentsPage', () => {
         renderPageAt('/customers/alpen-werkzeug/shipments?q=SH-1042')
 
         expect(await screen.findByText('No shipments to show')).toBeInTheDocument()
-      })
-    })
-
-    describe('detail route', () => {
-      it('shows the list for a shipment of the customer', async () => {
-        renderPageAt('/customers/nordwerk/shipments/SH-1042')
-
-        expect(await screen.findByText('Showing 6 of 6')).toBeInTheDocument()
-        expect(screen.getByRole('heading', { name: 'Your shipments' })).toBeInTheDocument()
-      })
-
-      it('shows "Page not found" for a shipment of another customer', async () => {
-        renderPageAt('/customers/nordwerk/shipments/SH-1037')
-
-        expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
-        expect(screen.queryByRole('heading', { name: 'Your shipments' })).not.toBeInTheDocument()
-      })
-
-      it('shows "Page not found" for an unknown shipment', async () => {
-        renderPageAt('/customers/nordwerk/shipments/SH-9999')
-
-        expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
       })
     })
   })

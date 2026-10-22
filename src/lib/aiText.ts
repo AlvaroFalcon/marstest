@@ -1,4 +1,4 @@
-import type { Customer, DocumentType, ExceptionType, MilestoneStatus, Shipment } from '@/api/types'
+import type { Customer, DocumentType, ExceptionType, Shipment } from '@/api/types'
 import { classifyDelay } from '@/lib/delayClassification'
 import { checkDocuments } from '@/lib/documentCheck'
 import type { DocumentFinding } from '@/lib/documentCheck'
@@ -7,36 +7,10 @@ import { getShipmentStatus } from '@/lib/shipmentStatus'
 import { STALE_AFTER_HOURS } from '@/lib/thresholds'
 
 /**
- * Simulated AI texts for content the seed does not already hold: the customer summary, the
- * suggested next action and the customer notice of exceptions created later (for example by the
- * simulated carrier event). Seeded explanations are never regenerated. Every sentence is built
+ * Simulated AI texts for content the seed does not already hold: the suggested next action and
+ * the customer notice of exceptions created later (for example by the simulated carrier event). Seeded explanations are never regenerated. Every sentence is built
  * only from values present in the shipment, so the texts cannot invent dates or numbers.
  */
-
-/** Customer-facing summary of a shipment plus the events it is based on. */
-export type ShipmentSummary = {
-  text: string
-  /** Raw events the text is based on; their count is the "Based on N events" label. */
-  basedOnEventIds: string[]
-}
-
-/** Predicate that follows "Shipment SH-1000" and reads naturally with the milestone location. */
-const STATUS_PREDICATES: Record<MilestoneStatus, (location: string) => string> = {
-  booked: location => `was booked at ${location}`,
-  pickedUp: location => `was picked up at ${location}`,
-  departed: location => `departed from ${location}`,
-  // Seed locations are positions such as "A-2 near Lleida" or "Bay of Biscay", so they follow a label, not a preposition.
-  inTransit: location => `is in transit; last reported position: ${location}`,
-  arrived: location => `arrived at ${location}`,
-  loadedOnVessel: location => `was loaded on the vessel at ${location}`,
-  vesselRolled: location => `was not loaded on its vessel at ${location} and moves to the next sailing`,
-  customsHold: location => `is held at customs at ${location}`,
-  customsCleared: location => `was cleared by customs at ${location}`,
-  delayed: location => `is delayed at ${location}`,
-  incident: location => `was affected by an incident at ${location}`,
-  outForDelivery: location => `is out for delivery in ${location}`,
-  delivered: location => `was delivered to ${location}`,
-}
 
 const EXCEPTION_PHRASES: Record<ExceptionType, string> = {
   customsHold: 'is held at customs',
@@ -62,40 +36,6 @@ const dateFormatter = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 
 
 function formatDate(isoDate: string): string {
   return dateFormatter.format(new Date(isoDate))
-}
-
-/**
- * Summarises where a shipment is for the customer: current status and location, our estimate
- * with its confidence, and the open exception if there is one.
- *
- * @returns The text and the ids of the raw events it is based on.
- */
-export function summarizeShipmentForCustomer(shipment: Shipment): ShipmentSummary {
-  const status = getShipmentStatus(shipment)
-  const sentences: string[] = []
-
-  if (status.kind === 'known') {
-    sentences.push(`Shipment ${shipment.id} ${STATUS_PREDICATES[status.status](status.milestone.location)}.`)
-  }
-  else {
-    sentences.push(`Shipment ${shipment.id} has no tracking update yet.`)
-  }
-
-  if (status.kind === 'known' && status.status === 'delivered') {
-    sentences.push(`It was delivered on ${formatDate(status.milestone.occurredAt)}.`)
-  }
-  else {
-    const { date, confidence } = shipment.estimatedEta
-    sentences.push(`We estimate delivery on ${formatDate(date)} (${confidence} % confidence).`)
-  }
-
-  const [openException] = listExceptionsByUrgency([shipment])
-  if (openException) {
-    sentences.push(`Open issue: this shipment ${EXCEPTION_PHRASES[openException.exception.type]}.`)
-  }
-
-  const basedOnEventIds = shipment.rawEvents.map(rawEvent => rawEvent.id)
-  return { text: sentences.join(' '), basedOnEventIds }
 }
 
 const FIELD_LABELS: Record<'hsCode' | 'grossWeightKg', string> = {

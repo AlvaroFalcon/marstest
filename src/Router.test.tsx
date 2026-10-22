@@ -146,8 +146,8 @@ describe('Router', () => {
     })
 
     it('lands on the target customer list when switching from a detail page', async () => {
-      renderRouterAt('/customers/nordwerk/shipments/SH-1029')
-      await screen.findByRole('heading', { name: 'Your shipments' })
+      renderRouterAt('/customers/nordwerk/shipments/SH-1042')
+      await screen.findByRole('heading', { name: /SH-1042/ })
 
       await chooseViewer('Alpen Werkzeug AG')
 
@@ -155,8 +155,8 @@ describe('Router', () => {
     })
 
     it('lands on the exceptions list when switching to Ops from a customer detail page', async () => {
-      renderRouterAt('/customers/nordwerk/shipments/SH-1029')
-      await screen.findByRole('heading', { name: 'Your shipments' })
+      renderRouterAt('/customers/nordwerk/shipments/SH-1042')
+      await screen.findByRole('heading', { name: /SH-1042/ })
 
       await chooseViewer('Ops · Spain sites')
 

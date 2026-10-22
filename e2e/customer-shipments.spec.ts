@@ -30,13 +30,6 @@ test.describe('customer shipments list', () => {
     await expect(page.getByRole('heading', { name: 'Your shipments' })).toHaveCount(0)
   })
 
-  test('shows the list for the shipment URL of the customer', async ({ page }) => {
-    await page.goto('/customers/nordwerk/shipments/SH-1042')
-
-    await expect(page.getByRole('heading', { level: 1, name: 'Your shipments' })).toBeVisible()
-    await expect(page.getByText('Showing 6 of 6')).toBeVisible()
-  })
-
   test('shows the alert for the most urgent shipment and selects Needs attention from +2 more', async ({ page }) => {
     await page.goto('/customers/nordwerk/shipments')
 
@@ -113,7 +106,7 @@ test.describe('customer shipments list', () => {
     await page.keyboard.press('Enter')
 
     await expect(page).toHaveURL('/customers/nordwerk/shipments/SH-1058?tab=needsAttention')
-    await expect(page.getByRole('heading', { level: 1, name: 'Your shipments' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1058/ })).toBeVisible()
   })
 
   test('has no horizontal scroll at 375 px', async ({ page }) => {
