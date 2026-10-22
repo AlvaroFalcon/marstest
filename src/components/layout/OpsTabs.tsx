@@ -45,7 +45,7 @@ function TabCount({ count, tone }: TabCountProps) {
 const tabClassName = `
   flex flex-1 items-center justify-center gap-2 rounded-md px-3 py-1.5 text-sm text-muted-foreground outline-hidden
   transition-colors
-  focus-visible:ring-3 focus-visible:ring-ring/50
+  focus-visible:ring-3 focus-visible:ring-ring
   aria-[current=page]:bg-card aria-[current=page]:font-semibold aria-[current=page]:text-foreground
   @xl:flex-none @xl:justify-start @xl:rounded-none @xl:border-b-2 @xl:border-transparent @xl:px-0 @xl:pt-2 @xl:pb-3
   @xl:text-base

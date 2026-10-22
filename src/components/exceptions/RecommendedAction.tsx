@@ -67,10 +67,10 @@ function PendingDraft({ exceptionId, initialBody, customerName, approve, discard
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card px-5 py-4">
-      <h3 className="flex items-center gap-2 text-ai-title font-semibold text-info">
+      <h2 className="flex items-center gap-2 text-ai-title font-semibold text-info">
         <Sparkles aria-hidden="true" className="size-4 shrink-0" />
         {intl.formatMessage({ id: 'recommendedAction.draftTitle' }, { customerName })}
-      </h3>
+      </h2>
       <div className="flex flex-col gap-1.5">
         <label htmlFor={messageId} className="sr-only">
           {intl.formatMessage({ id: 'recommendedAction.messageLabel' })}
@@ -154,17 +154,17 @@ function SentDraft({ body, notifiedAt, now, customerName, shouldFocus }: SentDra
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-card px-5 py-4">
-      <h3 className="flex items-center gap-2 text-ai-title font-semibold text-info">
+      <h2 className="flex items-center gap-2 text-ai-title font-semibold text-info">
         <Sparkles aria-hidden="true" className="size-4 shrink-0" />
         {intl.formatMessage({ id: 'recommendedAction.draftTitle' }, { customerName })}
-      </h3>
+      </h2>
       <p className="rounded-lg border bg-background px-2.5 py-2 text-sm whitespace-pre-wrap">{body}</p>
       <p
         ref={shouldFocus ? focusOnMount : undefined}
         tabIndex={-1}
         className="
           flex items-center gap-1.5 rounded-sm text-sm font-medium outline-hidden
-          focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:ring-3 focus-visible:ring-ring
         "
       >
         <CircleCheck aria-hidden="true" className="size-4 shrink-0" />
@@ -217,7 +217,7 @@ export function RecommendedAction({
         tabIndex={-1}
         className="
           rounded-sm text-base font-semibold outline-hidden
-          focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:ring-3 focus-visible:ring-ring
         "
       >
         {intl.formatMessage({ id: 'recommendedAction.title' })}

@@ -25,7 +25,7 @@ export function AiBlock({ title, children, evidence, className }: AiBlockProps) 
       <section className="flex flex-col gap-2.5 rounded-lg border border-info bg-info-subtle px-5 py-4.5">
         <header className="flex items-center gap-2 text-ai-title font-semibold text-info">
           <Sparkles aria-hidden className="size-4 shrink-0" />
-          <h3>{title}</h3>
+          <h2>{title}</h2>
         </header>
         <div className="text-ai-body text-foreground">{children}</div>
         {evidence === undefined ? null : <AiEvidence {...evidence} />}
@@ -52,7 +52,7 @@ function AiEvidence({ label, onClick }: AiEvidenceProps) {
     <button
       className="
         flex w-fit items-center gap-2 rounded-sm text-ai-footer text-info outline-hidden
-        focus-visible:ring-3 focus-visible:ring-ring/50
+        focus-visible:ring-3 focus-visible:ring-ring
         [@media(hover:hover)]:hover:underline
       "
       onClick={onClick}

@@ -40,7 +40,7 @@ export function ProactiveAlert({ alert, customerId, isCompact, onShowMore, class
         aria-label={intl.formatMessage({ id: 'proactiveAlert.viewLabel' }, { shipmentId: alert.row.id })}
         className="
           inline-flex items-center gap-1 rounded-sm font-semibold underline outline-hidden
-          focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:ring-3 focus-visible:ring-ring
         "
       >
         {intl.formatMessage({ id: isCompact ? 'proactiveAlert.viewCompact' : 'proactiveAlert.view' })}

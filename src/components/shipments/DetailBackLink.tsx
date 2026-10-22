@@ -18,7 +18,7 @@ export function DetailBackLink({ href, label, accessibleLabel }: DetailBackLinkP
       className="
         inline-flex w-fit items-center gap-1.5 rounded-md text-sm text-muted-foreground outline-hidden
         hover:text-foreground
-        focus-visible:ring-3 focus-visible:ring-ring/50
+        focus-visible:ring-3 focus-visible:ring-ring
       "
     >
       <ArrowLeft aria-hidden="true" className="size-4" />

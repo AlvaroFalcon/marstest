@@ -137,7 +137,7 @@ function ShipmentDetailHeader({ detail, freshness, now, statusBadge, titleRef, s
         tabIndex={-1}
         className="
           w-full rounded-sm text-xl font-semibold text-balance outline-hidden
-          focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:ring-3 focus-visible:ring-ring
           @xl:w-auto @xl:text-2xl
         "
       >

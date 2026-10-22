@@ -44,7 +44,7 @@ function SelectTrigger({
         `
           flex w-fit items-center justify-between gap-1.5 rounded-lg border border-input bg-transparent py-2 pr-2 pl-2.5
           text-sm whitespace-nowrap outline-hidden transition-colors select-none
-          focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring
           disabled:cursor-not-allowed disabled:opacity-50
           aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20
           data-placeholder:text-muted-foreground
