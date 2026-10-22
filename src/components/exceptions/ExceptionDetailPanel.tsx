@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useIntl } from 'react-intl'
 import { ArrowLeft, SearchX } from 'lucide-react'
 import { ExceptionStatusBadge, type ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
+import { RecommendedAction } from '@/components/exceptions/RecommendedAction'
 import { ShipmentDetail } from '@/components/shipments/ShipmentDetail'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -15,6 +16,7 @@ import {
   buildShipmentDetail,
   pickMostUrgentException,
 } from '@/lib/exceptionDetail'
+import { shouldOfferCertificateActions } from '@/lib/customerNotice'
 import { getFreshness, type Freshness } from '@/lib/freshness'
 import { cn } from '@/lib/utils'
 
@@ -140,6 +142,7 @@ type ReadyDetailProps = {
 
 function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDetailProps) {
   const now = useNow()
+  const titleRef = useRef<HTMLHeadingElement>(null)
   const exception = pickMostUrgentException(shipment)
 
   // A shipment without an open exception has no exception detail; it looks like an unknown id.
@@ -148,17 +151,31 @@ function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDeta
   }
 
   const freshness = getFreshness(shipment, now)
+  const detail = buildShipmentDetail(shipment, referenceData)
+  const exceptionLayer = buildExceptionLayer(shipment, exception)
 
   return (
     <DetailFrame isCard={isCard}>
       <ShipmentDetail
         shipment={shipment}
-        detail={buildShipmentDetail(shipment, referenceData)}
+        detail={detail}
         carrierNames={Object.fromEntries(referenceData.carriers.map(carrier => [carrier.id, carrier.name]))}
         freshness={freshness}
         now={now}
         statusBadge={<ExceptionStatusBadge status={toExceptionStatus(exception.type, freshness)} />}
-        exception={buildExceptionLayer(shipment, exception)}
+        exception={exceptionLayer}
+        titleRef={titleRef}
+        recommendedAction={(
+          <RecommendedAction
+            key={exception.id}
+            shipmentId={shipment.id}
+            exception={exception}
+            customerName={detail.customerName}
+            offerCertificateActions={shouldOfferCertificateActions(exceptionLayer.documentRows)}
+            now={now}
+            onSectionRemoved={() => titleRef.current?.focus()}
+          />
+        )}
       />
     </DetailFrame>
   )

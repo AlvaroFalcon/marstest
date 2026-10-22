@@ -1,7 +1,9 @@
 import { Link } from 'react-router'
 import { useIntl } from 'react-intl'
+import { Check } from 'lucide-react'
 import { cva } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
+import { Badge } from '@/components/ui/badge'
 import { ExceptionStatusBadge, type ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
 import { EXCEPTION_STATUS_PRESENTATION } from '@/components/exceptions/exceptionStatusPresentation'
 
@@ -16,6 +18,8 @@ export type ExceptionCardProps = {
   href: string
   /** True when this exception is the one open in the detail panel. */
   isOpen: boolean
+  /** True when the customer notice was sent; the exception stays in the inbox, so the card says so. */
+  isCustomerNotified: boolean
   className?: string
 }
 
@@ -44,7 +48,7 @@ const cardVariants = cva(
  * the severity (the badge has icon and text, so colour is not the only signal); the open card gets
  * the info background and `aria-current="page"`, which also tells screen readers which one is open.
  */
-export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen, className }: ExceptionCardProps) {
+export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen, isCustomerNotified, className }: ExceptionCardProps) {
   const intl = useIntl()
   const { tone } = EXCEPTION_STATUS_PRESENTATION[status.type]
 
@@ -58,7 +62,15 @@ export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen,
         {intl.formatMessage({ id: 'exceptionCard.title' }, { shipmentId, route })}
       </span>
       <span className="text-muted-foreground">{reason}</span>
-      <ExceptionStatusBadge status={status} />
+      <span className="flex flex-wrap items-center gap-1.5">
+        <ExceptionStatusBadge status={status} />
+        {isCustomerNotified && (
+          <Badge variant="outline" className="h-6 px-2 text-caption text-muted-foreground">
+            <Check aria-hidden="true" />
+            {intl.formatMessage({ id: 'exceptionCard.customerNotified' })}
+          </Badge>
+        )}
+      </span>
     </Link>
   )
 }

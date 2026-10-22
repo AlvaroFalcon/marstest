@@ -2,6 +2,7 @@ import type { Shipment, ShipmentException, Site } from '@/api/types'
 import { listExceptionsByUrgency } from '@/lib/exceptionPriority'
 import { getFreshness } from '@/lib/freshness'
 import { classifyDelay } from '@/lib/delayClassification'
+import { isCustomerNotified } from '@/lib/customerNotice'
 import { filterByOriginSite, scopeShipments } from '@/lib/scope'
 
 /** One card of the ops inbox, with every value the card shows already resolved. */
@@ -14,6 +15,8 @@ export type ExceptionInboxItem = {
   reason: string
   /** Whole hours since the last tracking update, rounded down; 0 for a delivered shipment. */
   hoursSinceUpdate: number
+  /** True when the customer notice was approved and sent; the exception stays open. */
+  isCustomerNotified: boolean
 }
 
 /** Open exceptions of one in-scope site, for the site filter. */
@@ -87,6 +90,7 @@ function toItem(shipment: Shipment, exception: ShipmentException, sites: readonl
     routeLabel: getRouteLabel(shipment, sites),
     reason: getFirstSentence(exception.aiDiagnosis.summary),
     hoursSinceUpdate: freshness.kind === 'notApplicable' ? 0 : Math.floor(freshness.hoursSinceUpdate),
+    isCustomerNotified: isCustomerNotified(exception),
   }
 }
 

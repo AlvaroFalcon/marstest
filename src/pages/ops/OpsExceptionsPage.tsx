@@ -68,6 +68,7 @@ export function OpsExceptionsPage() {
           status: toStatus(item),
           href: `${routes.ops.exception(item.shipmentId)}${search}`,
           isOpen: item.shipmentId === shipmentId,
+          isCustomerNotified: item.isCustomerNotified,
         })),
         kpis: {
           needAttention: exceptions.inbox.kpis.needAttention,
