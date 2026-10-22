@@ -10,6 +10,7 @@ function buildProps(overrides: Partial<ExceptionCardProps> = {}): ExceptionCardP
     status: { type: 'customsHold' },
     href: '/ops/exceptions/SH-1042?site=zaragoza-plant',
     isOpen: false,
+    isCustomerNotified: false,
     ...overrides,
   }
 }
@@ -48,5 +49,17 @@ describe('ExceptionCard', () => {
     renderWithProviders(<ExceptionCard {...buildProps({ isOpen: false })} />)
 
     expect(screen.getByRole('link')).not.toHaveAttribute('aria-current')
+  })
+
+  it('shows the "Customer notified" badge when the notice was sent', () => {
+    renderWithProviders(<ExceptionCard {...buildProps({ isCustomerNotified: true })} />)
+
+    expect(screen.getByRole('link')).toHaveTextContent('Customer notified')
+  })
+
+  it('does not show the "Customer notified" badge while the notice was not sent', () => {
+    renderWithProviders(<ExceptionCard {...buildProps({ isCustomerNotified: false })} />)
+
+    expect(screen.queryByText('Customer notified')).not.toBeInTheDocument()
   })
 })

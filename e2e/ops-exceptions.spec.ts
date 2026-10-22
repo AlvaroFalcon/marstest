@@ -168,3 +168,77 @@ test.describe('exception detail', () => {
     await expect(page.getByText('This exception isn\'t available')).toBeVisible()
   })
 })
+
+test.describe('recommended action', () => {
+  test('shows the editable AI draft with the approval note', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    const message = page.getByRole('textbox', { name: 'Message to customer' })
+    await expect(message).toBeEditable()
+    await expect(page.getByText('Nothing is sent without your approval.')).toBeVisible()
+  })
+
+  test('approves an edited draft, shows the toast, locks the text and notifies the card', async ({ page, isMobile }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+    const message = page.getByRole('textbox', { name: 'Message to customer' })
+    await message.fill('Hello John, your container is delayed by two days.')
+
+    await page.getByRole('button', { name: 'Approve and send' }).click()
+
+    await expect(page.getByText('Notice sent to Nordwerk GmbH')).toBeVisible()
+    await expect(page.getByText(/Customer notified · /)).toBeVisible()
+    await expect(page.getByText('Hello John, your container is delayed by two days.')).toBeVisible()
+    await expect(page.getByRole('textbox', { name: 'Message to customer' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Approve and send' })).toHaveCount(0)
+    if (!isMobile) {
+      await expect(page.getByRole('link', { name: /SH-1042/ })).toContainText('Customer notified')
+      await expect(page.getByRole('link', { name: /SH-1051/ })).not.toContainText('Customer notified')
+    }
+  })
+
+  test('shows the notified badge in the inbox after going back from the detail', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+    await page.getByRole('button', { name: 'Approve and send' }).click()
+    await expect(page.getByText(/Customer notified · /)).toBeVisible()
+
+    await page.goto('/ops/exceptions')
+
+    await expect(page.getByRole('link', { name: /SH-1042/ })).toContainText('Customer notified')
+  })
+
+  test('discards the draft and keeps the other actions on SH-1042', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await page.getByRole('button', { name: 'Discard' }).click()
+
+    await expect(page.getByText('Draft discarded')).toBeVisible()
+    await expect(page.getByRole('textbox', { name: 'Message to customer' })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: 'Upload certificate of origin' })).toBeVisible()
+  })
+
+  test('removes the whole recommended action after discarding the draft of SH-1037', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1037')
+
+    await page.getByRole('button', { name: 'Discard' }).click()
+
+    await expect(page.getByRole('heading', { level: 2, name: 'Recommended action' })).toHaveCount(0)
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1037/ })).toBeFocused()
+  })
+
+  test('gives simulated feedback for both certificate actions', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await page.getByRole('button', { name: 'Upload certificate of origin' }).click()
+    await expect(page.getByText('Certificate of origin upload simulated')).toBeVisible()
+    await page.getByRole('button', { name: 'Request it from Chamber of Commerce' }).click()
+
+    await expect(page.getByText('Request sent to Chamber of Commerce (simulated)')).toBeVisible()
+  })
+
+  test('does not offer the certificate actions on SH-1037', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1037')
+
+    await expect(page.getByRole('button', { name: 'Approve and send' })).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Upload certificate of origin' })).toHaveCount(0)
+  })
+})

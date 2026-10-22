@@ -18,7 +18,9 @@ const siteFilter: ExceptionInboxProps['siteFilter'] = {
   isDesktop: true,
 }
 
-const readyContent: ExceptionInboxContent = {
+type ReadyContent = Extract<ExceptionInboxContent, { status: 'ready' }>
+
+const readyContent: ReadyContent = {
   status: 'ready',
   items: [
     {
@@ -28,6 +30,7 @@ const readyContent: ExceptionInboxContent = {
       status: { type: 'customsHold' },
       href: '/ops/exceptions/SH-1042',
       isOpen: false,
+      isCustomerNotified: false,
     },
     {
       shipmentId: 'SH-1051',
@@ -36,6 +39,7 @@ const readyContent: ExceptionInboxContent = {
       status: { type: 'vesselRolled' },
       href: '/ops/exceptions/SH-1051',
       isOpen: true,
+      isCustomerNotified: true,
     },
   ],
   kpis: { needAttention: 5, staleOverDay: 2, onTime: 9, total: 16 },
@@ -105,6 +109,13 @@ describe('ExceptionInbox', () => {
 
       expect(screen.getByRole('link', { name: /SH-1051/ })).toHaveAttribute('aria-current', 'page')
       expect(screen.getByRole('link', { name: /SH-1042/ })).not.toHaveAttribute('aria-current')
+    })
+
+    it('shows the "Customer notified" badge only on the notified card', () => {
+      renderWithProviders(<ExceptionInbox content={readyContent} siteFilter={siteFilter} />)
+
+      expect(screen.getByRole('link', { name: /SH-1051/ })).toHaveTextContent('Customer notified')
+      expect(screen.getByRole('link', { name: /SH-1042/ })).not.toHaveTextContent('Customer notified')
     })
 
     it('shows the site filter trigger', () => {

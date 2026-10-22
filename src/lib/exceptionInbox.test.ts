@@ -50,6 +50,34 @@ describe('buildExceptionInbox', () => {
     expect(first.hoursSinceUpdate).toBeGreaterThan(24)
   })
 
+  it('flags no card as customer notified while every draft is pending', () => {
+    const flags = buildSeedInbox(null).items.map(item => item.isCustomerNotified)
+
+    expect(flags).toEqual([false, false, false, false, false])
+  })
+
+  it('flags the card whose notice was sent as customer notified', () => {
+    const sentShipments = exceptionShipments.map(shipment => shipment.id === 'SH-1042'
+      ? {
+          ...shipment,
+          exceptions: shipment.exceptions.map(exception => ({
+            ...exception,
+            draft: { status: 'sent' as const, body: 'Hello', notifiedAt: DEMO_NOW_ISO },
+          })),
+        }
+      : shipment)
+
+    const inbox = buildExceptionInbox({ exceptionShipments: sentShipments, shipments: seed.shipments, sites: seed.sites, siteId: null, now })
+
+    expect(inbox.items.map(item => [item.shipmentId, item.isCustomerNotified])).toEqual([
+      ['SH-1042', true],
+      ['SH-1051', false],
+      ['SH-1037', false],
+      ['SH-1035', false],
+      ['SH-1029', false],
+    ])
+  })
+
   it('computes the KPIs over all in-scope sites', () => {
     expect(buildSeedInbox(null).kpis).toEqual({ needAttention: 5, staleOver24h: 2, onTime: 9, total: 16 })
   })

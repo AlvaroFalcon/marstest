@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { useIntl } from 'react-intl'
 import { TriangleAlert } from 'lucide-react'
 import type { Shipment } from '@/api/types'
@@ -29,6 +29,8 @@ export type ShipmentDetailProps = {
   exception?: ExceptionLayerModel
   /** Slot for the recommended action, filled by the exception flow when it exists. */
   recommendedAction?: ReactNode
+  /** Ref of the title, so a flow that removes the focused control can move focus back to the top. */
+  titleRef?: Ref<HTMLHeadingElement>
   className?: string
 }
 
@@ -49,7 +51,7 @@ function ExceptionOpenBadge({ openedAt, className }: ExceptionOpenBadgeProps) {
   )
 }
 
-type ShipmentDetailHeaderProps = Pick<ShipmentDetailProps, 'detail' | 'freshness' | 'now' | 'statusBadge'> & {
+type ShipmentDetailHeaderProps = Pick<ShipmentDetailProps, 'detail' | 'freshness' | 'now' | 'statusBadge' | 'titleRef'> & {
   exceptionOpenedAt?: string
 }
 
@@ -58,16 +60,20 @@ type ShipmentDetailHeaderProps = Pick<ShipmentDetailProps, 'detail' | 'freshness
  * one the title takes its own row and the badges (status and, when open, the exception) follow it,
  * because the data row has no room for the exception badge there.
  */
-function ShipmentDetailHeader({ detail, freshness, now, statusBadge, exceptionOpenedAt }: ShipmentDetailHeaderProps) {
+function ShipmentDetailHeader({ detail, freshness, now, statusBadge, titleRef, exceptionOpenedAt }: ShipmentDetailHeaderProps) {
   const intl = useIntl()
   const { latestEventSource } = detail
 
   return (
     <header className="flex flex-wrap items-center gap-x-3 gap-y-2">
-      <h1 className="
-        w-full text-xl font-semibold text-balance
-        @xl:w-auto @xl:text-2xl
-      "
+      <h1
+        ref={titleRef}
+        tabIndex={-1}
+        className="
+          w-full rounded-sm text-xl font-semibold text-balance outline-hidden
+          focus-visible:ring-3 focus-visible:ring-ring/50
+          @xl:w-auto @xl:text-2xl
+        "
       >
         {intl.formatMessage({ id: 'shipmentDetail.title' }, { shipmentId: detail.shipmentId, route: detail.routeLabel })}
       </h1>
@@ -204,6 +210,7 @@ export function ShipmentDetail({
   statusBadge,
   exception,
   recommendedAction,
+  titleRef,
   className,
 }: ShipmentDetailProps) {
   return (
@@ -213,6 +220,7 @@ export function ShipmentDetail({
         freshness={freshness}
         now={now}
         statusBadge={statusBadge}
+        titleRef={titleRef}
         exceptionOpenedAt={exception?.openedAt}
       />
       <InternalDataRow detail={detail} exceptionOpenedAt={exception?.openedAt} />
