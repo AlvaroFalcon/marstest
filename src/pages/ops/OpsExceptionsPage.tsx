@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { useLocation, useParams } from 'react-router'
 import { ExceptionInbox, type ExceptionInboxContent } from '@/components/exceptions/ExceptionInbox'
 import type { ExceptionInboxItem as ExceptionInboxCard } from '@/components/exceptions/ExceptionInbox'
@@ -5,6 +6,7 @@ import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBad
 import { ExceptionDetailEmptyState } from '@/components/exceptions/ExceptionDetailEmptyState'
 import { ExceptionDetailPanel } from '@/components/exceptions/ExceptionDetailPanel'
 import { useExceptions } from '@/hooks/useExceptions'
+import { useMarkExceptionSeen, useUnseenExceptionShipmentIds } from '@/hooks/useUnseenExceptions'
 import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
 import type { ExceptionInboxItem } from '@/lib/exceptionInbox'
 import routes from '@/routes'
@@ -34,6 +36,16 @@ export function OpsExceptionsPage() {
   const { search } = useLocation()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const exceptions = useExceptions()
+  const unseenShipmentIds = useUnseenExceptionShipmentIds()
+  const { mutate: markExceptionSeen } = useMarkExceptionSeen()
+
+  const isOpenExceptionUnseen = shipmentId !== undefined && unseenShipmentIds.includes(shipmentId)
+  useEffect(() => {
+    // Opening the exception is what "sees" it; the fake API call clears the card's marker.
+    if (isOpenExceptionUnseen) {
+      markExceptionSeen(shipmentId)
+    }
+  }, [isOpenExceptionUnseen, shipmentId, markExceptionSeen])
 
   const selectedSiteId = exceptions.status === 'ready' ? exceptions.selectedSiteId : null
   const options = exceptions.status === 'ready'
@@ -62,6 +74,7 @@ export function OpsExceptionsPage() {
           href: `${routes.ops.exception(item.shipmentId)}${search}`,
           isOpen: item.shipmentId === shipmentId,
           isCustomerNotified: item.isCustomerNotified,
+          isNew: unseenShipmentIds.includes(item.shipmentId),
         })),
         kpis: {
           needAttention: exceptions.inbox.kpis.needAttention,

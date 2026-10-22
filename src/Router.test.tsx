@@ -50,15 +50,48 @@ describe('Router', () => {
       expect(await screen.findByText('Demo mode · synthetic data, no real login')).toBeInTheDocument()
     })
 
-    it('keeps the simulate button clickable without changing the page', async () => {
+    it('applies the event, re-orders the inbox and offers a View action to ops', async () => {
       renderRouterAt('/ops/exceptions')
       await screen.findByRole('link', { name: /^Exceptions\s*5$/ })
 
       await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
 
-      expect(screen.getByRole('link', { name: /^Exceptions\s*5$/ })).toBeInTheDocument()
-      expect(screen.queryByText('Demo reset')).not.toBeInTheDocument()
-      expectPath('/ops/exceptions')
+      expect(await screen.findByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeInTheDocument()
+      expect(await screen.findByRole('link', { name: /^Exceptions\s*6$/ })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'View' })).toBeInTheDocument()
+      expect(screen.getByText('New')).toBeInTheDocument()
+    })
+
+    it('says so when the event was already simulated', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent()
+      renderRouterAt('/ops/exceptions', api)
+      await screen.findByRole('link', { name: /^Exceptions\s*6$/ })
+
+      await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
+
+      expect(await screen.findByText('Already simulated. Reset the demo to run it again.')).toBeInTheDocument()
+    })
+
+    it('clears the New marker when ops open the exception', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent()
+      renderRouterAt('/ops/exceptions', api)
+      expect(await screen.findByText('New')).toBeInTheDocument()
+
+      await userEvent.click(screen.getByRole('link', { name: /SH-1060/ }))
+
+      await waitFor(() => expect(screen.queryByText('New')).not.toBeInTheDocument())
+    })
+
+    it('shows customers the toast without a View action', async () => {
+      renderRouterAt('/customers/nordwerk/shipments')
+      await screen.findByRole('button', { name: /Simulate/ })
+
+      await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
+
+      expect(await screen.findByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: 'View' })).not.toBeInTheDocument()
     })
   })
 

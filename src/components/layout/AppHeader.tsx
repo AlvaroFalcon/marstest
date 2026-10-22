@@ -11,8 +11,9 @@ export type AppHeaderProps = {
   onViewerChange: (value: string) => void
   onResetDemo: () => void
   isResetting: boolean
-  /** Present and clickable, but intentionally without effect until the simulation milestone. */
   onSimulateCarrierEvent: () => void
+  /** True while the simulated event is being applied: the button is disabled and flagged busy. */
+  isSimulating: boolean
   className?: string
 }
 
@@ -28,6 +29,7 @@ export function AppHeader({
   onResetDemo,
   isResetting,
   onSimulateCarrierEvent,
+  isSimulating,
   className,
 }: AppHeaderProps) {
   const intl = useIntl()
@@ -38,6 +40,7 @@ export function AppHeader({
         onResetDemo={onResetDemo}
         isResetting={isResetting}
         onSimulateCarrierEvent={onSimulateCarrierEvent}
+        isSimulating={isSimulating}
       />
       <div className="
         flex items-center justify-between gap-3 border-b bg-card px-4 py-3

@@ -5,7 +5,7 @@ import { renderWithProviders } from '@/test/renderWithProviders'
 
 function renderStrip(props: Partial<DemoStripProps> = {}) {
   return renderWithProviders(
-    <DemoStrip onResetDemo={() => {}} isResetting={false} onSimulateCarrierEvent={() => {}} {...props} />,
+    <DemoStrip onResetDemo={() => {}} isResetting={false} onSimulateCarrierEvent={() => {}} isSimulating={false} {...props} />,
   )
 }
 
@@ -40,6 +40,13 @@ describe('DemoStrip', () => {
     await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
 
     expect(onSimulateCarrierEvent).toHaveBeenCalledTimes(1)
+  })
+
+  it('disables "Simulate" and flags it busy while the event is applied', () => {
+    renderStrip({ isSimulating: true })
+
+    expect(screen.getByRole('button', { name: /Simulate/ })).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Simulate/ })).toHaveAttribute('aria-busy', 'true')
   })
 
   it('offers the theme toggle', () => {

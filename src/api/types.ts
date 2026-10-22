@@ -360,6 +360,12 @@ export type ReferenceData = z.infer<typeof referenceDataSchema>
 /** The whole demo state: what the mock database holds and persists to `sessionStorage`. */
 export const demoStateSchema = referenceDataSchema.extend({
   shipments: z.array(shipmentSchema),
+  /**
+   * Ids of shipments whose exception ops have not opened yet (set by the simulated carrier event),
+   * shown as a "New" marker on the inbox card. Defaults to empty so a state persisted before this
+   * field existed still parses.
+   */
+  unseenExceptionShipmentIds: z.array(z.string()).default([]),
 })
 
 /** @see demoStateSchema */

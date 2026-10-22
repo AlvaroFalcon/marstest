@@ -135,6 +135,37 @@ describe('createShipmentsApi', () => {
     expect(exceptions).toHaveLength(7)
   })
 
+  it('marks SH-1060 as unseen only once the event is applied', async () => {
+    const api = createTestApi()
+    const before = await api.listUnseenExceptionShipmentIds()
+
+    await api.simulateCarrierEvent()
+    await api.simulateCarrierEvent()
+    const after = await api.listUnseenExceptionShipmentIds()
+
+    expect(before).toEqual([])
+    expect(after).toEqual(['SH-1060'])
+  })
+
+  it('clears the unseen marker when the exception is marked as seen, and ignores repeats', async () => {
+    const api = createTestApi()
+    await api.simulateCarrierEvent()
+
+    await api.markExceptionSeen('SH-1060')
+    await api.markExceptionSeen('SH-1060')
+
+    expect(await api.listUnseenExceptionShipmentIds()).toEqual([])
+  })
+
+  it('clears the unseen marker on resetDemo', async () => {
+    const api = createTestApi()
+    await api.simulateCarrierEvent()
+
+    await api.resetDemo()
+
+    expect(await api.listUnseenExceptionShipmentIds()).toEqual([])
+  })
+
   it('restores the seed on resetDemo', async () => {
     const api = createTestApi()
     await api.simulateCarrierEvent()
