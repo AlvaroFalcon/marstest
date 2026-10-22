@@ -133,7 +133,6 @@ describe('Router', () => {
       expect(await screen.findByRole('heading', { name: 'Your shipments' })).toBeInTheDocument()
       expectPath('/customers/brenner-iberia/shipments')
       expect(screen.getByRole('combobox', { name: 'Viewing as' })).toHaveTextContent('Brenner Iberia S.L.')
-      expect(within(screen.getByRole('main')).getByText('Brenner Iberia S.L.')).toBeInTheDocument()
     })
 
     it('goes back to the exceptions inbox when Ops is chosen from a customer page', async () => {

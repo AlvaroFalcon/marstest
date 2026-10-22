@@ -10,6 +10,7 @@ import {
   getSortState,
   paginateShipmentRows,
   sortShipmentRows,
+  splitSearchTerms,
   type ShipmentListQuery,
 } from '@/lib/shipmentList'
 
@@ -223,5 +224,90 @@ describe('buildShipmentListPage', () => {
 describe('countRowsBySite', () => {
   it('counts the rows of one origin site', () => {
     expect(countRowsBySite(rows, 'bilbao-plant')).toBe(6)
+  })
+})
+
+describe('buildShipmentRows customer fields and viewer', () => {
+  const customerRows = buildShipmentRows(seed.shipments, seed, now, { role: 'customer', customerId: 'nordwerk' })
+
+  function rowOf(shipmentId: string) {
+    return customerRows.find(candidate => candidate.id === shipmentId)
+  }
+
+  it('keeps only the shipments of the customer viewer, including those from the out-of-scope site', () => {
+    const alpenRows = buildShipmentRows(seed.shipments, seed, now, { role: 'customer', customerId: 'alpen-werkzeug' })
+
+    expect(alpenRows).toHaveLength(7)
+    expect(ids(alpenRows)).toContain('SH-1055')
+    expect(alpenRows.every(row => row.customerId === 'alpen-werkzeug')).toBe(true)
+  })
+
+  it('returns no rows for a customer id that does not exist', () => {
+    expect(buildShipmentRows(seed.shipments, seed, now, { role: 'customer', customerId: 'unknown-co' })).toEqual([])
+  })
+
+  it('keeps the ops list unchanged when no viewer is given', () => {
+    expect(buildShipmentRows(seed.shipments, seed, now)).toHaveLength(16)
+  })
+
+  it('exposes the purchase order number', () => {
+    expect(rowOf('SH-1042')?.poNumber).toBe('4500-1187')
+  })
+
+  it('lists the transport modes in leg order keeping repeats', () => {
+    expect(rowOf('SH-1042')?.modes).toEqual(['road', 'sea', 'road'])
+    expect(rowOf('SH-1051')?.modes).toEqual(['road'])
+  })
+
+  it('has the urgency rank of the most urgent exception', () => {
+    expect(rowOf('SH-1042')?.exceptionUrgencyRank).toBe(0)
+    expect(rowOf('SH-1035')?.exceptionUrgencyRank).toBe(3)
+  })
+
+  it('has no urgency rank without an exception', () => {
+    expect(rowOf('SH-1053')?.exceptionUrgencyRank).toBeNull()
+  })
+
+  it('is not notified when no notice was sent', () => {
+    expect(rowOf('SH-1042')?.isCustomerNotified).toBe(false)
+  })
+
+  it('is notified when the notice of an exception was sent', () => {
+    const sentSeed = createSeed()
+    const shipment = sentSeed.shipments.find(candidate => candidate.id === 'SH-1042')
+    if (shipment === undefined) {
+      throw new Error('Missing SH-1042')
+    }
+    shipment.exceptions[0].draft = { status: 'sent', body: 'Hello', notifiedAt: DEMO_NOW_ISO }
+
+    const sentRows = buildShipmentRows(sentSeed.shipments, sentSeed, now, { role: 'customer', customerId: 'nordwerk' })
+
+    expect(sentRows.find(row => row.id === 'SH-1042')?.isCustomerNotified).toBe(true)
+  })
+})
+
+describe('customerSearchText', () => {
+  it('holds the lower-cased id, purchase order and both cities', () => {
+    const row = rows.find(candidate => candidate.id === 'SH-1042')
+
+    expect(row?.customerSearchText).toBe('sh-1042 4500-1187 zaragoza birmingham')
+  })
+
+  it('leaves out carrier names and the customer name', () => {
+    const row = rows.find(candidate => candidate.id === 'SH-1042')
+
+    expect(row?.customerSearchText).not.toContain('nordsee')
+    expect(row?.customerSearchText).not.toContain('transauto')
+    expect(row?.customerSearchText).not.toContain('nordwerk')
+  })
+})
+
+describe('splitSearchTerms', () => {
+  it('lower-cases and splits on any whitespace', () => {
+    expect(splitSearchTerms('  SH-1042   Munich\tZaragoza ')).toEqual(['sh-1042', 'munich', 'zaragoza'])
+  })
+
+  it('returns no terms for blank text', () => {
+    expect(splitSearchTerms('   ')).toEqual([])
   })
 })

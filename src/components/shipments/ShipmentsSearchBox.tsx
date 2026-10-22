@@ -12,6 +12,10 @@ export type ShipmentsSearchBoxProps = {
   value: string
   /** Called with the typed text once the user pauses for {@link SEARCH_DEBOUNCE_MS}. */
   onSearch: (search: string) => void
+  /** Accessible name; defaults to the ops wording. */
+  label?: string
+  /** Placeholder; defaults to the ops wording. */
+  placeholder?: string
   className?: string
 }
 
@@ -20,7 +24,7 @@ export type ShipmentsSearchBoxProps = {
  * reports it after a pause, so each keystroke neither re-filters nor rewrites the URL. When the
  * applied value changes from outside (clear filters, Back) the text follows it.
  */
-export function ShipmentsSearchBox({ value, onSearch, className }: ShipmentsSearchBoxProps) {
+export function ShipmentsSearchBox({ value, onSearch, label, placeholder, className }: ShipmentsSearchBoxProps) {
   const intl = useIntl()
   const [draft, setDraft] = useState(value)
   const [previousValue, setPreviousValue] = useState(value)
@@ -48,8 +52,8 @@ export function ShipmentsSearchBox({ value, onSearch, className }: ShipmentsSear
         type="search"
         value={draft}
         onChange={event => setDraft(event.target.value)}
-        aria-label={intl.formatMessage({ id: 'shipmentList.search.label' })}
-        placeholder={intl.formatMessage({ id: 'shipmentList.search.placeholder' })}
+        aria-label={label ?? intl.formatMessage({ id: 'shipmentList.search.label' })}
+        placeholder={placeholder ?? intl.formatMessage({ id: 'shipmentList.search.placeholder' })}
         className="h-9 pl-8"
       />
     </div>
