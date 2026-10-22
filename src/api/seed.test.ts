@@ -219,6 +219,27 @@ describe('createSeed', () => {
   })
 })
 
+describe('seeded AI signals', () => {
+  it('exists on the watching and predicted-delay shipments of the demo story', () => {
+    const state = createSeed()
+
+    const withSignal = state.shipments.filter(shipment => shipment.aiSignal !== undefined).map(shipment => shipment.id)
+
+    expect(withSignal).toEqual(['SH-1037', 'SH-1034', 'SH-1035', 'SH-1044'])
+  })
+
+  it('cites only raw events that exist on the same shipment', () => {
+    const state = createSeed()
+
+    for (const shipment of state.shipments) {
+      const rawEventIds = shipment.rawEvents.map(rawEvent => rawEvent.id)
+      for (const citedId of shipment.aiSignal?.basedOnEventIds ?? []) {
+        expect(rawEventIds).toContain(citedId)
+      }
+    }
+  })
+})
+
 describe('createSimulatedCarrierEvent', () => {
   it('builds a vessel-rolled event for SH-1060 received at the given time', () => {
     const receivedAt = new Date('2026-10-20T10:15:00.000Z')

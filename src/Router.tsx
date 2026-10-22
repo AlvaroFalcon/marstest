@@ -5,6 +5,7 @@ import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout'
 import { CustomerShipmentsPage } from '@/pages/customers/CustomerShipmentsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { OpsExceptionsPage } from '@/pages/ops/OpsExceptionsPage'
+import { OpsShipmentPage } from '@/pages/ops/OpsShipmentPage'
 import { OpsShipmentsPage } from '@/pages/ops/OpsShipmentsPage'
 import routes from '@/routes'
 
@@ -22,7 +23,7 @@ export function AppRoutes() {
           <Route path={routes.ops.exceptions()} element={<OpsExceptionsPage />} />
           <Route path={routes.ops.exception(':shipmentId')} element={<OpsExceptionsPage />} />
           <Route path={routes.ops.shipments()} element={<OpsShipmentsPage />} />
-          <Route path={routes.ops.shipment(':shipmentId')} element={<OpsShipmentsPage />} />
+          <Route path={routes.ops.shipment(':shipmentId')} element={<OpsShipmentPage />} />
         </Route>
         <Route path={routes.customer.shipments(':customerId')} element={<CustomerShipmentsPage />} />
         <Route path={routes.customer.shipment(':customerId', ':shipmentId')} element={<CustomerShipmentsPage />} />

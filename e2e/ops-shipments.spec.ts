@@ -119,21 +119,22 @@ test.describe('all shipments list', () => {
     await expect(page.getByText('Showing 4 of 4')).toBeVisible()
   })
 
-  test('opens the exception of a shipment that has one', async ({ page }) => {
+  test('opens the shipment detail of a shipment that has an open exception', async ({ page }) => {
     await page.goto('/ops/shipments')
 
     await page.getByRole('link', { name: /^SH-1029/ }).click()
 
-    await expect(page).toHaveURL('/ops/exceptions/SH-1029')
+    await expect(page).toHaveURL('/ops/shipments/SH-1029')
     await expect(page.getByRole('heading', { level: 1, name: /^SH-1029/ })).toBeVisible()
   })
 
-  test('opens the shipment route of a shipment without an exception', async ({ page }) => {
+  test('opens the shipment detail of a shipment without an exception', async ({ page }) => {
     await page.goto('/ops/shipments?page=2')
 
     await page.getByRole('link', { name: /^SH-1053/ }).click()
 
-    await expect(page).toHaveURL('/ops/shipments/SH-1053')
+    await expect(page).toHaveURL('/ops/shipments/SH-1053?page=2')
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1053/ })).toBeVisible()
   })
 
   test('has no horizontal scroll at 375 px', async ({ page }) => {

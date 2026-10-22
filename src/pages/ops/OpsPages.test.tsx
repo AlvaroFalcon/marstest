@@ -17,6 +17,6 @@ describe('OpsShipmentsPage', () => {
 
     expect(screen.getByRole('heading', { name: 'All shipments' })).toBeInTheDocument()
     expect(await screen.findByText('Showing 8 of 16')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /SH-1029/ })).toHaveAttribute('href', '/ops/exceptions/SH-1029')
+    expect(screen.getByRole('link', { name: /SH-1029/ })).toHaveAttribute('href', '/ops/shipments/SH-1029')
   })
 })

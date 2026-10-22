@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useIntl } from 'react-intl'
 import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown } from 'lucide-react'
@@ -69,6 +69,7 @@ function SortHeaderButton({ label, direction, onClick }: SortHeaderButtonProps) 
  */
 export function ShipmentsTable({ rows, now, sort, onSortChange, className }: ShipmentsTableProps) {
   const intl = useIntl()
+  const { search } = useLocation()
   const sortState = getSortState(sort)
 
   const columns = columnHelper.columns([
@@ -78,7 +79,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
       cell: ({ row }) => (
         <div className="flex flex-col">
           <Link
-            to={getShipmentRowHref(row.original)}
+            to={getShipmentRowHref(row.original, search)}
             className="
               font-semibold outline-hidden
               after:absolute after:inset-0

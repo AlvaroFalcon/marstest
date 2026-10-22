@@ -5,16 +5,9 @@ import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBad
 import { ExceptionDetailEmptyState } from '@/components/exceptions/ExceptionDetailEmptyState'
 import { ExceptionDetailPanel } from '@/components/exceptions/ExceptionDetailPanel'
 import { useExceptions } from '@/hooks/useExceptions'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
 import type { ExceptionInboxItem } from '@/lib/exceptionInbox'
 import routes from '@/routes'
-
-/**
- * Viewport at which the inbox and the detail sit side by side. One value drives both the layout
- * and the site filter presentation (popover vs bottom sheet), so the two can never disagree; a
- * container query could not do that because the filter renders in a portal.
- */
-const DESKTOP_QUERY = '(min-width: 64rem)'
 
 function toStatus(item: ExceptionInboxItem): ExceptionStatus {
   switch (item.exception.type) {
