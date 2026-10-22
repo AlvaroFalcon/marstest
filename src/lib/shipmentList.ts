@@ -24,7 +24,14 @@ export type ShipmentListStatus = typeof SHIPMENT_LIST_STATUSES[number]
  * Sort orders offered by the list. The string is also the value stored in the URL, so a link
  * restores the same order.
  */
-export const SHIPMENT_SORTS = ['carrierEtaAsc', 'carrierEtaDesc', 'confidenceAsc', 'confidenceDesc'] as const
+export const SHIPMENT_SORTS = [
+  'carrierEtaAsc',
+  'carrierEtaDesc',
+  'statusAsc',
+  'statusDesc',
+  'confidenceAsc',
+  'confidenceDesc',
+] as const
 
 /** @see SHIPMENT_SORTS */
 export type ShipmentSort = typeof SHIPMENT_SORTS[number]
@@ -33,7 +40,7 @@ export type ShipmentSort = typeof SHIPMENT_SORTS[number]
 export const DEFAULT_SHIPMENT_SORT: ShipmentSort = 'carrierEtaAsc'
 
 /** Columns the list can be sorted by. */
-export type ShipmentSortColumn = 'carrierEta' | 'confidence'
+export type ShipmentSortColumn = 'carrierEta' | 'status' | 'confidence'
 
 /** Direction of a sorted column, as announced through `aria-sort`. */
 export type ShipmentSortDirection = 'asc' | 'desc'
@@ -228,6 +235,10 @@ export function getSortState(sort: ShipmentSort): { column: ShipmentSortColumn, 
       return { column: 'carrierEta', direction: 'asc' }
     case 'carrierEtaDesc':
       return { column: 'carrierEta', direction: 'desc' }
+    case 'statusAsc':
+      return { column: 'status', direction: 'asc' }
+    case 'statusDesc':
+      return { column: 'status', direction: 'desc' }
     case 'confidenceAsc':
       return { column: 'confidence', direction: 'asc' }
     case 'confidenceDesc':
@@ -237,12 +248,23 @@ export function getSortState(sort: ShipmentSort): { column: ShipmentSortColumn, 
 
 /**
  * The sort a click on a column header leads to. Carrier ETA cycles ascending, descending, back to
- * the default (which is ascending ETA); confidence starts with the highest first, then lowest
- * first, then returns to the default.
+ * the default (which is ascending ETA); status starts with the most urgent first (ascending in the
+ * {@link SHIPMENT_LIST_STATUSES} order), then least urgent first; confidence starts with the
+ * highest first, then lowest first. Both then return to the default.
  */
 export function getNextSort(current: ShipmentSort, column: ShipmentSortColumn): ShipmentSort {
   if (column === 'carrierEta') {
     return current === 'carrierEtaAsc' ? 'carrierEtaDesc' : DEFAULT_SHIPMENT_SORT
+  }
+  if (column === 'status') {
+    switch (current) {
+      case 'statusAsc':
+        return 'statusDesc'
+      case 'statusDesc':
+        return DEFAULT_SHIPMENT_SORT
+      default:
+        return 'statusAsc'
+    }
   }
   switch (current) {
     case 'confidenceDesc':
@@ -254,7 +276,7 @@ export function getNextSort(current: ShipmentSort, column: ShipmentSortColumn): 
   }
 }
 
-function getSortValue(row: ShipmentListRow, column: ShipmentSortColumn): number | null {
+function getSortValue(row: ShipmentListRow, column: Exclude<ShipmentSortColumn, 'status'>): number | null {
   if (column === 'confidence') {
     return row.confidence
   }
@@ -265,10 +287,19 @@ function getSortValue(row: ShipmentListRow, column: ShipmentSortColumn): number 
 /**
  * Orders the rows. Rows with no value for the column (no carrier ETA, delivered) always go last,
  * in either direction, because they cannot be compared; ties break by shipment id so the order is
- * stable between renders.
+ * stable between renders. Every row has a status, so a status sort only groups them by urgency
+ * and keeps the default order inside each group.
  */
 export function sortShipmentRows(rows: readonly ShipmentListRow[], sort: ShipmentSort): ShipmentListRow[] {
   const { column, direction } = getSortState(sort)
+  if (column === 'status') {
+    // `orderBy` is stable, so rows of the same status keep the default order they arrive in.
+    return orderBy(
+      sortShipmentRows(rows, DEFAULT_SHIPMENT_SORT),
+      [row => SHIPMENT_LIST_STATUSES.indexOf(row.status)],
+      [direction],
+    )
+  }
   const comparable = rows.filter(row => getSortValue(row, column) !== null)
   const incomparable = rows.filter(row => getSortValue(row, column) === null)
 

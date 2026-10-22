@@ -147,6 +147,12 @@ describe('getNextSort', () => {
     expect(getNextSort('confidenceAsc', 'confidence')).toBe('carrierEtaAsc')
   })
 
+  it('starts status with the most urgent first, then least urgent first, then the default', () => {
+    expect(getNextSort('carrierEtaAsc', 'status')).toBe('statusAsc')
+    expect(getNextSort('statusAsc', 'status')).toBe('statusDesc')
+    expect(getNextSort('statusDesc', 'status')).toBe('carrierEtaAsc')
+  })
+
   it('returns to the default carrier ETA order from a confidence sort', () => {
     expect(getNextSort('confidenceDesc', 'carrierEta')).toBe('carrierEtaAsc')
   })
@@ -172,6 +178,20 @@ describe('sortShipmentRows', () => {
 
     expect(sorted[0]?.id).toBe('SH-1035')
     expect(ids(sorted.slice(-2))).toEqual(['SH-1009', 'SH-1012'])
+  })
+
+  it('groups by status from most urgent and keeps carrier ETA order inside each group', () => {
+    const sorted = ids(sortShipmentRows(rows, 'statusAsc'))
+
+    expect(sorted.slice(0, 6)).toEqual(['SH-1037', 'SH-1035', 'SH-1042', 'SH-1051', 'SH-1029', 'SH-1039'])
+    expect(sorted.slice(-3)).toEqual(['SH-1066', 'SH-1009', 'SH-1012'])
+  })
+
+  it('groups by status from least urgent when descending', () => {
+    const sorted = ids(sortShipmentRows(rows, 'statusDesc'))
+
+    expect(sorted.slice(0, 3)).toEqual(['SH-1009', 'SH-1012', 'SH-1066'])
+    expect(sorted.slice(-5)).toEqual(['SH-1029', 'SH-1037', 'SH-1035', 'SH-1042', 'SH-1051'])
   })
 
   it('orders by confidence ascending', () => {

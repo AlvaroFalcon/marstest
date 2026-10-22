@@ -39,7 +39,7 @@ export type ShipmentsTableProps = {
 const features = tableFeatures({})
 const columnHelper = createColumnHelper<typeof features, ShipmentListRow>()
 
-const SORT_COLUMNS: readonly ShipmentSortColumn[] = ['carrierEta', 'confidence']
+const SORT_COLUMNS: readonly ShipmentSortColumn[] = ['carrierEta', 'status', 'confidence']
 
 function isSortColumn(columnId: string): columnId is ShipmentSortColumn {
   return SORT_COLUMNS.some(column => column === columnId)
@@ -66,8 +66,8 @@ function SortHeaderButton({ label, direction, onClick }: SortHeaderButtonProps) 
 }
 
 /**
- * Desktop list of shipments. Carrier ETA and confidence headers are buttons that cycle the sort;
- * the shipment id in the first cell is a real link stretched over the whole row, so the row is
+ * Desktop list of shipments. Status, carrier ETA and confidence headers are buttons that cycle the
+ * sort; the shipment id in the first cell is a real link stretched over the whole row, so the row is
  * clickable with a pointer and reachable with the keyboard through a single tab stop.
  */
 export function ShipmentsTable({ rows, now, sort, onSortChange, className }: ShipmentsTableProps) {
@@ -107,7 +107,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
     }),
     columnHelper.display({
       id: 'milestone',
-      header: () => intl.formatMessage({ id: 'shipmentList.column.milestoneUpdated' }),
+      header: () => intl.formatMessage({ id: 'shipmentList.column.milestone' }),
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span>{formatShipmentMilestone(intl, row.original)}</span>
@@ -117,7 +117,13 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
     }),
     columnHelper.display({
       id: 'status',
-      header: () => intl.formatMessage({ id: 'shipmentList.column.status' }),
+      header: () => (
+        <SortHeaderButton
+          label={intl.formatMessage({ id: 'shipmentList.column.status' })}
+          direction={sortState.column === 'status' ? sortState.direction : null}
+          onClick={() => onSortChange(getNextSort(sort, 'status'))}
+        />
+      ),
       cell: ({ row }) => <ShipmentListStatusBadge status={row.original.status} />,
     }),
     columnHelper.display({

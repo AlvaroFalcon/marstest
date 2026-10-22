@@ -99,6 +99,18 @@ describe('OpsShipmentsPage', () => {
       expect(getCurrentUrl()).toBe('/ops/shipments?sort=confidenceDesc')
     })
 
+    it('sorts by the most urgent status first on the first click on Status', async () => {
+      const user = userEvent.setup()
+      renderPage()
+      await screen.findByRole('table', { name: 'Shipments' })
+
+      await user.click(screen.getByRole('button', { name: 'Status' }))
+
+      expect(screen.getByRole('columnheader', { name: 'Status' })).toHaveAttribute('aria-sort', 'ascending')
+      expect(screen.getByRole('columnheader', { name: 'Carrier ETA' })).toHaveAttribute('aria-sort', 'none')
+      expect(getCurrentUrl()).toBe('/ops/shipments?sort=statusAsc')
+    })
+
     it('goes to page 2 with the next button and writes it to the URL', async () => {
       const user = userEvent.setup()
       renderPage()

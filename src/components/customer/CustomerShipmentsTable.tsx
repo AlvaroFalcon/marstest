@@ -39,7 +39,7 @@ export function CustomerShipmentsTable({ rows, now, className }: CustomerShipmen
         <TableRow className="hover:bg-transparent">
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'customerShipments.column.shipment' })}</TableHead>
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'customerShipments.column.route' })}</TableHead>
-          <TableHead className="text-caption font-medium whitespace-normal text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.milestoneUpdated' })}</TableHead>
+          <TableHead className="text-caption font-medium whitespace-normal text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.milestone' })}</TableHead>
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.status' })}</TableHead>
           <TableHead className="text-caption font-semibold text-foreground">{intl.formatMessage({ id: 'shipmentList.column.carrierEta' })}</TableHead>
           <TableHead className="text-caption font-medium whitespace-normal text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.estimateConfidence' })}</TableHead>
