@@ -24,10 +24,18 @@ export type SiteFilterProps = {
   totalExceptionCount: number
   /** Called with a site id, or `null` for "All my sites". */
   onSelect: (siteId: string | null) => void
+  /**
+   * What the counts of `options` and `totalExceptionCount` count: open exceptions (inbox, the
+   * default) or shipments (all shipments list). The prop names keep the original wording.
+   */
+  countKind?: SiteFilterCountKind
   /** True on wide layouts (popover); false renders a bottom sheet. Decided by the page with `useMediaQuery`. */
   isDesktop: boolean
   className?: string
 }
+
+/** What a site count in the filter stands for. */
+export type SiteFilterCountKind = 'exceptions' | 'shipments'
 
 const ALL_SITES_VALUE = 'all'
 
@@ -36,6 +44,7 @@ type SiteFilterListProps = {
   outOfScopeOptions: SiteFilterOption[]
   selectedSiteId: string | null
   totalExceptionCount: number
+  countKind: SiteFilterCountKind
   onValueChange: (siteId: string | null) => void
   /** Called when the user confirms a choice (pointer, Enter or Space), as opposed to arrow keys that only move it. */
   onConfirm: () => void
@@ -46,6 +55,7 @@ type SiteRowProps = {
   name: string
   isSelected: boolean
   count: number
+  countKind: SiteFilterCountKind
   showCountLabel: boolean
 }
 
@@ -53,11 +63,11 @@ type SiteRowProps = {
  * One radio row. The radio button covers the whole row but is transparent: the check icon is the
  * visible indicator (no circles), and the row shows the focus ring through `:has(:focus-visible)`.
  */
-function SiteRow({ value, name, isSelected, count, showCountLabel }: SiteRowProps) {
+function SiteRow({ value, name, isSelected, count, countKind, showCountLabel }: SiteRowProps) {
   const intl = useIntl()
   const nameId = useId()
   const countId = useId()
-  const countText = intl.formatMessage({ id: 'siteFilter.exceptionCount' }, { count })
+  const countText = intl.formatMessage({ id: countKind === 'exceptions' ? 'siteFilter.exceptionCount' : 'siteFilter.shipmentCount' }, { count })
 
   return (
     <div className="
@@ -97,6 +107,7 @@ function SiteFilterList({
   outOfScopeOptions,
   selectedSiteId,
   totalExceptionCount,
+  countKind,
   onValueChange,
   onConfirm,
 }: SiteFilterListProps) {
@@ -120,6 +131,7 @@ function SiteFilterList({
           name={intl.formatMessage({ id: 'siteFilter.allSites' })}
           isSelected={selectedValue === ALL_SITES_VALUE}
           count={totalExceptionCount}
+          countKind={countKind}
           showCountLabel
         />
         {inScopeOptions.map(({ site, exceptionCount }) => (
@@ -129,6 +141,7 @@ function SiteFilterList({
             name={site.name}
             isSelected={selectedValue === site.id}
             count={exceptionCount}
+            countKind={countKind}
             showCountLabel={false}
           />
         ))}
@@ -166,6 +179,7 @@ export function SiteFilter({
   selectedSiteId,
   totalExceptionCount,
   onSelect,
+  countKind = 'exceptions',
   isDesktop,
   className,
 }: SiteFilterProps) {
@@ -185,6 +199,7 @@ export function SiteFilter({
       outOfScopeOptions={outOfScopeOptions}
       selectedSiteId={selectedSiteId}
       totalExceptionCount={totalExceptionCount}
+      countKind={countKind}
       onValueChange={handleValueChange}
       onConfirm={() => setIsOpen(false)}
     />
