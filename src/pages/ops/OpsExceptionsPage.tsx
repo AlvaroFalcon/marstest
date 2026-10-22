@@ -100,10 +100,17 @@ export function OpsExceptionsPage() {
   )
 
   if (isDesktop) {
+    // Each column sticks to the top and scrolls on its own, so reading a long detail never moves
+    // the inbox. The 0.25rem padding (offset by the negative margin) keeps the cards' 3px focus
+    // ring from being clipped by the scroll container.
+    const columnClassName = '-m-1 sticky top-0 max-h-svh overflow-y-auto p-1'
     return (
       <main className="grid grid-cols-[33.5rem_1fr] items-start gap-6">
-        {inbox}
-        {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
+        <div className={columnClassName}>{inbox}</div>
+        {/* Keyed by exception so opening another one starts its detail at the top. */}
+        <div key={shipmentId ?? 'none'} className={columnClassName}>
+          {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
+        </div>
       </main>
     )
   }
