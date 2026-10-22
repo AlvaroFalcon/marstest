@@ -15,6 +15,7 @@ import { STEP_ICONS, getStepIcon } from './stepIcon'
 const nodeVariants = cva(
   `
     flex size-journey-node shrink-0 items-center justify-center rounded-full border-2
+    group-hover/step:ring-3 group-hover/step:ring-ring/50
     journey-row:size-journey-node-wide
   `,
   {
@@ -29,7 +30,8 @@ const nodeVariants = cva(
 )
 
 const titleVariants = cva(`
-  text-sm font-semibold text-balance
+  text-sm font-semibold text-balance underline-offset-4
+  group-hover/step:underline
   journey-row:text-base
 `, {
   variants: {
@@ -59,9 +61,11 @@ function StepBody({ onSelect, children }: StepBodyProps) {
     <button
       className={cn(
         BODY_CLASS_NAME,
+        // No hover background: the body spans the whole column, so a fill would paint over the
+        // connector and leg label that the previous step draws into it. The node and title mark
+        // the hover instead (`group-hover/step` in their variants).
         `
-          cursor-pointer outline-hidden
-          hover:bg-muted
+          group/step cursor-pointer outline-hidden
           focus-visible:ring-3 focus-visible:ring-ring
         `,
       )}
