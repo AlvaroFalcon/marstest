@@ -28,15 +28,27 @@ export function AiBlock({ title, children, evidence, className }: AiBlockProps) 
           <h2>{title}</h2>
         </header>
         <div className="text-ai-body text-foreground">{children}</div>
-        {evidence === undefined ? null : <AiEvidence {...evidence} />}
+        <AiEvidence evidence={evidence} />
       </section>
     </div>
   )
 }
 
-type AiEvidenceProps = NonNullable<AiBlockProps['evidence']>
+type AiEvidenceProps = {
+  evidence: AiBlockProps['evidence']
+}
 
-function AiEvidence({ label, onClick }: AiEvidenceProps) {
+function AiEvidence({ evidence }: AiEvidenceProps) {
+  if (evidence === undefined) {
+    return null
+  }
+
+  return <AiEvidenceFooter {...evidence} />
+}
+
+type AiEvidenceFooterProps = NonNullable<AiBlockProps['evidence']>
+
+function AiEvidenceFooter({ label, onClick }: AiEvidenceFooterProps) {
   const content = (
     <>
       <ListTree aria-hidden className="size-4 shrink-0" />

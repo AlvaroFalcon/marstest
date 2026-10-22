@@ -29,6 +29,18 @@ function toStatus(item: ExceptionInboxItem): ExceptionStatus {
   }
 }
 
+type DesktopDetailProps = {
+  shipmentId: string | undefined
+}
+
+function DesktopDetail({ shipmentId }: DesktopDetailProps) {
+  if (shipmentId === undefined) {
+    return <ExceptionDetailEmptyState className="h-full" />
+  }
+
+  return <ExceptionDetailPanel shipmentId={shipmentId} />
+}
+
 /**
  * Ops exceptions inbox. Wide viewports show the inbox next to the detail panel; narrow ones show
  * the inbox, or only the detail when the URL names an exception, with a link back that keeps the
@@ -118,9 +130,7 @@ export function OpsExceptionsPage() {
           // With nothing open the column takes its full sticky height so the empty state fills the screen.
           className={cn('-m-1', shipmentId === undefined && 'h-[calc(100svh-3rem)]')}
         >
-          {shipmentId === undefined
-            ? <ExceptionDetailEmptyState className="h-full" />
-            : <ExceptionDetailPanel shipmentId={shipmentId} />}
+          <DesktopDetail shipmentId={shipmentId} />
         </ScrollColumn>
       </main>
     )

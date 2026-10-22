@@ -283,6 +283,43 @@ function AiSignalBlock({ signal, onOpenSourceEvents }: AiSignalBlockProps) {
   )
 }
 
+type OptionalDocumentCheckProps = {
+  rows: DocumentRow[] | undefined
+  poNumber: string
+}
+
+function OptionalDocumentCheck({ rows, poNumber }: OptionalDocumentCheckProps) {
+  if (rows === undefined) {
+    return null
+  }
+
+  return <DocumentCheck rows={rows} poNumber={poNumber} />
+}
+
+type DocumentsAndActionsProps = OptionalDocumentCheckProps & {
+  actions: ReactNode | undefined
+}
+
+/** The document check alone, or beside the actions card (below it in narrow containers) when there is one. */
+function DocumentsAndActions({ rows, poNumber, actions }: DocumentsAndActionsProps) {
+  const documentCheck = <OptionalDocumentCheck rows={rows} poNumber={poNumber} />
+
+  if (actions === undefined) {
+    return documentCheck
+  }
+
+  return (
+    <div className="
+      flex flex-col gap-6
+      @3xl:grid @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] @3xl:items-start
+    "
+    >
+      {documentCheck}
+      {actions}
+    </div>
+  )
+}
+
 /**
  * The one data-driven shipment detail (ADR 0025): header, internal data row, ETA pair and journey
  * for any shipment, plus optional layers. Ops exception detail passes the exception layer; the ops
@@ -311,7 +348,6 @@ export function ShipmentDetail({
   const intl = useIntl()
   const state = resolveStateBadge(intl, stateBadge, exception)
   const rows = documentRows ?? exception?.documentRows
-  const documentCheck = rows === undefined ? null : <DocumentCheck rows={rows} poNumber={detail.poNumber} />
 
   return (
     <article className={cn('@container flex flex-col gap-6', className)}>
@@ -341,18 +377,7 @@ export function ShipmentDetail({
       {exception !== undefined && aiSignal === undefined && (
         <AiDiagnosis layer={exception} onOpenSourceEvents={onOpenSourceEvents} />
       )}
-      {actions === undefined
-        ? documentCheck
-        : (
-            <div className="
-              flex flex-col gap-6
-              @3xl:grid @3xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] @3xl:items-start
-            "
-            >
-              {documentCheck}
-              {actions}
-            </div>
-          )}
+      <DocumentsAndActions rows={rows} poNumber={detail.poNumber} actions={actions} />
       {recommendedAction}
     </article>
   )

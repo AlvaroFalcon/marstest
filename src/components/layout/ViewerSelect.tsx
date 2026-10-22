@@ -24,7 +24,11 @@ type ViewerIconProps = {
 }
 
 function ViewerIcon({ kind }: ViewerIconProps) {
-  return kind === 'ops' ? <HeadsetIcon aria-hidden="true" /> : <Building2Icon aria-hidden="true" />
+  if (kind === 'ops') {
+    return <HeadsetIcon aria-hidden="true" />
+  }
+
+  return <Building2Icon aria-hidden="true" />
 }
 
 /**

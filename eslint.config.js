@@ -8,6 +8,16 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
+const NO_REACT_FC = {
+  selector: 'TSTypeReference[typeName.left.name="React"][typeName.right.name="FC"]',
+  message: 'Type props with a named, exported `XProps` type instead of React.FC (CLAUDE.md §5).',
+}
+
+const NO_JSX_TERNARY = {
+  selector: ':matches(ConditionalExpression > JSXElement, ConditionalExpression > JSXFragment)',
+  message: 'Do not choose JSX with a ternary: extract a named component that returns each branch with if/return (CLAUDE.md §5).',
+}
+
 export default defineConfig([
   globalIgnores(['dist', 'coverage', 'playwright-report', 'test-results', 'qa-artifacts']),
   {
@@ -40,13 +50,7 @@ export default defineConfig([
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector: 'TSTypeReference[typeName.left.name="React"][typeName.right.name="FC"]',
-          message: 'Type props with a named, exported `XProps` type instead of React.FC (CLAUDE.md §5).',
-        },
-      ],
+      'no-restricted-syntax': ['error', NO_REACT_FC, NO_JSX_TERNARY],
     },
   },
   {

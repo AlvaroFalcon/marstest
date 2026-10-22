@@ -36,6 +36,18 @@ type DiscardMutation = ReturnType<typeof useDiscardDraft>
 
 const wrappingButtonClassName = 'h-auto min-h-9 w-full py-1.5 whitespace-normal @md:w-auto'
 
+type ApproveIconProps = {
+  isPending: boolean
+}
+
+function ApproveIcon({ isPending }: ApproveIconProps) {
+  if (isPending) {
+    return <Loader2 aria-hidden="true" className="animate-spin" />
+  }
+
+  return <Send aria-hidden="true" />
+}
+
 type PendingDraftProps = {
   exceptionId: string
   initialBody: string
@@ -101,7 +113,7 @@ function PendingDraft({ exceptionId, initialBody, customerName, approve, discard
           className={wrappingButtonClassName}
           onClick={() => approve.mutate({ exceptionId, body: body.trim() }, { onSuccess: () => onHandled('sent') })}
         >
-          {approve.isPending ? <Loader2 aria-hidden="true" className="animate-spin" /> : <Send aria-hidden="true" />}
+          <ApproveIcon isPending={approve.isPending} />
           {intl.formatMessage({ id: approve.isPending ? 'recommendedAction.sending' : 'recommendedAction.approve' })}
         </Button>
         <Button
