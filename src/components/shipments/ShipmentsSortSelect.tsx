@@ -10,7 +10,7 @@ export type ShipmentsSortSelectProps = {
 
 /**
  * Sort control for the card layout, where there are no column headers to click. Offers the same
- * four orders the table headers cycle through.
+ * orders the table headers cycle through.
  */
 export function ShipmentsSortSelect({ sort, onSortChange, className }: ShipmentsSortSelectProps) {
   const intl = useIntl()

@@ -8,6 +8,7 @@ import {
   formatShipmentMilestone,
   formatShipmentRoute,
 } from '@/components/shipments/shipmentRowPresentation'
+import { ShipmentsTableColGroup } from '@/components/shipments/ShipmentsTableColGroup'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { ShipmentListRow } from '@/lib/shipmentList'
 import { cn } from '@/lib/utils'
@@ -29,17 +30,19 @@ export function CustomerShipmentsTable({ rows, now, className }: CustomerShipmen
   const { search } = useLocation()
 
   return (
-    <Table aria-label={intl.formatMessage({ id: 'shipmentList.table.label' })} className={cn(className)}>
+    <Table
+      aria-label={intl.formatMessage({ id: 'shipmentList.table.label' })}
+      className={cn('min-w-4xl table-fixed', className)}
+    >
+      <ShipmentsTableColGroup />
       <TableHeader>
         <TableRow className="hover:bg-transparent">
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'customerShipments.column.shipment' })}</TableHead>
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'customerShipments.column.route' })}</TableHead>
-          <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.milestone' })}</TableHead>
+          <TableHead className="text-caption font-medium whitespace-normal text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.milestone' })}</TableHead>
           <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.status' })}</TableHead>
           <TableHead className="text-caption font-semibold text-foreground">{intl.formatMessage({ id: 'shipmentList.column.carrierEta' })}</TableHead>
-          <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.estimate' })}</TableHead>
-          <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.confidence' })}</TableHead>
-          <TableHead className="text-caption font-medium text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.updated' })}</TableHead>
+          <TableHead className="text-caption font-medium whitespace-normal text-muted-foreground">{intl.formatMessage({ id: 'shipmentList.column.estimateConfidence' })}</TableHead>
           <TableHead>
             <span className="sr-only">{intl.formatMessage({ id: 'customerShipments.column.open' })}</span>
           </TableHead>
@@ -71,12 +74,21 @@ export function CustomerShipmentsTable({ rows, now, className }: CustomerShipmen
                 <span className="text-muted-foreground">{formatShipmentModes(intl, row)}</span>
               </div>
             </TableCell>
-            <TableCell className="py-3 whitespace-normal">{formatShipmentMilestone(intl, row)}</TableCell>
+            <TableCell className="py-3 whitespace-normal">
+              <div className="flex flex-col">
+                <span>{formatShipmentMilestone(intl, row)}</span>
+                <ShipmentUpdated row={row} now={now} />
+              </div>
+            </TableCell>
             <TableCell className="py-3 whitespace-normal"><ShipmentListStatusBadge status={row.status} /></TableCell>
-            <TableCell className="py-3 font-semibold">{formatShipmentCarrierEta(intl, row)}</TableCell>
-            <TableCell className="py-3 whitespace-normal"><ShipmentEstimate row={row} /></TableCell>
-            <TableCell className="py-3 whitespace-normal"><ShipmentConfidence row={row} /></TableCell>
-            <TableCell className="py-3 whitespace-normal"><ShipmentUpdated row={row} now={now} /></TableCell>
+            <TableCell className="py-3 font-semibold whitespace-normal">{formatShipmentCarrierEta(intl, row)}</TableCell>
+            <TableCell className="py-3 whitespace-normal">
+              <div className="flex flex-col items-start">
+                <ShipmentEstimate row={row} />
+                {/* A delivered shipment has neither; the estimate's dash is enough. */}
+                {row.confidence !== null && <ShipmentConfidence row={row} className="text-muted-foreground" />}
+              </div>
+            </TableCell>
             <TableCell className="py-3"><ChevronRight aria-hidden="true" className="size-4 text-muted-foreground" /></TableCell>
           </TableRow>
         ))}
