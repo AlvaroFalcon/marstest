@@ -159,6 +159,50 @@ test.describe('exception detail', () => {
     await expect(documents.getByRole('listitem')).toHaveCount(5)
   })
 
+  test('scrolls the detail without moving the inbox on desktop', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Only the desktop layout has two scrolling columns')
+    await page.goto('/ops/exceptions/SH-1042')
+    const detail = page.getByRole('region', { name: 'Exception detail' })
+    const firstCard = page.getByRole('link', { name: /SH-1042/ })
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeVisible()
+    // Hovering scrolls the region fully into view, which moves the page, so measure after it.
+    await detail.hover()
+    const cardTopBefore = (await firstCard.boundingBox())?.y
+
+    await page.mouse.wheel(0, 400)
+
+    await expect.poll(() => detail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+    expect((await firstCard.boundingBox())?.y).toBe(cardTopBefore)
+  })
+
+  test('shows another exception from the top of the detail on desktop', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Only the desktop layout has two scrolling columns')
+    await page.goto('/ops/exceptions/SH-1042')
+    const detail = page.getByRole('region', { name: 'Exception detail' })
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeVisible()
+    await detail.hover()
+    await page.mouse.wheel(0, 400)
+    await expect.poll(() => detail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+
+    await page.getByRole('link', { name: /SH-1051/ }).click()
+
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1051/ })).toBeVisible()
+    expect(await detail.evaluate(element => element.scrollTop)).toBe(0)
+  })
+
+  test('scrolls the detail with the keyboard on desktop', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Only the desktop layout has two scrolling columns')
+    await page.goto('/ops/exceptions/SH-1042')
+    const detail = page.getByRole('region', { name: 'Exception detail' })
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeVisible()
+
+    await detail.focus()
+    await page.keyboard.press('PageDown')
+
+    await expect(detail).toBeFocused()
+    await expect.poll(() => detail.evaluate(element => element.scrollTop)).toBeGreaterThan(0)
+  })
+
   test('shows the same unavailable message for an unknown id and an out-of-scope shipment', async ({ page }) => {
     await page.goto('/ops/exceptions/SH-9999')
     await expect(page.getByText('This exception isn\'t available')).toBeVisible()

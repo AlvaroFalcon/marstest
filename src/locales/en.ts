@@ -165,6 +165,8 @@ export const messages = {
   'shipmentList.pagination.page': 'Page {page}',
   'shipmentList.pagination.summary': 'Page {page} of {pageCount}',
   'siteFilter.outOfScope': '{site} · outside your scope',
+  'exceptionsLayout.inboxColumn': 'Exceptions list',
+  'exceptionsLayout.detailColumn': 'Exception detail',
   'exceptionsDetail.select': 'Select an exception',
   'exceptionsDetail.back': 'Back to exceptions',
   'exceptionsDetail.backShort': 'Exceptions',

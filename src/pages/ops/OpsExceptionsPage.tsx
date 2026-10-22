@@ -1,10 +1,12 @@
 import { useEffect } from 'react'
+import { useIntl } from 'react-intl'
 import { useLocation, useParams } from 'react-router'
 import { ExceptionInbox, type ExceptionInboxContent } from '@/components/exceptions/ExceptionInbox'
 import type { ExceptionInboxItem as ExceptionInboxCard } from '@/components/exceptions/ExceptionInbox'
 import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
 import { ExceptionDetailEmptyState } from '@/components/exceptions/ExceptionDetailEmptyState'
 import { ExceptionDetailPanel } from '@/components/exceptions/ExceptionDetailPanel'
+import { ScrollColumn } from '@/components/layout/ScrollColumn'
 import { useExceptions } from '@/hooks/useExceptions'
 import { useMarkExceptionSeen, useUnseenExceptionShipmentIds } from '@/hooks/useUnseenExceptions'
 import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
@@ -32,6 +34,7 @@ function toStatus(item: ExceptionInboxItem): ExceptionStatus {
  * `?site=` filter. The route serves both `/ops/exceptions` and `/ops/exceptions/:shipmentId`.
  */
 export function OpsExceptionsPage() {
+  const intl = useIntl()
   const { shipmentId } = useParams()
   const { search } = useLocation()
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
@@ -100,10 +103,21 @@ export function OpsExceptionsPage() {
   )
 
   if (isDesktop) {
+    // Each column scrolls on its own, so reading a long detail never moves the inbox. The negative
+    // margin cancels the columns' 0.25rem focus-ring padding so the content keeps its alignment.
     return (
       <main className="grid grid-cols-[33.5rem_1fr] items-start gap-6">
-        {inbox}
-        {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
+        <ScrollColumn label={intl.formatMessage({ id: 'exceptionsLayout.inboxColumn' })} className="-m-1">
+          {inbox}
+        </ScrollColumn>
+        {/* Keyed by exception so opening another one starts its detail at the top. */}
+        <ScrollColumn
+          key={shipmentId ?? 'none'}
+          label={intl.formatMessage({ id: 'exceptionsLayout.detailColumn' })}
+          className="-m-1"
+        >
+          {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
+        </ScrollColumn>
       </main>
     )
   }
