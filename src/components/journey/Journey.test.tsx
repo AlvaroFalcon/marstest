@@ -199,8 +199,8 @@ describe('Journey', () => {
 
       renderWithProviders(<Journey carrierNames={CARRIER_NAMES} now={NOW} shipment={shipment} onStepSelect={vi.fn()} />)
 
-      expect(screen.getByText('Click a step to see its source events')).toBeInTheDocument()
-      expect(screen.getByText('Tap a step to see its source events')).toBeInTheDocument()
+      expect(screen.getByText('Click a step to see the source events, with its own highlighted')).toBeInTheDocument()
+      expect(screen.getByText('Tap a step to see the source events, with its own highlighted')).toBeInTheDocument()
     })
 
     it('renders a button for each step with source events and none for future steps', () => {
