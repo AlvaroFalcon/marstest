@@ -1,4 +1,4 @@
-import { Link } from 'react-router'
+import { Link, useLocation } from 'react-router'
 import { useIntl } from 'react-intl'
 import type { ShipmentListRow } from '@/lib/shipmentList'
 import { cn } from '@/lib/utils'
@@ -20,16 +20,17 @@ export type ShipmentCardProps = {
 }
 
 /**
- * One shipment of the list on narrow screens: the whole card is the link to its detail (the
- * exception when one is open). Shows the same data as a table row, regrouped for reading in a
- * column: identity and status, route, milestone, then the two ETAs with confidence.
+ * One shipment of the list on narrow screens: the whole card is the link to its detail. Shows the
+ * same data as a table row, regrouped for reading in a column: identity and status, route,
+ * milestone, then the two ETAs with confidence.
  */
 export function ShipmentCard({ row, now, className }: ShipmentCardProps) {
   const intl = useIntl()
+  const { search } = useLocation()
 
   return (
     <Link
-      to={getShipmentRowHref(row)}
+      to={getShipmentRowHref(row, search)}
       className={cn(
         `
           flex flex-col gap-2 rounded-xl border bg-card p-4 text-sm shadow-card outline-hidden transition-colors

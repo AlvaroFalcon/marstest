@@ -291,6 +291,22 @@ export const aiDiagnosisSchema = z.object({
 /** @see aiDiagnosisSchema */
 export type AiDiagnosis = z.infer<typeof aiDiagnosisSchema>
 
+/**
+ * The AI's early warning about a shipment that has no open exception yet (or whose exception was
+ * opened by the same signal): what it expects, why, and what it is based on. Seeded only on
+ * shipments the demo story needs it for; the detail falls back to the ETA reason without it.
+ */
+export const aiSignalSchema = z.object({
+  text: z.string(),
+  /** Ready-made evidence line ("Based on 9 GPS pings and 1 traffic feed"). */
+  evidenceLabel: z.string(),
+  /** Raw events the signal cites in the source events panel. */
+  basedOnEventIds: z.array(z.string()),
+})
+
+/** @see aiSignalSchema */
+export type AiSignal = z.infer<typeof aiSignalSchema>
+
 /** An open exception on a shipment, listed in the ops inbox. */
 export const shipmentExceptionSchema = z.object({
   id: z.string(),
@@ -325,6 +341,7 @@ export const shipmentSchema = z.object({
   estimatedEta: estimatedEtaSchema,
   documents: z.array(shipmentDocumentSchema),
   exceptions: z.array(shipmentExceptionSchema),
+  aiSignal: aiSignalSchema.optional(),
 })
 
 /** @see shipmentSchema */

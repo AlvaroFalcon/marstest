@@ -183,12 +183,22 @@ describe('OpsShipmentsPage', () => {
       expect(getCurrentUrl()).toBe('/ops/shipments')
     })
 
-    it('links an open exception row to its exception and other rows to the shipment', async () => {
+    it('links every row to its shipment detail, including rows with an open exception', async () => {
       renderPage()
       await screen.findByRole('table', { name: 'Shipments' })
 
-      expect(screen.getByRole('link', { name: 'SH-1029' })).toHaveAttribute('href', '/ops/exceptions/SH-1029')
+      expect(screen.getByRole('link', { name: 'SH-1029' })).toHaveAttribute('href', '/ops/shipments/SH-1029')
       expect(screen.getByRole('link', { name: 'SH-1039' })).toHaveAttribute('href', '/ops/shipments/SH-1039')
+    })
+
+    it('hands the current filters to the detail link so its back link can restore them', async () => {
+      renderPage('/ops/shipments?status=atRisk&sort=confidenceDesc')
+      await screen.findByRole('table', { name: 'Shipments' })
+
+      expect(screen.getByRole('link', { name: 'SH-1035' })).toHaveAttribute(
+        'href',
+        '/ops/shipments/SH-1035?status=atRisk&sort=confidenceDesc',
+      )
     })
 
     it('keeps delivered shipments and shipments without a carrier ETA last', async () => {
@@ -217,7 +227,7 @@ describe('OpsShipmentsPage', () => {
 
       const card = await screen.findByRole('link', { name: /^SH-1029 · Brenner Iberia S\.L\./ })
 
-      expect(card).toHaveAttribute('href', '/ops/exceptions/SH-1029')
+      expect(card).toHaveAttribute('href', '/ops/shipments/SH-1029')
     })
 
     it('sorts from the Sort by select instead of column headers', async () => {

@@ -364,6 +364,11 @@ function predictedDelayShipment(at: (hours: number) => string): Shipment {
       reason: 'The truck has been stopped in the Basel border queue for 2 h, and EuroRuta trucks on this lane arrived 11 h late on average this month.',
     },
     documents: swissRoadDocuments(id, at(-41), '8207.70', 1320),
+    aiSignal: {
+      text: 'Delay very likely (~14 h). The truck has been in the Basel border queue for 2 h and EuroRuta trucks on this lane arrived 11 h late on average this month. The carrier ETA has not changed, so we keep showing it as reported.',
+      evidenceLabel: 'Based on 12 GPS pings and 1 border-wait feed',
+      basedOnEventIds: [`${id}-E2`, `${id}-E3`],
+    },
     exceptions: [
       {
         id: `${id}-X1`,
@@ -545,6 +550,11 @@ function suspectedDelayShipment(at: (hours: number) => string): Shipment {
       reason: 'Slow traffic on the A-8 near Nice; the carrier ETA may slip by about 7 h.',
     },
     documents: euRoadDocuments(id, at(-17), '8460.29', 1150),
+    aiSignal: {
+      text: 'Possible delay of 0–14 h, most likely about 7 h. Signals: the last GPS position reports 12 km/h on the A-8 near Nice and traffic there is slow. Not enough evidence to open an exception yet; we re-evaluate with every new GPS ping.',
+      evidenceLabel: 'Based on 9 GPS pings and 1 traffic feed',
+      basedOnEventIds: [`${id}-E1`, `${id}-E2`],
+    },
     exceptions: [],
   }
 }
@@ -581,6 +591,11 @@ function confidentDelayShipment(at: (hours: number) => string): Shipment {
       reason: 'The driver started an 11 h mandatory rest 1 h ago, so with about 8 h of driving left the truck cannot reach Munich before early tomorrow morning.',
     },
     documents: euRoadDocuments(id, at(-27), '8503.00', 2100),
+    aiSignal: {
+      text: 'Delay very likely (~10 h). The driver started an 11 h mandatory rest at the Mâcon rest area 1 h ago, with about 8 h of driving left to Munich. The carrier ETA has not changed, so we keep showing it as reported.',
+      evidenceLabel: 'Based on 18 GPS pings and EU driver-hours rules',
+      basedOnEventIds: [`${id}-E2`, `${id}-E3`],
+    },
     exceptions: [
       {
         id: `${id}-X1`,
@@ -629,6 +644,11 @@ function noCarrierEtaShipment(at: (hours: number) => string): Shipment {
       reason: 'Vascor Trans does not send ETAs; the estimate uses the pickup time and the average transit time of this lane.',
     },
     documents: euRoadDocuments(id, at(-9), '8414.80', 520),
+    aiSignal: {
+      text: 'Possible delay: Vascor Trans sends no ETA, so our estimate has nothing to be compared with. Signal: the only update so far is the pickup, 8 h ago. Not enough evidence to alert the customer; we re-evaluate with every new update from the carrier.',
+      evidenceLabel: 'Based on 1 carrier event and the average transit time of this lane',
+      basedOnEventIds: [`${id}-E1`],
+    },
     exceptions: [],
   }
 }

@@ -1,6 +1,13 @@
 import { useSyncExternalStore } from 'react'
 
 /**
+ * Viewport at which ops screens switch to their wide layout (list beside detail, table instead of
+ * cards, popover instead of bottom sheet). One shared value, so the layout and the portal-based
+ * controls it goes with can never disagree.
+ */
+export const DESKTOP_QUERY = '(min-width: 64rem)'
+
+/**
  * Whether a CSS media query currently matches, re-rendering when it changes.
  *
  * This is the one viewport query of the app. Layout stays on container queries, but Radix portals
@@ -9,7 +16,7 @@ import { useSyncExternalStore } from 'react'
  * anything a container query or a responsive token can express.
  *
  * @example
- * const isDesktop = useMediaQuery('(min-width: 64rem)')
+ * const isDesktop = useMediaQuery(DESKTOP_QUERY)
  */
 export function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(

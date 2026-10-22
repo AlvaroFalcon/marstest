@@ -101,9 +101,10 @@ export function getLatestEventSource(shipment: Shipment, carriers: ReferenceData
 /**
  * Builds one row per required document, in ERP order, each showing its worst finding
  * (missing, then mismatch, then pending, then match). A mismatch therefore wins over a match on
- * the same document. Documents that are not required are left out.
+ * the same document. Documents that are not required are left out. Without an `exceptionType`
+ * (a shipment with no open exception) no row is marked as the cause of a hold.
  */
-export function buildDocumentRows(shipment: Shipment, exceptionType: ExceptionType): DocumentRow[] {
+export function buildDocumentRows(shipment: Shipment, exceptionType?: ExceptionType): DocumentRow[] {
   const { findings } = checkDocuments(shipment)
 
   return shipment.erpOrder.requiredDocuments.map((documentType): DocumentRow => {

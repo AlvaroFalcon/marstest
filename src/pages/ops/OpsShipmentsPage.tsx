@@ -5,24 +5,15 @@ import { ShipmentsListMessage } from '@/components/shipments/ShipmentsListMessag
 import { ShipmentsListSkeleton } from '@/components/shipments/ShipmentsListSkeleton'
 import { ShipmentsTable } from '@/components/shipments/ShipmentsTable'
 import { ShipmentsToolbar } from '@/components/shipments/ShipmentsToolbar'
-import { useMediaQuery } from '@/hooks/useMediaQuery'
+import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
 import { useNow } from '@/hooks/useNow'
 import { useShipments } from '@/hooks/useShipments'
 
 /**
- * Viewport at which the shipments show as a table instead of cards. One value drives the layout,
- * the filter presentation (popover vs bottom sheet) and the sort control, so they never disagree.
- * A viewport query is used instead of a container query because it also has to decide the
- * presentation of the filters, which render in a portal outside the page container, and because
- * it renders only one of table and cards.
- */
-const DESKTOP_QUERY = '(min-width: 64rem)'
-
-/**
  * Ops "All shipments" list. The table (wide) or cards (narrow) show the shipments of the ops
  * sites, narrowed by the site, status and search filters, ordered by carrier ETA or confidence and
- * paginated; all of that view state lives in the URL. The route also serves
- * `/ops/shipments/:shipmentId`, which keeps showing the list until the shipment detail exists.
+ * paginated; all of that view state lives in the URL. Every row links to the shipment detail
+ * (`OpsShipmentPage`), which hands the same search string back to return to this view.
  */
 export function OpsShipmentsPage() {
   const intl = useIntl()

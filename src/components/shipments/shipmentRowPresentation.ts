@@ -9,11 +9,14 @@ import type { ShipmentListRow } from '@/lib/shipmentList'
 import routes from '@/routes'
 
 /**
- * Where a row leads: the exception detail when the shipment has an open exception (that is where
- * ops can act), otherwise the shipment detail.
+ * Where a row leads: the shipment detail, for every shipment (an open exception is shown there
+ * too, with a link on to the exceptions inbox).
+ *
+ * @param search - The list's current search string (with its leading `?`). The detail's back link
+ * hands it back, so filters, sort and page survive the round trip.
  */
-export function getShipmentRowHref(row: ShipmentListRow): string {
-  return row.hasOpenException ? routes.ops.exception(row.id) : routes.ops.shipment(row.id)
+export function getShipmentRowHref(row: ShipmentListRow, search: string): string {
+  return `${routes.ops.shipment(row.id)}${search}`
 }
 
 /** "Zaragoza → Hamburg". */
