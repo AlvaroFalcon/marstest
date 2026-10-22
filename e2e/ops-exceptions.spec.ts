@@ -77,12 +77,12 @@ test.describe('exceptions inbox', () => {
 
     await expect(page).toHaveURL('/ops/exceptions/SH-1051?site=bilbao-plant')
     if (isMobile) {
-      await expect(page.getByText('Exception detail comes next')).toBeVisible()
+      await expect(page.getByRole('heading', { level: 1, name: /^SH-1051 · Bilbao →/ })).toBeVisible()
       await expect(page.getByRole('list', { name: 'Open exceptions' })).toHaveCount(0)
     }
     else {
       await expect(page.getByRole('link', { name: /SH-1051/ })).toHaveAttribute('aria-current', 'page')
-      await expect(page.getByText('Exception detail comes next')).toBeVisible()
+      await expect(page.getByRole('heading', { level: 1, name: /^SH-1051 · Bilbao →/ })).toBeVisible()
     }
   })
 
@@ -113,5 +113,58 @@ test.describe('exceptions inbox', () => {
     )
 
     expect(hasHorizontalScroll).toBe(false)
+  })
+})
+
+test.describe('exception detail', () => {
+  test('shows the SH-1042 detail with header, diagnosis and document check', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await expect(page.getByRole('heading', { level: 1, name: 'SH-1042 · Zaragoza → Birmingham' })).toBeVisible()
+    await expect(page.getByText('No update for 25 h')).toBeVisible()
+    await expect(page.getByText('Nordsee Line · Email')).toBeVisible()
+    await expect(page.getByText('AI diagnosis')).toBeVisible()
+    const documents = page.getByRole('list', { name: 'Documents checked against the ERP order' })
+    await expect(documents.getByRole('listitem')).toHaveCount(5)
+    await expect(documents.getByRole('listitem').filter({ hasText: 'Commercial invoice' }))
+      .toContainText('HS code 8467.29 differs from ERP order (8467.21)')
+    await expect(documents.getByRole('listitem').filter({ hasText: 'Certificate of origin' }))
+      .toContainText('Missing · cause of the hold')
+  })
+
+  test('shows the inbox beside the detail on desktop', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Desktop shows the list and the detail side by side')
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await expectCardsInOrder(page, allSiteCards)
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Back to exceptions' })).toHaveCount(0)
+  })
+
+  test('shows the detail alone with a back link that keeps the site filter on mobile', async ({ page, isMobile }) => {
+    test.skip(!isMobile, 'The detail only replaces the list on narrow viewports')
+    await page.goto('/ops/exceptions/SH-1051?site=bilbao-plant')
+
+    await expect(page.getByRole('list', { name: 'Open exceptions' })).toHaveCount(0)
+    await expect(page.getByRole('link', { name: 'Back to exceptions' })).toHaveAttribute('href', '/ops/exceptions?site=bilbao-plant')
+  })
+
+  test('opens SH-1042 from the inbox and lists its documents on mobile and desktop', async ({ page }) => {
+    await page.goto('/ops/exceptions')
+
+    await page.getByRole('link', { name: /SH-1042/ }).click()
+
+    await expect(page).toHaveURL('/ops/exceptions/SH-1042')
+    const documents = page.getByRole('list', { name: 'Documents checked against the ERP order' })
+    await expect(documents.getByRole('listitem')).toHaveCount(5)
+  })
+
+  test('shows the same unavailable message for an unknown id and an out-of-scope shipment', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-9999')
+    await expect(page.getByText('This exception isn\'t available')).toBeVisible()
+
+    await page.goto('/ops/exceptions/SH-1058')
+
+    await expect(page.getByText('This exception isn\'t available')).toBeVisible()
   })
 })

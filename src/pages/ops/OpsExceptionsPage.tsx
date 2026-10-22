@@ -2,7 +2,8 @@ import { useLocation, useParams } from 'react-router'
 import { ExceptionInbox, type ExceptionInboxContent } from '@/components/exceptions/ExceptionInbox'
 import type { ExceptionInboxItem as ExceptionInboxCard } from '@/components/exceptions/ExceptionInbox'
 import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
-import { ExceptionsDetailPlaceholder } from '@/components/exceptions/ExceptionsDetailPlaceholder'
+import { ExceptionDetailEmptyState } from '@/components/exceptions/ExceptionDetailEmptyState'
+import { ExceptionDetailPanel } from '@/components/exceptions/ExceptionDetailPanel'
 import { useExceptions } from '@/hooks/useExceptions'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import type { ExceptionInboxItem } from '@/lib/exceptionInbox'
@@ -41,7 +42,6 @@ export function OpsExceptionsPage() {
   const isDesktop = useMediaQuery(DESKTOP_QUERY)
   const exceptions = useExceptions()
 
-  const hasSelection = shipmentId !== undefined
   const selectedSiteId = exceptions.status === 'ready' ? exceptions.selectedSiteId : null
   const options = exceptions.status === 'ready'
     ? [
@@ -96,15 +96,15 @@ export function OpsExceptionsPage() {
     return (
       <main className="grid grid-cols-[33.5rem_1fr] items-start gap-6">
         {inbox}
-        <ExceptionsDetailPlaceholder hasSelection={hasSelection} />
+        {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
       </main>
     )
   }
 
-  if (hasSelection) {
+  if (shipmentId !== undefined) {
     return (
       <main>
-        <ExceptionsDetailPlaceholder hasSelection backHref={`${routes.ops.exceptions()}${search}`} />
+        <ExceptionDetailPanel shipmentId={shipmentId} backHref={`${routes.ops.exceptions()}${search}`} />
       </main>
     )
   }

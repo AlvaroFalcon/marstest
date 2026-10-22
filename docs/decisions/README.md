@@ -82,3 +82,5 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0067](0067-inbox-kpis-follow-site-filter.md) | Inbox KPIs follow the site filter | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0068](0068-inbox-card-reason-from-ai-summary-first-sentence.md) | Inbox card reason line is the first sentence of the AI diagnosis summary | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0069](0069-viewport-media-query-for-site-filter-presentation.md) | Site filter presentation switches by viewport media query | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0070](0070-document-check-one-row-per-document-neutral-chip.md) | Document check shows one row per document with a neutral chip | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0071](0071-exception-header-freshness-is-tracking-freshness.md) | Exception detail header shows tracking freshness, not carrier ETA update time | User, on Claude's proposal | Accepted | 2026-10-21 |

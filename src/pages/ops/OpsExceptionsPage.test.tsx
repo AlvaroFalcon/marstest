@@ -88,12 +88,22 @@ describe('OpsExceptionsPage', () => {
       expect(await screen.findByText('Select an exception')).toBeInTheDocument()
     })
 
-    it('highlights the open card and shows the coming-next placeholder', async () => {
+    it('highlights the open card and shows its detail', async () => {
       renderPageAt('/ops/exceptions/SH-1042')
 
       expect(await screen.findByRole('link', { name: /SH-1042/ })).toHaveAttribute('aria-current', 'page')
       expect(screen.getByRole('link', { name: /SH-1051/ })).not.toHaveAttribute('aria-current')
-      expect(screen.getByText('Exception detail comes next')).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { level: 1, name: 'SH-1042 · Zaragoza → Birmingham' })).toBeInTheDocument()
+    })
+
+    it('shows the inbox and the SH-1042 detail with its document check side by side', async () => {
+      renderPageAt('/ops/exceptions/SH-1042')
+
+      const documents = await screen.findByRole('list', { name: 'Documents checked against the ERP order' })
+
+      expect(screen.getByRole('list', { name: 'Open exceptions' })).toBeInTheDocument()
+      expect(within(documents).getAllByRole('listitem')).toHaveLength(5)
+      expect(screen.queryByRole('link', { name: 'Back to exceptions' })).not.toBeInTheDocument()
     })
 
     it('opens the detail URL when a card is pressed and keeps the site filter', async () => {
@@ -111,7 +121,7 @@ describe('OpsExceptionsPage', () => {
       await findCardShipmentIds()
 
       expect(screen.queryAllByRole('link', { current: 'page' })).toHaveLength(0)
-      expect(screen.getByText('Exception detail comes next')).toBeInTheDocument()
+      expect(await screen.findByText('This exception isn\'t available')).toBeInTheDocument()
     })
 
     it('does not highlight a card for the out-of-scope Lyon shipment', async () => {
@@ -256,12 +266,19 @@ describe('OpsExceptionsPage', () => {
       expect(screen.queryByText('Select an exception')).not.toBeInTheDocument()
     })
 
-    it('shows only the placeholder with a back link when an exception is open', async () => {
+    it('shows only the detail with a back link when an exception is open', async () => {
       renderPageAt('/ops/exceptions/SH-1042')
 
-      expect(await screen.findByText('Exception detail comes next')).toBeInTheDocument()
+      expect(await screen.findByRole('heading', { level: 1, name: 'SH-1042 · Zaragoza → Birmingham' })).toBeInTheDocument()
       expect(screen.getByRole('link', { name: 'Back to exceptions' })).toHaveAttribute('href', '/ops/exceptions')
       expect(screen.queryByRole('list', { name: 'Open exceptions' })).not.toBeInTheDocument()
+    })
+
+    it('keeps the back link when the detail is unavailable', async () => {
+      renderPageAt('/ops/exceptions/SH-9999?site=bilbao-plant')
+
+      expect(await screen.findByText('This exception isn\'t available')).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: 'Back to exceptions' })).toHaveAttribute('href', '/ops/exceptions?site=bilbao-plant')
     })
 
     it('keeps the site filter in the back link', async () => {
