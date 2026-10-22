@@ -10,6 +10,7 @@ import { ScrollColumn } from '@/components/layout/ScrollColumn'
 import { useExceptions } from '@/hooks/useExceptions'
 import { useMarkExceptionSeen, useUnseenExceptionShipmentIds } from '@/hooks/useUnseenExceptions'
 import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
+import { cn } from '@/lib/utils'
 import type { ExceptionInboxItem } from '@/lib/exceptionInbox'
 import routes from '@/routes'
 
@@ -114,9 +115,12 @@ export function OpsExceptionsPage() {
         <ScrollColumn
           key={shipmentId ?? 'none'}
           label={intl.formatMessage({ id: 'exceptionsLayout.detailColumn' })}
-          className="-m-1"
+          // With nothing open the column takes its full sticky height so the empty state fills the screen.
+          className={cn('-m-1', shipmentId === undefined && 'h-[calc(100svh-3rem)]')}
         >
-          {shipmentId === undefined ? <ExceptionDetailEmptyState /> : <ExceptionDetailPanel shipmentId={shipmentId} />}
+          {shipmentId === undefined
+            ? <ExceptionDetailEmptyState className="h-full" />
+            : <ExceptionDetailPanel shipmentId={shipmentId} />}
         </ScrollColumn>
       </main>
     )
