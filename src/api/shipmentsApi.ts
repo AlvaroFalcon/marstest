@@ -65,6 +65,10 @@ export type ShipmentsApi = {
   discardDraft: (shipmentId: string, exceptionId: string) => Promise<Shipment>
   /** Applies the scripted demo event (vessel rolled on SH-1060) once; later calls change nothing. */
   simulateCarrierEvent: () => Promise<SimulateCarrierEventResult>
+  /** Shipment ids whose exception ops have not opened yet, to mark their inbox cards as new. */
+  listUnseenExceptionShipmentIds: () => Promise<string[]>
+  /** Clears the "new" marker of one shipment's exception. Idempotent: unknown or seen ids change nothing. */
+  markExceptionSeen: (shipmentId: string) => Promise<void>
   /** Restores the seed. */
   resetDemo: () => Promise<void>
 }
@@ -147,8 +151,17 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
         shipment.carrierEta = event.carrierEta
         shipment.estimatedEta = event.estimatedEta
         shipment.exceptions.push(event.exception)
+        state.unseenExceptionShipmentIds.push(SIMULATED_EVENT_SHIPMENT_ID)
       })
       return { shipment: findShipment(db.read(), SIMULATED_EVENT_SHIPMENT_ID), applied: true }
+    }),
+
+    listUnseenExceptionShipmentIds: () => respond(() => db.read().unseenExceptionShipmentIds),
+
+    markExceptionSeen: shipmentId => respond(() => {
+      db.write((state) => {
+        state.unseenExceptionShipmentIds = state.unseenExceptionShipmentIds.filter(candidate => candidate !== shipmentId)
+      })
     }),
 
     resetDemo: () => respond(() => db.reset()),

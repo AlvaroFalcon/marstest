@@ -984,6 +984,7 @@ export function createSeed(demoNow: Date = new Date(DEMO_NOW_ISO)): DemoState {
       ...routineShipments(at),
       ...outOfScopeShipments(at),
     ],
+    unseenExceptionShipmentIds: [],
   }
 }
 

@@ -31,6 +31,7 @@ const readyContent: ReadyContent = {
       href: '/ops/exceptions/SH-1042',
       isOpen: false,
       isCustomerNotified: false,
+      isNew: false,
     },
     {
       shipmentId: 'SH-1051',
@@ -40,6 +41,7 @@ const readyContent: ReadyContent = {
       href: '/ops/exceptions/SH-1051',
       isOpen: true,
       isCustomerNotified: true,
+      isNew: false,
     },
   ],
   kpis: { needAttention: 5, staleOverDay: 2, onTime: 9, total: 16 },

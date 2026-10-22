@@ -9,6 +9,8 @@ export type DemoStripProps = {
   /** True while the reset is running: the button is disabled and shows a spinner. */
   isResetting: boolean
   onSimulateCarrierEvent: () => void
+  /** True while the simulated event is being applied: the button is disabled and flagged busy. */
+  isSimulating: boolean
   className?: string
 }
 
@@ -18,7 +20,7 @@ export type DemoStripProps = {
  * queries: "Reset demo" becomes an icon-only button and texts shorten in narrow containers.
  * Must be rendered inside an `@container` ancestor.
  */
-export function DemoStrip({ onResetDemo, isResetting, onSimulateCarrierEvent, className }: DemoStripProps) {
+export function DemoStrip({ onResetDemo, isResetting, onSimulateCarrierEvent, isSimulating, className }: DemoStripProps) {
   const intl = useIntl()
 
   return (
@@ -45,8 +47,17 @@ export function DemoStrip({ onResetDemo, isResetting, onSimulateCarrierEvent, cl
         </span>
       </p>
       <div className="flex items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={onSimulateCarrierEvent}>
-          <ZapIcon aria-hidden="true" />
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isSimulating}
+          aria-busy={isSimulating}
+          onClick={onSimulateCarrierEvent}
+        >
+          {isSimulating
+            ? <Loader2Icon aria-hidden="true" className="motion-safe:animate-spin" />
+            : <ZapIcon aria-hidden="true" />}
           <span className="@xl:hidden">{intl.formatMessage({ id: 'demo.simulateShort' })}</span>
           <span className="
             hidden

@@ -20,6 +20,8 @@ export type ExceptionCardProps = {
   isOpen: boolean
   /** True when the customer notice was sent; the exception stays in the inbox, so the card says so. */
   isCustomerNotified: boolean
+  /** True while ops have not opened this exception since it was raised by a carrier event. */
+  isNew: boolean
   className?: string
 }
 
@@ -47,8 +49,9 @@ const cardVariants = cva(
  * One open exception of the inbox, as a link to its detail. The left bar and the badge both carry
  * the severity (the badge has icon and text, so colour is not the only signal); the open card gets
  * the info background and `aria-current="page"`, which also tells screen readers which one is open.
+ * A new exception carries a "New" text badge in the info tone, so the marker is not colour-only.
  */
-export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen, isCustomerNotified, className }: ExceptionCardProps) {
+export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen, isCustomerNotified, isNew, className }: ExceptionCardProps) {
   const intl = useIntl()
   const { tone } = EXCEPTION_STATUS_PRESENTATION[status.type]
 
@@ -64,6 +67,11 @@ export function ExceptionCard({ shipmentId, route, reason, status, href, isOpen,
       <span className="text-muted-foreground">{reason}</span>
       <span className="flex flex-wrap items-center gap-1.5">
         <ExceptionStatusBadge status={status} />
+        {isNew && (
+          <Badge className="h-6 bg-info-subtle px-2 text-caption text-info">
+            {intl.formatMessage({ id: 'exceptionCard.new' })}
+          </Badge>
+        )}
         {isCustomerNotified && (
           <Badge variant="outline" className="h-6 px-2 text-caption text-muted-foreground">
             <Check aria-hidden="true" />

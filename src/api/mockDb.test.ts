@@ -76,6 +76,16 @@ describe('createMockDb', () => {
     expect(db.read()).toEqual(createSeed())
   })
 
+  it('accepts a stored state saved before the unseen exceptions field existed', () => {
+    const { unseenExceptionShipmentIds, ...legacyState } = createSeed()
+    const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify(legacyState) })
+
+    const db = createMockDb({ storage })
+
+    expect(unseenExceptionShipmentIds).toEqual([])
+    expect(db.read()).toEqual(createSeed())
+  })
+
   it('ignores stored state that is not valid JSON', () => {
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: '{not json' })
 

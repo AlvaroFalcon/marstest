@@ -11,6 +11,7 @@ function buildProps(overrides: Partial<ExceptionCardProps> = {}): ExceptionCardP
     href: '/ops/exceptions/SH-1042?site=zaragoza-plant',
     isOpen: false,
     isCustomerNotified: false,
+    isNew: false,
     ...overrides,
   }
 }
@@ -37,6 +38,18 @@ describe('ExceptionCard', () => {
     )
 
     expect(screen.getByText('No update 52 h')).toBeInTheDocument()
+  })
+
+  it('shows a New badge only when the exception is new', () => {
+    renderWithProviders(<ExceptionCard {...buildProps({ isNew: true })} />)
+
+    expect(screen.getByText('New')).toBeInTheDocument()
+  })
+
+  it('shows no New badge by default', () => {
+    renderWithProviders(<ExceptionCard {...buildProps()} />)
+
+    expect(screen.queryByText('New')).not.toBeInTheDocument()
   })
 
   it('marks the open card as the current page', () => {
