@@ -12,10 +12,11 @@ describe('OpsExceptionsPage', () => {
 })
 
 describe('OpsShipmentsPage', () => {
-  it('shows the all-shipments heading with a coming soon note', () => {
+  it('shows the heading and the first page of shipments with the footer count', async () => {
     renderWithProviders(<OpsShipmentsPage />)
 
     expect(screen.getByRole('heading', { name: 'All shipments' })).toBeInTheDocument()
-    expect(screen.getByText('Coming soon')).toBeInTheDocument()
+    expect(await screen.findByText('Showing 8 of 16')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /SH-1029/ })).toHaveAttribute('href', '/ops/exceptions/SH-1029')
   })
 })
