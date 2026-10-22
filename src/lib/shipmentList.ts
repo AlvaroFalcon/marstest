@@ -1,9 +1,11 @@
 import { orderBy, uniq } from 'es-toolkit'
-import type { CarrierEta, EstimatedEta, MilestoneStatus, ReferenceData, Shipment } from '@/api/types'
+import type { CarrierEta, EstimatedEta, MilestoneStatus, ReferenceData, Shipment, TransportMode } from '@/api/types'
 import { compareEta } from '@/lib/eta'
 import { classifyDelay } from '@/lib/delayClassification'
 import { getFreshness, type Freshness } from '@/lib/freshness'
-import { scopeShipments } from '@/lib/scope'
+import { getExceptionUrgencyRank } from '@/lib/exceptionPriority'
+import { isCustomerNotified } from '@/lib/customerNotice'
+import { scopeShipments, type Viewer } from '@/lib/scope'
 import { getShipmentStatus, isDelivered } from '@/lib/shipmentStatus'
 
 /** Rows per page of the ops "All shipments" list. */
@@ -42,6 +44,15 @@ export type ShipmentSortDirection = 'asc' | 'desc'
  */
 export type ShipmentListRow = {
   id: string
+  customerId: string
+  /** Customer purchase order number ("Your PO" in the customer view). */
+  poNumber: string
+  /** Transport mode of each leg in journey order, repeats kept ("road", "sea", "road"). */
+  modes: TransportMode[]
+  /** True once the customer notice of any exception of the shipment was approved and sent. */
+  isCustomerNotified: boolean
+  /** Urgency rank of the most urgent open exception (0 is the most urgent); `null` without one. */
+  exceptionUrgencyRank: number | null
   originSiteId: string
   customerName: string
   originCity: string
@@ -62,6 +73,11 @@ export type ShipmentListRow = {
   hasOpenException: boolean
   /** Lower-cased shipment id, customer, PO, carriers and origin/destination cities, joined for search. */
   searchText: string
+  /**
+   * Lower-cased shipment id, PO and origin/destination cities only. The customer view searches
+   * this instead of `searchText`, so carrier and customer names never match.
+   */
+  customerSearchText: string
 }
 
 /** Criteria that narrow, order and slice the list; this is the state held in the URL. */
@@ -115,15 +131,19 @@ export function getShipmentListStatus(shipment: Shipment, now: Date): ShipmentLi
 }
 
 /**
- * Builds the rows of the ops list: only shipments from the ops sites (delivered ones included),
+ * Builds the rows of a list: only the shipments the viewer may see (delivered ones included),
  * with ids resolved to names. Order is the order of `shipments`.
+ *
+ * @param viewer - Defaults to ops, which keeps the ops list unchanged; the customer list passes
+ * its customer so another customer's shipments never become rows.
  */
 export function buildShipmentRows(
   shipments: readonly Shipment[],
   referenceData: ReferenceData,
   now: Date,
+  viewer: Viewer = { role: 'ops' },
 ): ShipmentListRow[] {
-  return scopeShipments(shipments, { role: 'ops' }, referenceData.sites).map((shipment) => {
+  return scopeShipments(shipments, viewer, referenceData.sites).map((shipment) => {
     const customerName = referenceData.customers.find(customer => customer.id === shipment.customerId)?.name
       ?? shipment.customerId
     const originCity = referenceData.sites.find(site => site.id === shipment.originSiteId)?.city
@@ -137,8 +157,15 @@ export function buildShipmentRows(
       : null
     const listStatus = getShipmentListStatus(shipment, now)
 
+    const urgencyRanks = shipment.exceptions.map(exception => getExceptionUrgencyRank(exception.type))
+
     return {
       id: shipment.id,
+      customerId: shipment.customerId,
+      poNumber: shipment.erpOrder.poNumber,
+      modes: shipment.legs.map(leg => leg.mode),
+      isCustomerNotified: shipment.exceptions.some(isCustomerNotified),
+      exceptionUrgencyRank: urgencyRanks.length > 0 ? Math.min(...urgencyRanks) : null,
       originSiteId: shipment.originSiteId,
       customerName,
       originCity,
@@ -154,6 +181,12 @@ export function buildShipmentRows(
       confidence: listStatus === 'delivered' ? null : shipment.estimatedEta.confidence,
       freshness: getFreshness(shipment, now),
       hasOpenException: shipment.exceptions.length > 0,
+      customerSearchText: [
+        shipment.id,
+        shipment.erpOrder.poNumber,
+        originCity,
+        shipment.destination.city,
+      ].join(' ').toLowerCase(),
       searchText: [
         shipment.id,
         customerName,
@@ -174,13 +207,18 @@ export function filterShipmentRows(
   rows: readonly ShipmentListRow[],
   { siteId, status, search }: Pick<ShipmentListQuery, 'siteId' | 'status' | 'search'>,
 ): ShipmentListRow[] {
-  const terms = search.toLowerCase().split(/\s+/).filter(term => term !== '')
+  const terms = splitSearchTerms(search)
 
   return rows.filter(row =>
     (siteId === null || row.originSiteId === siteId)
     && (status === null || row.status === status)
     && terms.every(term => row.searchText.includes(term)),
   )
+}
+
+/** Splits free text into lower-cased, whitespace-separated search terms. */
+export function splitSearchTerms(search: string): string[] {
+  return search.toLowerCase().split(/\s+/).filter(term => term !== '')
 }
 
 /** Splits a sort into the column and direction the header shows. */
