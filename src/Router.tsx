@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { OpsLayout } from '@/components/layout/OpsLayout'
 import { StandalonePageLayout } from '@/components/layout/StandalonePageLayout'
+import { CustomerShipmentPage } from '@/pages/customers/CustomerShipmentPage'
 import { CustomerShipmentsPage } from '@/pages/customers/CustomerShipmentsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
 import { OpsExceptionsPage } from '@/pages/ops/OpsExceptionsPage'
@@ -26,7 +27,7 @@ export function AppRoutes() {
           <Route path={routes.ops.shipment(':shipmentId')} element={<OpsShipmentPage />} />
         </Route>
         <Route path={routes.customer.shipments(':customerId')} element={<CustomerShipmentsPage />} />
-        <Route path={routes.customer.shipment(':customerId', ':shipmentId')} element={<CustomerShipmentsPage />} />
+        <Route path={routes.customer.shipment(':customerId', ':shipmentId')} element={<CustomerShipmentPage />} />
       </Route>
       <Route
         path="*"

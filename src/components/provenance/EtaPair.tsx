@@ -40,7 +40,8 @@ type EtaCardProps = {
   value: string
   valueClassName?: string
   badge?: ReactNode
-  note: string
+  /** One-line note under the value; omit it when the card has nothing to add. */
+  note?: string
   /** Highlights the card in the info colour; only used for an estimate that deviates. */
   isHighlighted?: boolean
 }
@@ -68,13 +69,17 @@ export function EtaCard({ label, value, valueClassName, badge, note, isHighlight
         <span className={cn('text-eta font-medium', valueClassName)}>{value}</span>
         {badge}
       </dd>
-      <dd className="
-        text-caption text-muted-foreground
-        @xl:text-sm
-      "
-      >
-        {note}
-      </dd>
+      {note === undefined
+        ? null
+        : (
+            <dd className="
+              text-caption text-muted-foreground
+              @xl:text-sm
+            "
+            >
+              {note}
+            </dd>
+          )}
     </dl>
   )
 }

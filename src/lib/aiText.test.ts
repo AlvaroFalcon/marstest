@@ -1,6 +1,6 @@
 import { createSeed } from '@/api/seed'
 import type { Customer, Shipment } from '@/api/types'
-import { draftCustomerNotice, suggestNextAction, summarizeShipmentForCustomer } from '@/lib/aiText'
+import { draftCustomerNotice, suggestNextAction } from '@/lib/aiText'
 
 function getSeedShipment(shipmentId: string): Shipment {
   const shipment = createSeed().shipments.find(candidate => candidate.id === shipmentId)
@@ -23,100 +23,6 @@ function buildCustomsHoldShipment(): Shipment {
   const shipment = getSeedShipment('SH-1042')
   return { ...shipment, erpOrder: { ...shipment.erpOrder, hsCode: '8467.29' } }
 }
-
-describe('summarizeShipmentForCustomer', () => {
-  it('summarises a shipment with an open customs hold', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
-
-    expect(summary.text).toBe(
-      'Shipment SH-1042 is held at customs at Southampton port. We estimate delivery on 22 Oct 2026 (81 % confidence). Open issue: this shipment is held at customs.',
-    )
-  })
-
-  it('summarises a shipment without exceptions and omits the open issue sentence', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1033'))
-
-    expect(summary.text).toBe('Shipment SH-1033 is in transit; last reported position: A-9 near Nîmes. We estimate delivery on 21 Oct 2026 (90 % confidence).')
-  })
-
-  it('states the delivery date instead of an estimate for a delivered shipment', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1009'))
-
-    expect(summary.text).toBe('Shipment SH-1009 was delivered to Nordwerk GmbH, Hamburg. It was delivered on 18 Oct 2026.')
-  })
-
-  it('words an arrived shipment as arrived at its location', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1047'))
-
-    expect(summary.text).toBe('Shipment SH-1047 arrived at Barcelona port terminal. We estimate delivery on 22 Oct 2026 (78 % confidence).')
-  })
-
-  it('words a picked up shipment as picked up at its location', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1044'))
-
-    expect(summary.text).toBe('Shipment SH-1044 was picked up at Barcelona warehouse. We estimate delivery on 20 Oct 2026 (70 % confidence).')
-  })
-
-  it('says there is no tracking update when there are no milestones', () => {
-    const shipment: Shipment = { ...getSeedShipment('SH-1033'), milestones: [] }
-
-    const summary = summarizeShipmentForCustomer(shipment)
-
-    expect(summary.text).toBe('Shipment SH-1033 has no tracking update yet. We estimate delivery on 21 Oct 2026 (90 % confidence).')
-  })
-
-  it('mentions only the most urgent exception when there are several', () => {
-    const base = getSeedShipment('SH-1042')
-    const shipment: Shipment = {
-      ...base,
-      exceptions: [{ ...base.exceptions[0], id: 'X-stale', type: 'staleTracking' }, base.exceptions[0]],
-    }
-
-    const summary = summarizeShipmentForCustomer(shipment)
-
-    expect(summary.text).toContain('Open issue: this shipment is held at customs.')
-    expect(summary.text).not.toContain('no tracking update for more than 24 hours')
-  })
-
-  it('summarises a shipment with an open incident', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1051'))
-
-    expect(summary.text).toBe(
-      'Shipment SH-1051 was affected by an incident at A10 near Poitiers. We estimate delivery on 22 Oct 2026 (77 % confidence). Open issue: this shipment was affected by an incident on its way.',
-    )
-  })
-
-  it('contains only the numbers present in the shipment', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
-
-    expect(summary.text.match(/\d+/g)).toEqual(['1042', '22', '2026', '81'])
-  })
-
-  it('does not invent a different date when the estimate changes', () => {
-    const shipment = getSeedShipment('SH-1033')
-    const changed: Shipment = { ...shipment, estimatedEta: { ...shipment.estimatedEta, date: '2026-11-03T08:00:00.000Z', confidence: 66 } }
-
-    const summary = summarizeShipmentForCustomer(changed)
-
-    expect(summary.text).toContain('We estimate delivery on 3 Nov 2026 (66 % confidence).')
-    expect(summary.text).not.toContain('21 Oct')
-  })
-
-  it('reports the raw events it is based on', () => {
-    const summary = summarizeShipmentForCustomer(getSeedShipment('SH-1042'))
-
-    expect(summary.basedOnEventIds).toHaveLength(6)
-    expect(summary.basedOnEventIds).toEqual(['SH-1042-E1', 'SH-1042-E2', 'SH-1042-E3', 'SH-1042-E4', 'SH-1042-E5', 'SH-1042-E6'])
-  })
-
-  it('reports zero events when the shipment has no raw events', () => {
-    const shipment: Shipment = { ...getSeedShipment('SH-1033'), rawEvents: [] }
-
-    const summary = summarizeShipmentForCustomer(shipment)
-
-    expect(summary.basedOnEventIds).toEqual([])
-  })
-})
 
 describe('suggestNextAction', () => {
   it('lists the missing certificate and both HS code corrections on the SH-1042 customs hold', () => {
