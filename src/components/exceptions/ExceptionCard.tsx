@@ -31,7 +31,7 @@ const cardVariants = cva(
     shadow-card outline-hidden transition-colors
     before:absolute before:inset-y-0 before:left-0 before:w-1
     hover:not-aria-[current=page]:bg-accent
-    focus-visible:ring-3 focus-visible:ring-ring/50
+    focus-visible:ring-3 focus-visible:ring-ring
     aria-[current=page]:border-info aria-[current=page]:bg-info-subtle
   `,
   {

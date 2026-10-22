@@ -34,7 +34,7 @@ function StatusRow({ value, label, isSelected }: StatusRowProps) {
     <div className="
       relative flex items-center gap-2 rounded-md px-2 py-2.5 text-sm transition-colors
       hover:bg-accent
-      has-focus-visible:ring-3 has-focus-visible:ring-ring/50
+      has-focus-visible:ring-3 has-focus-visible:ring-ring
       has-aria-checked:bg-accent has-aria-checked:font-medium
     "
     >

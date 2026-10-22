@@ -30,7 +30,7 @@ export function CustomerShipmentCard({ row, now, className }: CustomerShipmentCa
         `
           flex flex-col gap-2 rounded-xl border bg-card p-4 text-sm shadow-card outline-hidden transition-colors
           hover:bg-accent
-          focus-visible:ring-3 focus-visible:ring-ring/50
+          focus-visible:ring-3 focus-visible:ring-ring
         `,
         className,
       )}
