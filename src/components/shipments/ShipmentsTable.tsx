@@ -215,7 +215,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
           <TableRow key={row.id} className="relative">
             {row.getAllCells().map(cell => (
               <TableCell key={cell.id} className="py-3 whitespace-normal">
-                <table.FlexRender cell={cell} />
+                <FlexRender cell={cell} />
               </TableCell>
             ))}
           </TableRow>

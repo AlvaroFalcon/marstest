@@ -43,12 +43,12 @@ function CustomerFreshnessText({ detail, now }: CustomerFreshnessTextProps) {
   )
 }
 
-type CustomerArrivalCardProps = Pick<CustomerShipmentDetailProps, 'shipment' | 'now'> & {
+type CustomerArrivalProps = Pick<CustomerShipmentDetailProps, 'shipment' | 'now'> & {
   arrival: CustomerShipmentDetailModel['arrival']
 }
 
 /** The delivery card once delivered; the ETA pair while in transit. */
-function CustomerArrivalCard({ shipment, arrival, now }: CustomerArrivalCardProps) {
+function CustomerArrival({ shipment, arrival, now }: CustomerArrivalProps) {
   if (arrival.kind === 'delivered') {
     return <DeliveredEtaPair arrival={arrival} />
   }
@@ -94,7 +94,7 @@ export function CustomerShipmentDetail({ shipment, detail, now, className }: Cus
       >
         {detail.summary.text}
       </AiBlock>
-      <CustomerArrivalCard shipment={shipment} arrival={detail.arrival} now={now} />
+      <CustomerArrival shipment={shipment} arrival={detail.arrival} now={now} />
       <Journey carrierNames={detail.carrierNames} now={now} shipment={shipment} />
       <CustomerDocuments rows={detail.documents} />
     </article>
