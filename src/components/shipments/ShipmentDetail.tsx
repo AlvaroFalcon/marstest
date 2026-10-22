@@ -31,6 +31,12 @@ export type ShipmentDetailProps = {
   recommendedAction?: ReactNode
   /** Ref of the title, so a flow that removes the focused control can move focus back to the top. */
   titleRef?: Ref<HTMLHeadingElement>
+  /**
+   * Opens the source events panel. Called without ids from the AI evidence button ("Based on N
+   * events") and with the raw event ids of a step when a journey step is selected. Omit it and the
+   * evidence is plain text and the journey steps are not clickable.
+   */
+  onOpenSourceEvents?: (highlightEventIds?: readonly string[]) => void
   className?: string
 }
 
@@ -171,9 +177,10 @@ function InternalDataRow({ detail, exceptionOpenedAt }: InternalDataRowProps) {
 type ExceptionLayerProps = {
   layer: ExceptionLayerModel
   poNumber: string
+  onOpenSourceEvents?: ShipmentDetailProps['onOpenSourceEvents']
 }
 
-function ExceptionLayer({ layer, poNumber }: ExceptionLayerProps) {
+function ExceptionLayer({ layer, poNumber, onOpenSourceEvents }: ExceptionLayerProps) {
   const intl = useIntl()
 
   return (
@@ -186,6 +193,7 @@ function ExceptionLayer({ layer, poNumber }: ExceptionLayerProps) {
             { kind: 'events', count: layer.citedEventCount },
             { kind: 'documents', count: layer.receivedDocumentCount },
           ),
+          onClick: onOpenSourceEvents && (() => onOpenSourceEvents()),
         }}
       >
         {layer.diagnosis}
@@ -198,8 +206,8 @@ function ExceptionLayer({ layer, poNumber }: ExceptionLayerProps) {
 /**
  * The one data-driven shipment detail (ADR 0025): header, internal data row, ETA pair and journey
  * for any shipment, plus an optional exception layer. Ops exception detail passes the layer; other
- * screens reuse the same structure without it. The AI evidence is plain text until the source
- * events panel exists, so the journey has no clickable steps either.
+ * screens reuse the same structure without it. When `onOpenSourceEvents` is given, the AI evidence
+ * and the journey steps open the source events panel; the owner of that panel keeps its state.
  */
 export function ShipmentDetail({
   shipment,
@@ -211,6 +219,7 @@ export function ShipmentDetail({
   exception,
   recommendedAction,
   titleRef,
+  onOpenSourceEvents,
   className,
 }: ShipmentDetailProps) {
   return (
@@ -231,8 +240,15 @@ export function ShipmentDetail({
         now={now}
         variant="reason"
       />
-      <Journey carrierNames={carrierNames} now={now} shipment={shipment} />
-      {exception !== undefined && <ExceptionLayer layer={exception} poNumber={detail.poNumber} />}
+      <Journey
+        carrierNames={carrierNames}
+        now={now}
+        shipment={shipment}
+        onStepSelect={onOpenSourceEvents && (step => onOpenSourceEvents(step.rawEventIds))}
+      />
+      {exception !== undefined && (
+        <ExceptionLayer layer={exception} poNumber={detail.poNumber} onOpenSourceEvents={onOpenSourceEvents} />
+      )}
       {recommendedAction}
     </article>
   )

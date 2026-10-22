@@ -242,3 +242,65 @@ test.describe('recommended action', () => {
     await expect(page.getByRole('button', { name: 'Upload certificate of origin' })).toHaveCount(0)
   })
 })
+
+test.describe('source events', () => {
+  test('opens from "Based on N events" with events, deltas and mapping texts', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await page.getByRole('button', { name: /Based on 2 events/ }).click()
+
+    await expect(page).toHaveURL('/ops/exceptions/SH-1042?events=open')
+    const sheet = page.getByRole('dialog', { name: 'Source events · SH-1042' })
+    await expect(sheet.getByRole('listitem')).toHaveCount(6)
+    await expect(sheet.getByText('IFTSTA DISCHARGED SOUTHAMPTON')).toBeVisible()
+    await expect(sheet.getByText('Oct 19 · 08:20')).toBeVisible()
+    await expect(sheet.getByText('+3 d 18 h')).toBeVisible()
+    await expect(sheet.getByText('+4 h 15 min')).toBeVisible()
+    await expect(sheet.getByText('Mapped by rule').first()).toBeVisible()
+    await expect(sheet.getByText('Mapped by AI · 91% confidence')).toBeVisible()
+    await expect(sheet.getByText('Cited by diagnosis')).toHaveCount(2)
+  })
+
+  test('closes with Escape, returns focus to the trigger and drops the param', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+    const trigger = page.getByRole('button', { name: /Based on 2 events/ })
+    await trigger.click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+
+    await page.keyboard.press('Escape')
+
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page).toHaveURL('/ops/exceptions/SH-1042')
+    await expect(trigger).toBeFocused()
+  })
+
+  test('opens from a journey step and highlights that step\'s events', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042')
+
+    await page.getByRole('button', { name: /Southampton port/ }).click()
+
+    const sheet = page.getByRole('dialog', { name: 'Source events · SH-1042' })
+    await expect(sheet.getByText('Selected journey step')).toHaveCount(2)
+  })
+
+  test('opens on load from the ?events=open deep link and focuses the title after Escape', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1042?events=open')
+
+    await expect(page.getByRole('dialog', { name: 'Source events · SH-1042' })).toBeVisible()
+    await page.keyboard.press('Escape')
+
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page).toHaveURL('/ops/exceptions/SH-1042')
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeFocused()
+  })
+
+  test('flags the low-confidence AI mapping of SH-1029 for review', async ({ page }) => {
+    await page.goto('/ops/exceptions/SH-1029')
+
+    await page.getByRole('button', { name: /Based on 1 event/ }).click()
+
+    const sheet = page.getByRole('dialog', { name: 'Source events · SH-1029' })
+    await expect(sheet.getByText('AI 54% · below threshold, needs human review')).toBeVisible()
+    await expect(sheet.getByText('In transit?')).toBeVisible()
+  })
+})

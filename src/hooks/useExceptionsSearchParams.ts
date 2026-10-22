@@ -5,10 +5,12 @@ import { z } from 'zod'
 /**
  * Search params of the ops exceptions route. `site` is the origin site id of the filter; absent
  * means "all my sites", which is the default and is therefore never written to the URL. An empty
- * value is treated as absent.
+ * value is treated as absent. `events=open` means the source events sheet is open; closed is the
+ * default and is never written.
  */
 export const exceptionsSearchParamsSchema = z.object({
   site: z.string().min(1).optional().catch(undefined),
+  events: z.literal('open').optional().catch(undefined),
 })
 
 /** @see exceptionsSearchParamsSchema */
@@ -20,10 +22,16 @@ export type UseExceptionsSearchParamsResult = {
   siteId: string | null
   /** Selects a site, or all sites with `null`; the default is omitted from the URL. */
   setSiteId: (siteId: string | null) => void
+  /** True when the URL asks for the source events sheet to be open. */
+  isSourceEventsOpen: boolean
+  /** Opens the source events sheet; adds a history entry so Back closes it. */
+  openSourceEvents: () => void
+  /** Closes the sheet by removing the param, replacing the entry so Back does not reopen it. */
+  closeSourceEvents: () => void
 }
 
 /**
- * Reads and writes the `?site=` filter of the exceptions route. A site that is not one of the
+ * Reads and writes the `?site=` filter and the `?events=open` sheet state of the exceptions route. A site that is not one of the
  * in-scope sites (unknown, or the locked out-of-scope one) is treated as "all my sites" and is
  * removed from the URL with `replace`, so the back button does not return to the invalid state.
  * Other search params are preserved.
@@ -33,7 +41,10 @@ export type UseExceptionsSearchParamsResult = {
  */
 export function useExceptionsSearchParams(inScopeSiteIds: readonly string[] | null): UseExceptionsSearchParamsResult {
   const [searchParams, setSearchParams] = useSearchParams()
-  const { site } = exceptionsSearchParamsSchema.parse({ site: searchParams.get('site') ?? undefined })
+  const { site, events } = exceptionsSearchParamsSchema.parse({
+    site: searchParams.get('site') ?? undefined,
+    events: searchParams.get('events') ?? undefined,
+  })
 
   const isInvalidSite = site !== undefined && inScopeSiteIds !== null && !inScopeSiteIds.includes(site)
 
@@ -47,7 +58,32 @@ export function useExceptionsSearchParams(inScopeSiteIds: readonly string[] | nu
     setSearchParams(previous => withSite(previous, siteId))
   }
 
-  return { siteId: isInvalidSite ? null : site ?? null, setSiteId }
+  function openSourceEvents(): void {
+    setSearchParams(previous => withEvents(previous, true))
+  }
+
+  function closeSourceEvents(): void {
+    setSearchParams(previous => withEvents(previous, false), { replace: true })
+  }
+
+  return {
+    siteId: isInvalidSite ? null : site ?? null,
+    setSiteId,
+    isSourceEventsOpen: events === 'open',
+    openSourceEvents,
+    closeSourceEvents,
+  }
+}
+
+function withEvents(previous: URLSearchParams, isOpen: boolean): URLSearchParams {
+  const next = new URLSearchParams(previous)
+  if (isOpen) {
+    next.set('events', 'open')
+  }
+  else {
+    next.delete('events')
+  }
+  return next
 }
 
 function withSite(previous: URLSearchParams, siteId: string | null): URLSearchParams {

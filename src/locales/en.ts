@@ -186,6 +186,21 @@ export const messages = {
   'journey.status.incident': 'Incident',
   'journey.status.outForDelivery': 'Out for delivery',
   'journey.status.delivered': 'Delivered',
+  'sourceEvents.title': 'Source events · {shipmentId}',
+  'sourceEvents.description': 'Original carrier messages and the status we mapped them to',
+  'sourceEvents.listLabel': 'Carrier events, oldest first',
+  'sourceEvents.source': '{carrier} · {channel}',
+  'sourceEvents.mapping.rule': 'Mapped by rule',
+  'sourceEvents.mapping.ai': 'Mapped by AI · {percent}% confidence',
+  'sourceEvents.lowConfidence': 'AI {percent}% · below threshold, needs human review',
+  'sourceEvents.reviewStatus': '{status}?',
+  'sourceEvents.cited': 'Cited by diagnosis',
+  'sourceEvents.highlighted': 'Selected journey step',
+  'sourceEvents.delta.daysHours': '+{days} d {hours} h',
+  'sourceEvents.delta.days': '+{days} d',
+  'sourceEvents.delta.hoursMinutes': '+{hours} h {minutes} min',
+  'sourceEvents.delta.hours': '+{hours} h',
+  'sourceEvents.delta.minutes': '+{minutes} min',
 } satisfies Record<string, string>
 
 /** Every message id the application can use; unknown ids fail type-checking. */

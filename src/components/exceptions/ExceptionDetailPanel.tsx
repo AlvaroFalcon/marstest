@@ -1,13 +1,15 @@
-import { useRef, type ReactNode } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router'
 import { useIntl } from 'react-intl'
 import { ArrowLeft, SearchX } from 'lucide-react'
 import { ExceptionStatusBadge, type ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
 import { RecommendedAction } from '@/components/exceptions/RecommendedAction'
 import { ShipmentDetail } from '@/components/shipments/ShipmentDetail'
+import { SourceEventsSheet } from '@/components/shipments/SourceEventsSheet'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useExceptionsSearchParams } from '@/hooks/useExceptionsSearchParams'
 import { useNow } from '@/hooks/useNow'
 import { useShipment } from '@/hooks/useShipment'
 import type { ExceptionType, ReferenceData, Shipment } from '@/api/types'
@@ -18,6 +20,7 @@ import {
 } from '@/lib/exceptionDetail'
 import { shouldOfferCertificateActions } from '@/lib/customerNotice'
 import { getFreshness, type Freshness } from '@/lib/freshness'
+import { buildSourceEventRows } from '@/lib/sourceEvents'
 import { cn } from '@/lib/utils'
 
 export type ExceptionDetailPanelProps = {
@@ -143,6 +146,9 @@ type ReadyDetailProps = {
 function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDetailProps) {
   const now = useNow()
   const titleRef = useRef<HTMLHeadingElement>(null)
+  const openerRef = useRef<HTMLElement | null>(null)
+  const [highlightedEventIds, setHighlightedEventIds] = useState<readonly string[]>([])
+  const { isSourceEventsOpen, openSourceEvents, closeSourceEvents } = useExceptionsSearchParams(null)
   const exception = pickMostUrgentException(shipment)
 
   // A shipment without an open exception has no exception detail; it looks like an unknown id.
@@ -153,18 +159,48 @@ function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDeta
   const freshness = getFreshness(shipment, now)
   const detail = buildShipmentDetail(shipment, referenceData)
   const exceptionLayer = buildExceptionLayer(shipment, exception)
+  const carrierNames = Object.fromEntries(referenceData.carriers.map(carrier => [carrier.id, carrier.name]))
+
+  function handleOpenSourceEvents(highlightEventIds: readonly string[] = []): void {
+    openerRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    setHighlightedEventIds(highlightEventIds)
+    openSourceEvents()
+  }
+
+  function handleSourceEventsOpenChange(isOpen: boolean): void {
+    if (!isOpen) {
+      setHighlightedEventIds([])
+      closeSourceEvents()
+    }
+  }
+
+  // The sheet has no SheetTrigger (its state lives in the URL), so Radix has nothing to return
+  // focus to. Focus goes back to the control that opened it; when there is none (opened from the
+  // URL) or it left the page, it goes to the title instead of being lost on the body.
+  function handleCloseAutoFocus(event: Event): void {
+    event.preventDefault()
+    const opener = openerRef.current
+    openerRef.current = null
+    if (opener?.isConnected) {
+      opener.focus()
+    }
+    else {
+      titleRef.current?.focus()
+    }
+  }
 
   return (
     <DetailFrame isCard={isCard}>
       <ShipmentDetail
         shipment={shipment}
         detail={detail}
-        carrierNames={Object.fromEntries(referenceData.carriers.map(carrier => [carrier.id, carrier.name]))}
+        carrierNames={carrierNames}
         freshness={freshness}
         now={now}
         statusBadge={<ExceptionStatusBadge status={toExceptionStatus(exception.type, freshness)} />}
         exception={exceptionLayer}
         titleRef={titleRef}
+        onOpenSourceEvents={handleOpenSourceEvents}
         recommendedAction={(
           <RecommendedAction
             key={exception.id}
@@ -176,6 +212,16 @@ function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDeta
             onSectionRemoved={() => titleRef.current?.focus()}
           />
         )}
+      />
+      <SourceEventsSheet
+        isOpen={isSourceEventsOpen}
+        onOpenChange={handleSourceEventsOpenChange}
+        shipmentId={shipment.id}
+        rows={buildSourceEventRows(shipment.rawEvents, exception.aiDiagnosis.basedOnEventIds)}
+        carrierNames={carrierNames}
+        highlightedEventIds={highlightedEventIds}
+        isDesktop={isCard}
+        onCloseAutoFocus={handleCloseAutoFocus}
       />
     </DetailFrame>
   )
