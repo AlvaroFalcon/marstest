@@ -49,11 +49,6 @@ Everything you write â€” workflow names, job names, step names, comments, docs â
 2. Run `npm ci` on a clean copy (it fails when the lockfile is out of sync, which local `npm install` hides), then every npm script the workflow calls, and confirm they pass.
 3. After pushing, check the run with `gh run list --workflow <file>` and `gh run view <id> --log-failed`. Fix the root cause of failures; never add `continue-on-error` to hide them.
 
-## Documentation
-
-- When the user decides something about CI/CD (new workflow, deployment target, secrets, branch protection), hand the decision and the user's words to `decision-recorder`. Explain your own technical choices in the workflow comments and commit messages instead.
-- Update the CI section of `CLAUDE.md` when workflows are added or removed.
-- Mention any manual step the user must do in GitHub settings (secrets, environments, required status checks for branch protection).
 
 ## Final report
 

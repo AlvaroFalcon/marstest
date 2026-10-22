@@ -32,7 +32,7 @@ Ask `react-vite-expert` (and `ui-ux-expert` when the milestone has UI) for an **
 - files to create or change and what each does;
 - **open choices**: every point where the plan, `CLAUDE.md` or an ADR does not settle the answer and more than one option is valid (which data to use, which shipment or entity, naming of user-visible things, library APIs, behaviour not described, new dependencies). For each: options, recommendation, why.
 
-If there are open choices, **ask the user** (one `AskUserQuestion` call, recommendation first) before continuing. Never pick an option silently, never leave it as a note in the PR or the log for later. Send the user's **high-impact** decisions to `decision-recorder` (decision, options, the user's words); the impact test and categories are in `.claude/agents/decision-recorder.md`. List the smaller decisions as one line each in the milestone's entry of `docs/implementation/<slug>.md` ("gate decisions without ADR").
+If there are open choices, **ask the user** (one `AskUserQuestion` call, recommendation first) before continuing. Never pick an option silently, never leave it as a note in the PR or the log for later.
 
 ### 3. Implement
 

@@ -12,7 +12,6 @@ Use this skill to pick **the simplest pattern that solves a problem the code has
 1. Identify the problem in the **Problem → pattern** table below.
 2. Open the reference file for the category and read the pattern entry (intent, when to use, when not to, example).
 3. Apply it following `CLAUDE.md` conventions (function declarations, named exports, exported types, JSDoc).
-4. If the pattern shapes the architecture (not a local detail), present it to the user as an option. If the user adopts it, hand the decision to the `decision-recorder` agent.
 
 ## Problem → pattern
 

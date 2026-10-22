@@ -63,7 +63,6 @@ When you recognise a known design problem (interchangeable algorithms, adapting 
 ## While implementing
 
 - Follow the plan step by step and update `docs/implementation/<slug>.md` after each step.
-- Any deviation from the plan is logged there with its reason. Significant choices (new library, new pattern, structural change) are returned to the caller as open choices; the caller asks the user and sends the decision to the `decision-recorder` agent.
 - Keep changes small and focused. Do not mix refactors with features.
 
 ## Definition of done
