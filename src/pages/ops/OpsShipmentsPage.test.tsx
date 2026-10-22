@@ -67,7 +67,7 @@ describe('OpsShipmentsPage', () => {
       await screen.findByRole('table', { name: 'Shipments' })
 
       expect(screen.getByRole('columnheader', { name: 'Carrier ETA' })).toHaveAttribute('aria-sort', 'ascending')
-      expect(screen.getByRole('columnheader', { name: 'Confidence' })).toHaveAttribute('aria-sort', 'none')
+      expect(screen.getByRole('columnheader', { name: 'Our estimate · Confidence' })).toHaveAttribute('aria-sort', 'none')
     })
 
     it('cycles Carrier ETA from ascending to descending and back to the default', async () => {
@@ -92,9 +92,9 @@ describe('OpsShipmentsPage', () => {
       renderPage()
       await screen.findByRole('table', { name: 'Shipments' })
 
-      await user.click(screen.getByRole('button', { name: 'Confidence' }))
+      await user.click(screen.getByRole('button', { name: 'Our estimate · Confidence' }))
 
-      expect(screen.getByRole('columnheader', { name: 'Confidence' })).toHaveAttribute('aria-sort', 'descending')
+      expect(screen.getByRole('columnheader', { name: 'Our estimate · Confidence' })).toHaveAttribute('aria-sort', 'descending')
       expect(screen.getByRole('columnheader', { name: 'Carrier ETA' })).toHaveAttribute('aria-sort', 'none')
       expect(getCurrentUrl()).toBe('/ops/shipments?sort=confidenceDesc')
     })

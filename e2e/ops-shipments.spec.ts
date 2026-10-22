@@ -73,8 +73,8 @@ test.describe('all shipments list', () => {
       await page.getByRole('option', { name: 'Confidence, highest first' }).click()
     }
     else {
-      await page.getByRole('button', { name: 'Confidence' }).click()
-      await expect(page.getByRole('columnheader', { name: 'Confidence' })).toHaveAttribute('aria-sort', 'descending')
+      await page.getByRole('button', { name: 'Our estimate · Confidence' }).click()
+      await expect(page.getByRole('columnheader', { name: 'Our estimate · Confidence' })).toHaveAttribute('aria-sort', 'descending')
     }
 
     await expect(page).toHaveURL('/ops/shipments?sort=confidenceDesc')
@@ -94,6 +94,24 @@ test.describe('all shipments list', () => {
 
     await expect(page).toHaveURL('/ops/shipments')
     await expectShipmentsInOrder(page, firstPageIds)
+  })
+
+  test('keeps the column widths when changing page and sort on desktop', async ({ page, isMobile }) => {
+    test.skip(isMobile, 'Narrow viewports show cards, not the table')
+    await page.goto('/ops/shipments')
+    const headers = page.getByRole('columnheader')
+    await expect(page.getByText('Showing 8 of 16')).toBeVisible()
+    const widthsBefore = await headers.evaluateAll(cells => cells.map(cell => cell.getBoundingClientRect().width))
+
+    await page.getByRole('button', { name: 'Next page' }).click()
+    await expect(page).toHaveURL('/ops/shipments?page=2')
+    const widthsAfterPage = await headers.evaluateAll(cells => cells.map(cell => cell.getBoundingClientRect().width))
+    await page.getByRole('button', { name: 'Our estimate · Confidence' }).click()
+    await expect(page.getByRole('columnheader', { name: 'Our estimate · Confidence' })).toHaveAttribute('aria-sort', 'descending')
+    const widthsAfterSort = await headers.evaluateAll(cells => cells.map(cell => cell.getBoundingClientRect().width))
+
+    expect(widthsAfterPage).toEqual(widthsBefore)
+    expect(widthsAfterSort).toEqual(widthsBefore)
   })
 
   test('keeps the page and sort after a reload', async ({ page }) => {

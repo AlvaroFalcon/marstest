@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils'
 import { ShipmentListStatusBadge } from './ShipmentListStatusBadge'
 import { ShipmentConfidence, ShipmentEstimate, ShipmentUpdated } from './ShipmentRowCells'
+import { ShipmentsTableColGroup } from './ShipmentsTableColGroup'
 import {
   formatShipmentCarrierEta,
   formatShipmentCarriers,
@@ -55,7 +56,9 @@ function SortHeaderButton({ label, direction, onClick }: SortHeaderButtonProps) 
   const Icon = direction === null ? ChevronsUpDown : direction === 'asc' ? ArrowUp : ArrowDown
 
   return (
-    <Button variant="ghost" size="sm" onClick={onClick}>
+    // The negative margin cancels the button's inline padding so its label lines up with the cells
+    // below; the caption size matches the plain headers.
+    <Button variant="ghost" size="sm" className="-ml-2.5 text-caption" onClick={onClick}>
       {label}
       <Icon aria-hidden="true" />
     </Button>
@@ -104,8 +107,13 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
     }),
     columnHelper.display({
       id: 'milestone',
-      header: () => intl.formatMessage({ id: 'shipmentList.column.milestone' }),
-      cell: ({ row }) => formatShipmentMilestone(intl, row.original),
+      header: () => intl.formatMessage({ id: 'shipmentList.column.milestoneUpdated' }),
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span>{formatShipmentMilestone(intl, row.original)}</span>
+          <ShipmentUpdated row={row.original} now={now} />
+        </div>
+      ),
     }),
     columnHelper.display({
       id: 'status',
@@ -124,25 +132,25 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
       cell: ({ row }) => formatShipmentCarrierEta(intl, row.original),
     }),
     columnHelper.display({
-      id: 'estimate',
-      header: () => intl.formatMessage({ id: 'shipmentList.column.estimate' }),
-      cell: ({ row }) => <ShipmentEstimate row={row.original} />,
-    }),
-    columnHelper.display({
+      // Keeps the `confidence` id: the estimate itself is not sortable, so the merged header sorts
+      // by the confidence shown under it.
       id: 'confidence',
       header: () => (
         <SortHeaderButton
-          label={intl.formatMessage({ id: 'shipmentList.column.confidence' })}
+          label={intl.formatMessage({ id: 'shipmentList.column.estimateConfidence' })}
           direction={sortState.column === 'confidence' ? sortState.direction : null}
           onClick={() => onSortChange(getNextSort(sort, 'confidence'))}
         />
       ),
-      cell: ({ row }) => <ShipmentConfidence row={row.original} />,
-    }),
-    columnHelper.display({
-      id: 'updated',
-      header: () => intl.formatMessage({ id: 'shipmentList.column.updated' }),
-      cell: ({ row }) => <ShipmentUpdated row={row.original} now={now} />,
+      cell: ({ row }) => (
+        <div className="flex flex-col items-start">
+          <ShipmentEstimate row={row.original} />
+          {/* A delivered shipment has neither; the estimate's dash is enough. */}
+          {row.original.confidence !== null && (
+            <ShipmentConfidence row={row.original} className="text-muted-foreground" />
+          )}
+        </div>
+      ),
     }),
     columnHelper.display({
       id: 'open',
@@ -164,7 +172,11 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
   }
 
   return (
-    <Table className={cn('text-sm', className)} aria-label={intl.formatMessage({ id: 'shipmentList.table.label' })}>
+    <Table
+      className={cn('min-w-4xl table-fixed text-sm', className)}
+      aria-label={intl.formatMessage({ id: 'shipmentList.table.label' })}
+    >
+      <ShipmentsTableColGroup />
       <TableHeader>
         {table.getHeaderGroups().map(headerGroup => (
           <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -172,7 +184,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
               <TableHead
                 key={header.id}
                 aria-sort={getAriaSort(header.column.id)}
-                className="text-caption font-medium text-muted-foreground"
+                className="text-caption font-medium whitespace-normal text-muted-foreground"
               >
                 {header.isPlaceholder ? null : <table.FlexRender header={header} />}
               </TableHead>
