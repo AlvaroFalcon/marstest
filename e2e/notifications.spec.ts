@@ -65,19 +65,32 @@ test.describe('notification center', () => {
     await expect(page.getByText('Unread')).toHaveCount(2)
   })
 
-  test('shows an event of Nordwerk to ops and Nordwerk but not to Alpen', async ({ page }) => {
+  test('lists a Nordwerk event for ops', async ({ page }) => {
     await page.goto('/customers/nordwerk/shipments')
     await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
 
     await page.goto('/ops/exceptions')
-    await expect(page.getByRole('button', { name: 'Notifications, 1 unread' })).toBeVisible()
-    await page.goto('/customers/alpen-werkzeug/shipments')
-    await expect(page.getByRole('button', { name: 'Notifications', exact: true })).toBeVisible()
-    await page.getByRole('button', { name: 'Notifications', exact: true }).click()
-    await expect(page.getByText('No notifications yet')).toBeVisible()
-    await page.goto('/customers/nordwerk/shipments')
 
     await expect(page.getByRole('button', { name: 'Notifications, 1 unread' })).toBeVisible()
+  })
+
+  test('lists a Nordwerk event for Nordwerk', async ({ page }) => {
+    await page.goto('/customers/nordwerk/shipments')
+    await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
+
+    await missTheToast(page)
+
+    await expect(page.getByRole('button', { name: 'Notifications, 1 unread' })).toBeVisible()
+  })
+
+  test('hides a Nordwerk event from Alpen Werkzeug', async ({ page }) => {
+    await page.goto('/customers/nordwerk/shipments')
+    await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
+
+    await page.goto('/customers/alpen-werkzeug/shipments')
+    await page.getByRole('button', { name: 'Notifications', exact: true }).click()
+
+    await expect(page.getByText('No notifications yet')).toBeVisible()
   })
 
   test('keeps the read state of each viewer separate', async ({ page }) => {

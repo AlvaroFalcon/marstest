@@ -1,7 +1,8 @@
-import type { NotificationItem } from './NotificationList'
-import type { NotificationPanelStatus } from './NotificationBell'
+import type { NotificationPanelStatus } from '@/components/notifications/NotificationBell'
+import type { NotificationItem } from '@/components/notifications/NotificationList'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { formatElapsedTime } from '@/components/provenance/formatProvenance'
 import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
 import { useMarkNotificationRead } from '@/hooks/useMarkNotificationRead'
@@ -14,7 +15,6 @@ import {
   getNotificationPath,
   isNotificationRead,
 } from '@/lib/notifications'
-import { NotificationBell } from './NotificationBell'
 
 export type NotificationCenterProps = {
   className?: string
@@ -59,7 +59,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
     if (!notification) {
       return
     }
-    markRead.mutate(id)
+    markRead.mutate({ viewer, notificationId: id })
     navigate(getNotificationPath(viewer, notification))
   }
 

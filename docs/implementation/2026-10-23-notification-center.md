@@ -46,5 +46,6 @@ frozen clock makes every `receivedAt` equal.
 
 ## Follow-ups
 
-- None. Ops see every notification while their lists are scoped to their sites, but no scripted
+- [#33](https://github.com/AlvaroFalcon/marstest/issues/33): scope ops notifications to the ops
+  sites. Ops see every notification while their lists are scoped to their sites; no scripted
   event targets an out-of-scope shipment, so it cannot show today.

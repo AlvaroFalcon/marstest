@@ -70,12 +70,12 @@ describe('NotificationBell', () => {
       expect(screen.getByText('Carrier events you simulate show up here.')).toBeInTheDocument()
     })
 
-    it('shows a busy skeleton while loading', async () => {
+    it('announces the loading state while notifications load', async () => {
       renderBell({ items: [], status: 'loading', unreadCount: 0 })
 
       await userEvent.click(screen.getByRole('button', { name: 'Notifications' }))
 
-      expect(await screen.findByText((_content, element) => element?.getAttribute('aria-busy') === 'true')).toBeInTheDocument()
+      expect(await screen.findByRole('status')).toHaveTextContent('Loading notifications')
       expect(screen.queryByText('No notifications yet')).not.toBeInTheDocument()
     })
 

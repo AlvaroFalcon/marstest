@@ -1,15 +1,16 @@
-import type { NotificationItem } from './NotificationList'
+import type { NotificationItem } from '@/components/notifications/NotificationList'
 import { BellIcon } from 'lucide-react'
 import { useState } from 'react'
 import { useIntl } from 'react-intl'
+import { NotificationList } from '@/components/notifications/NotificationList'
+import { NotificationsEmpty } from '@/components/notifications/NotificationsEmpty'
 import { Button } from '@/components/ui/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
-import { NotificationList } from './NotificationList'
-import { NotificationsEmpty } from './NotificationsEmpty'
 
+/** Which panel body shows: `loading` the skeleton, `error` the retry message, `ready` the list or the empty state. */
 export type NotificationPanelStatus = 'loading' | 'error' | 'ready'
 
 export type NotificationBellProps = {
@@ -46,16 +47,15 @@ function CountBadge({ count }: CountBadgeProps) {
   )
 }
 
-type PanelBodyProps = Pick<NotificationBellProps, 'items' | 'status' | 'onRetry'> & {
-  onSelect: (id: string) => void
-}
+type PanelBodyProps = Pick<NotificationBellProps, 'items' | 'status' | 'onRetry' | 'onSelect'>
 
 function PanelBody({ items, status, onRetry, onSelect }: PanelBodyProps) {
   const intl = useIntl()
 
   if (status === 'loading') {
     return (
-      <div className="flex flex-col gap-3 p-2" aria-busy="true">
+      <div role="status" className="flex flex-col gap-3 p-2" aria-busy="true">
+        <span className="sr-only">{intl.formatMessage({ id: 'notifications.loading' })}</span>
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />

@@ -287,6 +287,7 @@ export const messages = {
   'notifications.unread': 'Unread:',
   'notifications.empty.title': 'No notifications yet',
   'notifications.empty.description': 'Carrier events you simulate show up here.',
+  'notifications.loading': 'Loading notifications',
   'notifications.error': 'Notifications could not be loaded.',
   'notifications.retry': 'Try again',
   'provenance.ago.minutes': '{value} min ago',

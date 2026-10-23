@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import { NOTIFICATIONS_QUERY_KEY } from '@/hooks/useNotifications'
+import { useMarkNotificationRead } from '@/hooks/useMarkNotificationRead'
 import { useShipmentsApi } from '@/hooks/useShipmentsApi'
 import { useViewer } from '@/hooks/useViewer'
 import { getNotificationPath } from '@/lib/notifications'
@@ -23,6 +23,7 @@ export function useSimulateCarrierEvent() {
   const intl = useIntl()
   const navigate = useNavigate()
   const viewer = useViewer()
+  const markRead = useMarkNotificationRead()
 
   return useMutation({
     mutationFn: () => api.simulateCarrierEvent(viewer),
@@ -37,7 +38,7 @@ export function useSimulateCarrierEvent() {
           label: intl.formatMessage({ id: 'demo.simulateView' }),
           onClick: () => {
             // Same effect as opening it from the panel: read for the viewer who triggered it.
-            void api.markNotificationRead(viewer, result.notificationId).then(() => queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY }))
+            markRead.mutate({ viewer, notificationId: result.notificationId })
             void navigate(getNotificationPath(viewer, { shipmentId: result.shipment.id, opensException: result.opensException }))
           },
         },
