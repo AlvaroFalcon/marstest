@@ -40,7 +40,7 @@ Use this skill to pick **the simplest pattern that solves a problem the code has
 ## Anti-patterns to avoid
 
 - **Speculative abstraction**: interfaces with a single implementation "for the future".
-- **God context**: one Context holding unrelated global state (re-renders every consumer). Split it, or use zustand.
+- **God context**: one Context holding unrelated global state (re-renders every consumer). Split it into focused contexts.
 - **Class hierarchies in React**: use composition and functions, not inheritance.
 - **Singleton with mutable global state** that tests cannot reset.
 - **Pattern names in identifiers** (`ShipmentStrategyFactoryManager`). Name things after the domain.
