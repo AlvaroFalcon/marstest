@@ -23,7 +23,8 @@ npm run dev
 
 ## Stack
 
-The whole handbook stack was installed up front ([ADR 0009](docs/decisions/0009-full-recommended-stack.md)).
+The handbook stack was installed up front ([ADR 0009](docs/decisions/0009-full-recommended-stack.md));
+libraries the app never used were removed later.
 Versions are the major lines in [`package.json`](package.json).
 
 ### Core
@@ -65,11 +66,6 @@ There is no backend: the data comes from an in-memory fake API seeded in `src/ap
 ([ADR 0033](docs/decisions/0033-in-memory-fake-api-for-runtime-data.md)), and the demo state is
 kept in `sessionStorage` ([ADR 0034](docs/decisions/0034-demo-state-kept-in-session-storage.md)).
 
-Installed but not used yet: [zustand](https://github.com/pmndrs/zustand) (global client state,
-only if Context is not enough), [react-hook-form](https://react-hook-form.com/) with
-`@hookform/resolvers` (forms; resolvers pinned to `~5.2.2` because later versions break `npm ci`)
-and [ky](https://github.com/sindresorhus/ky) (HTTP, for when there is a real API).
-
 ### Testing
 
 | Library | Version | What it does here |
@@ -96,22 +92,11 @@ and [ky](https://github.com/sindresorhus/ky) (HTTP, for when there is a real API
 - **Claude Code**: agents, skills, hooks and scoped rules in `.claude/`, described in
   [`CLAUDE.md`](CLAUDE.md).
 
-Not installed until needed: [Hey API](https://heyapi.dev/) (when an OpenAPI spec exists) and
-[nuqs](https://nuqs.dev/) (when a route has many search params).
-
 ## Deployment
 
 The app is hosted on Vercel through the project's Git integration: every push to `main` is deployed to production and every pull request gets a preview deployment. No environment variables are required.
 
 [`vercel.json`](vercel.json) only holds routing and headers; build settings stay in the Vercel project. It rewrites every non-asset path to `index.html` so client-side routes work on reload, caches `/assets/*` for one year as immutable, forces revalidation of everything else (so a new deployment is picked up immediately) and sets `X-Content-Type-Options`, `Referrer-Policy` and `X-Frame-Options` on all routes.
-
-To run the E2E tests against a deployed URL:
-
-```bash
-PLAYWRIGHT_BASE_URL=https://<deployment-url> npm run test:e2e
-```
-
-Preview deployments behind Vercel Deployment Protection answer with a login page, so disable the protection for the project or configure a protection bypass before running the E2E tests against them.
 
 ## Documentation
 
