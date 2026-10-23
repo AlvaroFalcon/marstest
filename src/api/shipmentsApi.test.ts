@@ -4,6 +4,7 @@ import { createSeed } from '@/api/seed'
 import { ConflictError, createShipmentsApi, DEFAULT_LATENCY_MS, NotFoundError } from '@/api/shipmentsApi'
 import type { ShipmentsApi, ShipmentsApiOptions, SimulateCarrierEventResult } from '@/api/shipmentsApi'
 import type { Viewer } from '@/api/types'
+import { buildJourney } from '@/lib/journey'
 
 const APPROVAL_TIME = new Date('2026-10-20T10:30:00.000Z')
 
@@ -250,6 +251,39 @@ describe('simulateCarrierEvent', () => {
       expect(appliedShipmentIds(results)).toEqual([
         'SH-1060', 'SH-1053', 'SH-1042', 'SH-1035', 'SH-1037', 'SH-1066', 'SH-1033', 'SH-1029', 'SH-1048', 'finished',
       ])
+    })
+
+    it('leaves no problem step on a shipment without exceptions after all nine events', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, ops, 9)
+
+      const shipments = await api.listShipments()
+
+      const inconsistentShipmentIds = shipments
+        .filter(shipment => shipment.exceptions.length === 0)
+        .filter(shipment => buildJourney(shipment, APPROVAL_TIME).some(step => step.state === 'problem'))
+        .map(shipment => shipment.id)
+      expect(inconsistentShipmentIds).toEqual([])
+    })
+
+    it('shows the Southampton step of SH-1042 as customs cleared once the container is released', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, ops, 3)
+
+      const steps = buildJourney(await api.getShipment('SH-1042'), APPROVAL_TIME)
+
+      const southampton = steps.find(step => step.place === 'Southampton port')
+      expect(southampton?.state).toBe('done')
+      expect(southampton?.status).toBe('customsCleared')
+    })
+
+    it('shows SH-1029 out for delivery in Seville after the carrier update', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, ops, 8)
+
+      const steps = buildJourney(await api.getShipment('SH-1029'), APPROVAL_TIME)
+
+      expect(steps.some(step => step.place.includes('Seville') && step.status === 'outForDelivery')).toBe(true)
     })
 
     it('skips an event already applied from a customer view', async () => {

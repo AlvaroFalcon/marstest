@@ -31,6 +31,8 @@
 | 1 | Event `rest-over-sh-1035` | `driver-swap-sh-1035` | Gate decision above; plan row updated |
 | 3 | No change outside the API and hook | `ExceptionDetailPanel` redirects in-scope shipments without an open exception | Gate decision above |
 | 4 | `e2e/simulate-event.spec.ts` only | Also `e2e/demo-story.spec.ts` | Its Nordwerk click now applies SH-1053 instead of SH-1060 |
+| 1 | SH-1042 customs release on the onward road leg | Milestone on the sea leg (L2), like the seeded hold | Review: the journey kept the Southampton step as "Customs hold" |
+| 1 | SH-1029 "unloaded in Seville" (`arrived`) | `outForDelivery` in Seville, delivering today (user) | Review: the journey only reaches the final place with `delivered`, so Seville stayed upcoming |
 
 ## Verification
 
