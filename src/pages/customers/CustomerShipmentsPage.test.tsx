@@ -144,13 +144,13 @@ describe('CustomerShipmentsPage', () => {
     })
 
     describe('proactive alert', () => {
-      it('shows one banner for the most urgent shipment with +2 more', async () => {
+      it('shows one banner for the most urgent shipment with +3 more', async () => {
         renderPageAt('/customers/nordwerk/shipments')
 
         const banner = await screen.findByRole('region', { name: 'Shipment alert' })
 
         expect(banner).toHaveTextContent('SH-1042 will arrive later than planned.')
-        expect(within(banner).getByRole('button', { name: 'Show 2 more shipments that need attention' })).toHaveTextContent('+2 more')
+        expect(within(banner).getByRole('button', { name: 'Show 3 more shipments that need attention' })).toHaveTextContent('+3 more')
         expect(screen.getAllByRole('region', { name: 'Shipment alert' })).toHaveLength(1)
       })
 
@@ -171,10 +171,10 @@ describe('CustomerShipmentsPage', () => {
         expect(screen.queryByRole('region', { name: 'Shipment alert' })).not.toBeInTheDocument()
       })
 
-      it('selects the Needs attention tab when +2 more is pressed', async () => {
+      it('selects the Needs attention tab when +3 more is pressed', async () => {
         renderPageAt('/customers/nordwerk/shipments')
 
-        await userEvent.click(await screen.findByRole('button', { name: /Show 2 more shipments/ }))
+        await userEvent.click(await screen.findByRole('button', { name: /Show 3 more shipments/ }))
 
         expect(getCurrentUrl()).toBe('/customers/nordwerk/shipments?tab=needsAttention')
         expect(screen.getByRole('tab', { name: 'Needs attention · 4' })).toHaveAttribute('aria-selected', 'true')

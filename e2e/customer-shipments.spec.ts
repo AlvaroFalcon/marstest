@@ -30,13 +30,13 @@ test.describe('customer shipments list', () => {
     await expect(page.getByRole('heading', { name: 'Your shipments' })).toHaveCount(0)
   })
 
-  test('shows the alert for the most urgent shipment and selects Needs attention from +2 more', async ({ page }) => {
+  test('shows the alert for the most urgent shipment and selects Needs attention from +3 more', async ({ page }) => {
     await page.goto('/customers/nordwerk/shipments')
 
     const banner = page.getByRole('region', { name: 'Shipment alert' })
     await expect(banner).toContainText('SH-1042')
     await expect(banner.getByRole('link', { name: 'View shipment SH-1042' })).toBeVisible()
-    await banner.getByRole('button', { name: 'Show 2 more shipments that need attention' }).click()
+    await banner.getByRole('button', { name: 'Show 3 more shipments that need attention' }).click()
 
     await expect(page).toHaveURL('/customers/nordwerk/shipments?tab=needsAttention')
     await expect(page.getByRole('tab', { name: 'Needs attention · 4' })).toHaveAttribute('aria-selected', 'true')

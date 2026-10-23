@@ -73,11 +73,11 @@ describe('countCustomerTabs', () => {
 })
 
 describe('pickProactiveAlert', () => {
-  it('picks the most urgent at-risk shipment and counts the others', () => {
+  it('picks the most urgent at-risk shipment and counts the other Needs attention rows, stale included', () => {
     const alert = pickProactiveAlert(nordwerkRows)
 
     expect(alert?.row.id).toBe('SH-1042')
-    expect(alert?.additionalCount).toBe(2)
+    expect(alert?.additionalCount).toBe(3)
   })
 
   it('picks the only at-risk shipment of Alpen with no others', () => {
@@ -112,6 +112,16 @@ describe('pickProactiveAlert', () => {
     const alert = pickProactiveAlert([onTimeNotified])
 
     expect(alert?.row.id).toBe('SH-1053')
+  })
+
+  it('counts a stale shipment as more when the headline is a notified on-time shipment', () => {
+    const onTimeNotified = { ...findRow(nordwerkRows, 'SH-1053'), isCustomerNotified: true }
+    const stale = findRow(nordwerkRows, 'SH-1058')
+
+    const alert = pickProactiveAlert([onTimeNotified, stale])
+
+    expect(alert?.row.id).toBe('SH-1053')
+    expect(alert?.additionalCount).toBe(1)
   })
 
   it('never alerts for a delivered shipment even when its notice was sent', () => {
