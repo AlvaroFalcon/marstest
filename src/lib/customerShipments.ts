@@ -35,7 +35,10 @@ export type CustomerShipmentsQuery = {
 export type ProactiveAlertData = {
   /** The most urgent shipment that needs the customer's attention. */
   row: ShipmentListRow
-  /** How many other shipments alert too; 0 hides the "+N more" link. */
+  /**
+   * How many other shipments the "Needs attention" tab lists, which is where "+N more" leads, so
+   * the number always matches what the tab shows besides `row`; 0 hides the button.
+   */
   additionalCount: number
 }
 
@@ -75,6 +78,9 @@ export function countCustomerTabs(rows: readonly ShipmentListRow[]): CustomerTab
  * ops inbox), then by id so the choice is stable. A shipment at risk without an exception (a
  * predicted delay) ranks after those that have one.
  *
+ * The "+N more" count comes from the "Needs attention" tab, not from the alerting shipments: the
+ * button opens that tab, which also lists shipments with no recent update.
+ *
  * @returns `null` when no shipment alerts.
  */
 export function pickProactiveAlert(rows: readonly ShipmentListRow[]): ProactiveAlertData | null {
@@ -85,7 +91,13 @@ export function pickProactiveAlert(rows: readonly ShipmentListRow[]): ProactiveA
   )
   const [first] = alerting
 
-  return first === undefined ? null : { row: first, additionalCount: alerting.length - 1 }
+  if (first === undefined) {
+    return null
+  }
+
+  const additionalCount = rows.filter(row => row.id !== first.id && matchesCustomerTab(row, 'needsAttention')).length
+
+  return { row: first, additionalCount }
 }
 
 /**
