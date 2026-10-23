@@ -1,8 +1,9 @@
 import { delay } from 'es-toolkit'
 import { createMockDb } from '@/api/mockDb'
 import type { MockDb } from '@/api/mockDb'
-import { createSimulatedCarrierEvent, DEMO_NOW_ISO, SIMULATED_EVENT_ID, SIMULATED_EVENT_SHIPMENT_ID } from '@/api/seed'
-import type { DemoState, ReferenceData, Shipment, ShipmentException } from '@/api/types'
+import { createScriptedEvents, DEMO_NOW_ISO, getEventScript } from '@/api/seed'
+import type { ScriptedCarrierEvent } from '@/api/seed'
+import type { DemoState, ReferenceData, Shipment, ShipmentException, Viewer } from '@/api/types'
 
 /** Simulated network latency, so loading states are visible in the demo (ADR 0033). */
 export const DEFAULT_LATENCY_MS = 200
@@ -35,12 +36,20 @@ export type ShipmentsApiOptions = {
   now?: () => Date
 }
 
-/** Outcome of {@link ShipmentsApi.simulateCarrierEvent}. */
-export type SimulateCarrierEventResult = {
-  shipment: Shipment
-  /** False when the scripted event had already been applied, so nothing changed. */
-  applied: boolean
-}
+/**
+ * Outcome of {@link ShipmentsApi.simulateCarrierEvent}: the event that was applied, or
+ * `scriptFinished` when the viewer's script has no event left and nothing changed.
+ */
+export type SimulateCarrierEventResult
+  = | {
+    kind: 'applied'
+    shipment: Shipment
+    /** Toast text of the event. */
+    headline: string
+    /** True when the event opened an exception, so ops can jump to it. */
+    opensException: boolean
+  }
+  | { kind: 'scriptFinished' }
 
 /**
  * The fake shipments API the TanStack Query hooks call. Every function is async, waits for the
@@ -63,8 +72,12 @@ export type ShipmentsApi = {
   approveDraft: (shipmentId: string, exceptionId: string, body: string) => Promise<Shipment>
   /** Discards a pending customer notice. Rejects with {@link ConflictError} when it is not pending. */
   discardDraft: (shipmentId: string, exceptionId: string) => Promise<Shipment>
-  /** Applies the scripted demo event (vessel rolled on SH-1060) once; later calls change nothing. */
-  simulateCarrierEvent: () => Promise<SimulateCarrierEventResult>
+  /**
+   * Applies the next scripted carrier event of the viewer's script that no view has applied yet
+   * (ops and customers share one catalogue, so an event runs once). Changes nothing once the
+   * script is finished.
+   */
+  simulateCarrierEvent: (viewer: Viewer) => Promise<SimulateCarrierEventResult>
   /** Shipment ids whose exception ops have not opened yet, to mark their inbox cards as new. */
   listUnseenExceptionShipmentIds: () => Promise<string[]>
   /** Clears the "new" marker of one shipment's exception. Idempotent: unknown or seen ids change nothing. */
@@ -87,6 +100,69 @@ function findException(shipment: Shipment, exceptionId: string): ShipmentExcepti
     throw new NotFoundError(`Exception ${exceptionId} not found on shipment ${shipment.id}`)
   }
   return exception
+}
+
+/** Applies a scripted event to its shipment inside a `db.write` and returns whether it opened an exception. */
+function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, receivedAt: string): boolean {
+  const shipment = findShipment(state, event.shipmentId)
+  const previousRawEvent = shipment.rawEvents.at(-1)
+  const rawEventId = `${shipment.id}-E${shipment.rawEvents.length + 1}`
+
+  for (const { legId, changes } of event.legChanges) {
+    const leg = shipment.legs.find(candidate => candidate.id === legId)
+    if (leg) {
+      Object.assign(leg, changes)
+    }
+  }
+  shipment.rawEvents.push({
+    id: rawEventId,
+    carrierId: event.carrierMessage.carrierId,
+    channel: event.carrierMessage.channel,
+    receivedAt,
+    rawText: event.carrierMessage.rawText,
+    normalizedStatus: event.milestone.status,
+    mapping: event.carrierMessage.mapping,
+  })
+  shipment.milestones.push({
+    id: `${shipment.id}-M${shipment.milestones.length + 1}`,
+    legId: event.milestone.legId,
+    status: event.milestone.status,
+    location: event.milestone.location,
+    occurredAt: receivedAt,
+    receivedAt,
+    source: 'carrier',
+    rawEventIds: [rawEventId],
+  })
+  shipment.carrierEta = event.carrierEta
+  shipment.estimatedEta = event.estimatedEta
+  shipment.customerSummary = event.customerSummary
+  shipment.documents.push(...event.addedDocuments)
+  shipment.erpOrder.requiredDocuments.push(...event.addedRequiredDocuments)
+  if (event.clearsAiSignal) {
+    delete shipment.aiSignal
+  }
+
+  const { exceptionEffect } = event
+  if (exceptionEffect.kind === 'closes') {
+    shipment.exceptions = []
+    state.unseenExceptionShipmentIds = state.unseenExceptionShipmentIds.filter(candidate => candidate !== shipment.id)
+  }
+  if (exceptionEffect.kind === 'opens') {
+    shipment.exceptions.push({
+      id: `${shipment.id}-X${shipment.exceptions.length + 1}`,
+      type: exceptionEffect.type,
+      openedAt: receivedAt,
+      aiDiagnosis: {
+        summary: exceptionEffect.diagnosis,
+        basedOnEventIds: previousRawEvent ? [previousRawEvent.id, rawEventId] : [rawEventId],
+      },
+      draft: { status: 'pending', body: exceptionEffect.draftBody },
+    })
+    state.unseenExceptionShipmentIds.push(shipment.id)
+  }
+  state.appliedEventIds.push(event.id)
+
+  return exceptionEffect.kind === 'opens'
 }
 
 /** Creates the fake API over `db`. The app uses the {@link shipmentsApi} instance. */
@@ -136,25 +212,26 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
       exception.draft = { status: 'discarded', discardedAt: now().toISOString() }
     })),
 
-    simulateCarrierEvent: () => respond(() => {
-      const current = findShipment(db.read(), SIMULATED_EVENT_SHIPMENT_ID)
-      if (current.rawEvents.some(rawEvent => rawEvent.id === SIMULATED_EVENT_ID)) {
-        return { shipment: current, applied: false }
+    simulateCarrierEvent: viewer => respond(() => {
+      const { appliedEventIds } = db.read()
+      const receivedAt = now()
+      const catalogue = createScriptedEvents(receivedAt)
+      const nextEventId = getEventScript(viewer).find(eventId => !appliedEventIds.includes(eventId))
+      const event = catalogue.find(candidate => candidate.id === nextEventId)
+      if (!event) {
+        return { kind: 'scriptFinished' }
       }
 
-      const event = createSimulatedCarrierEvent(now())
+      let opensException = false
       db.write((state) => {
-        const shipment = findShipment(state, SIMULATED_EVENT_SHIPMENT_ID)
-        shipment.legs = event.legs
-        shipment.rawEvents.push(event.rawEvent)
-        shipment.milestones.push(event.milestone)
-        shipment.carrierEta = event.carrierEta
-        shipment.estimatedEta = event.estimatedEta
-        shipment.exceptions.push(event.exception)
-        shipment.customerSummary = event.customerSummary
-        state.unseenExceptionShipmentIds.push(SIMULATED_EVENT_SHIPMENT_ID)
+        opensException = applyScriptedEvent(state, event, receivedAt.toISOString())
       })
-      return { shipment: findShipment(db.read(), SIMULATED_EVENT_SHIPMENT_ID), applied: true }
+      return {
+        kind: 'applied',
+        shipment: findShipment(db.read(), event.shipmentId),
+        headline: event.headline,
+        opensException,
+      }
     }),
 
     listUnseenExceptionShipmentIds: () => respond(() => db.read().unseenExceptionShipmentIds),

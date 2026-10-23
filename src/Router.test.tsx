@@ -56,26 +56,28 @@ describe('Router', () => {
 
       await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
 
-      expect(await screen.findByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeInTheDocument()
+      expect(await screen.findByText('SH-1060: vessel rolled to the next sailing')).toBeInTheDocument()
       expect(await screen.findByRole('link', { name: /^Exceptions\s*6$/ })).toBeInTheDocument()
       expect(screen.getByRole('button', { name: 'View' })).toBeInTheDocument()
       expect(screen.getByText('New')).toBeInTheDocument()
     })
 
-    it('says so when the event was already simulated', async () => {
+    it('says so when the ops script has no event left', async () => {
       const api = createTestApi()
-      await api.simulateCarrierEvent()
+      for (let eventCount = 0; eventCount < 9; eventCount += 1) {
+        await api.simulateCarrierEvent({ role: 'ops' })
+      }
       renderRouterAt('/ops/exceptions', api)
-      await screen.findByRole('link', { name: /^Exceptions\s*6$/ })
+      await screen.findByRole('link', { name: /^Exceptions\s*\d+$/ })
 
       await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
 
-      expect(await screen.findByText('Already simulated. Reset the demo to run it again.')).toBeInTheDocument()
+      expect(await screen.findByText('No more events here. Reset the demo to run them again.')).toBeInTheDocument()
     })
 
     it('clears the New marker when ops open the exception', async () => {
       const api = createTestApi()
-      await api.simulateCarrierEvent()
+      await api.simulateCarrierEvent({ role: 'ops' })
       renderRouterAt('/ops/exceptions', api)
       expect(await screen.findByText('New')).toBeInTheDocument()
 
@@ -84,14 +86,42 @@ describe('Router', () => {
       await waitFor(() => expect(screen.queryByText('New')).not.toBeInTheDocument())
     })
 
-    it('shows customers the toast without a View action', async () => {
+    it('shows customers an event on their own shipment with a View action', async () => {
       renderRouterAt('/customers/nordwerk/shipments')
       await screen.findByRole('button', { name: /Simulate/ })
 
       await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
 
-      expect(await screen.findByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeInTheDocument()
-      expect(screen.queryByRole('button', { name: 'View' })).not.toBeInTheDocument()
+      expect(await screen.findByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'View' })).toBeInTheDocument()
+    })
+  })
+
+  describe('exception that gets resolved', () => {
+    it('redirects the open exception to the ops shipment detail when a carrier event closes it', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent({ role: 'ops' })
+      await api.simulateCarrierEvent({ role: 'ops' })
+      renderRouterAt('/ops/exceptions/SH-1042', api)
+      await screen.findByRole('heading', { level: 1, name: /^SH-1042/ })
+
+      await userEvent.click(screen.getByRole('button', { name: /Simulate/ }))
+
+      await waitFor(() => expectPath('/ops/shipments/SH-1042'))
+      expect(await screen.findByText('SH-1042: customs released the container')).toBeInTheDocument()
+    })
+
+    it('redirects an in-scope shipment that has no open exception to its ops shipment detail', async () => {
+      renderRouterAt('/ops/exceptions/SH-1033')
+
+      await waitFor(() => expectPath('/ops/shipments/SH-1033'))
+    })
+
+    it('keeps showing the unavailable message for an unknown shipment id', async () => {
+      renderRouterAt('/ops/exceptions/SH-9999')
+
+      expect((await screen.findAllByText('This exception isn\'t available')).length).toBeGreaterThan(0)
+      expectPath('/ops/exceptions/SH-9999')
     })
   })
 
@@ -218,7 +248,7 @@ describe('Router', () => {
   describe('reset demo', () => {
     it('refreshes the data, confirms with a toast and stays on the route', async () => {
       const api = createTestApi()
-      await api.simulateCarrierEvent()
+      await api.simulateCarrierEvent({ role: 'ops' })
       renderRouterAt('/ops/shipments', api)
       await screen.findByRole('link', { name: /^Exceptions\s*6$/ })
 

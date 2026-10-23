@@ -1,12 +1,10 @@
 import {
+  createScriptedEvents,
   createSeed,
-  createSimulatedCarrierEvent,
+  CUSTOMER_EVENT_SCRIPTS,
   DEMO_NOW_ISO,
-  SIMULATED_EVENT_ID,
-  SIMULATED_EVENT_SEQUENCE,
-  SIMULATED_EVENT_SHIPMENT_ID,
-  SIMULATED_EXCEPTION_ID,
-  SIMULATED_MILESTONE_ID,
+  getEventScript,
+  OPS_EVENT_SCRIPT,
 } from '@/api/seed'
 import { demoStateSchema, shipmentSchema } from '@/api/types'
 import type { DemoState, Shipment } from '@/api/types'
@@ -143,24 +141,9 @@ describe('createSeed', () => {
 
     const statuses = shipment.milestones.map(milestone => milestone.status)
 
-    expect(SIMULATED_EVENT_SHIPMENT_ID).toBe('SH-1060')
     expect(statuses).not.toContain('vesselRolled')
     expect(shipment.exceptions).toEqual([])
     expect(shipment.legs[1]).toMatchObject({ mode: 'sea', carrierId: 'mareline', vessel: 'Mareline Levante', voyage: 'ML-0842' })
-  })
-
-  it('derives the simulated event ids from the next free positions of the SH-1060 seed', () => {
-    const shipment = shipmentById(createSeed(), SIMULATED_EVENT_SHIPMENT_ID)
-
-    const nextRawEventSequence = shipment.rawEvents.length + 1
-    const nextMilestoneSequence = shipment.milestones.length + 1
-    const nextExceptionSequence = shipment.exceptions.length + 1
-
-    expect(nextRawEventSequence).toBe(SIMULATED_EVENT_SEQUENCE)
-    expect(nextMilestoneSequence).toBe(SIMULATED_EVENT_SEQUENCE)
-    expect(SIMULATED_EVENT_ID).toBe(`SH-1060-E${nextRawEventSequence}`)
-    expect(SIMULATED_MILESTONE_ID).toBe(`SH-1060-M${nextMilestoneSequence}`)
-    expect(SIMULATED_EXCEPTION_ID).toBe(`SH-1060-X${nextExceptionSequence}`)
   })
 
   it('leaves the last carrier message of SH-1029 48 h old', () => {
@@ -262,26 +245,96 @@ describe('seeded customer summaries', () => {
   })
 })
 
-describe('createSimulatedCarrierEvent', () => {
-  it('builds a vessel-rolled event for SH-1060 received at the given time', () => {
-    const receivedAt = new Date('2026-10-20T10:15:00.000Z')
+describe('createScriptedEvents', () => {
+  it('rewrites the customer summary of every event with the days of its estimate and the destination city', () => {
+    const seed = createSeed()
 
-    const event = createSimulatedCarrierEvent(receivedAt)
+    for (const event of createScriptedEvents(new Date('2026-10-20T10:15:00.000Z'))) {
+      const shipment = shipmentById(seed, event.shipmentId)
+      for (const quotedDay of quotedEstimateDays(event)) {
+        expect(event.customerSummary, event.id).toContain(quotedDay)
+      }
+      expect(event.customerSummary, event.id).toContain(shipment.destination.city)
+    }
+  })
+})
 
-    expect(event.rawEvent).toMatchObject({ id: 'SH-1060-E4', receivedAt: '2026-10-20T10:15:00.000Z' })
-    expect(event.milestone).toMatchObject({ id: 'SH-1060-M4', status: 'vesselRolled' })
-    expect(event.exception).toMatchObject({ id: 'SH-1060-X1', type: 'vesselRolled', draft: { status: 'pending' } })
-    expect(event.exception.draft).toMatchObject({ body: expect.stringContaining('Brenner Iberia') })
-    expect(event.exception.draft).toMatchObject({ body: expect.stringContaining('PO 4500-1203') })
-    expect(event.legs[1]).toMatchObject({ vessel: 'Mareline Poniente', voyage: 'ML-0846' })
+describe('scripted event catalogue', () => {
+  const receivedAt = new Date('2026-10-20T10:15:00.000Z')
+
+  it('has nine events, one per shipment', () => {
+    const events = createScriptedEvents(receivedAt)
+
+    const shipmentIds = events.map(event => event.shipmentId)
+
+    expect(events).toHaveLength(9)
+    expect(new Set(shipmentIds).size).toBe(9)
+    expect(new Set(events.map(event => event.id)).size).toBe(9)
   })
 
-  it('rewrites the customer summary with the days of the new estimate', () => {
-    const event = createSimulatedCarrierEvent(new Date('2026-10-20T10:15:00.000Z'))
+  it('targets only shipments that exist in the seed', () => {
+    const seed = createSeed()
+    const seededShipmentIds = new Set(seed.shipments.map(shipment => shipment.id))
 
-    expect(event.customerSummary).toContain('next sailing')
-    for (const quotedDay of quotedEstimateDays(event)) {
-      expect(event.customerSummary).toContain(quotedDay)
+    const unknownShipmentIds = createScriptedEvents(receivedAt)
+      .map(event => event.shipmentId)
+      .filter(shipmentId => !seededShipmentIds.has(shipmentId))
+
+    expect(unknownShipmentIds).toEqual([])
+  })
+
+  it('names the shipment in every headline', () => {
+    for (const event of createScriptedEvents(receivedAt)) {
+      expect(event.headline, event.id).toContain(event.shipmentId)
     }
+  })
+})
+
+describe('event scripts', () => {
+  const catalogueIds = createScriptedEvents(new Date('2026-10-20T10:15:00.000Z')).map(event => event.id)
+
+  it('lists in the ops script every event of the catalogue starting with the SH-1060 roll', () => {
+    expect(OPS_EVENT_SCRIPT).toHaveLength(9)
+    expect(OPS_EVENT_SCRIPT[0]).toBe('vessel-rolled-sh-1060')
+    expect([...OPS_EVENT_SCRIPT].sort()).toEqual([...catalogueIds].sort())
+  })
+
+  it('only references events that exist in the catalogue', () => {
+    const scriptedIds = [...OPS_EVENT_SCRIPT, ...Object.values(CUSTOMER_EVENT_SCRIPTS).flat()]
+
+    const unknownIds = scriptedIds.filter(eventId => !catalogueIds.includes(eventId))
+
+    expect(unknownIds).toEqual([])
+  })
+
+  it('gives each customer three events on that customer\'s own shipments', () => {
+    const seed = createSeed()
+    const events = createScriptedEvents(new Date('2026-10-20T10:15:00.000Z'))
+
+    const customerIdsByScript = Object.fromEntries(
+      Object.entries(CUSTOMER_EVENT_SCRIPTS).map(([customerId, eventIds]) => [
+        customerId,
+        eventIds.map((eventId) => {
+          const event = events.find(candidate => candidate.id === eventId)
+          return shipmentById(seed, event?.shipmentId ?? '').customerId
+        }),
+      ]),
+    )
+
+    expect(customerIdsByScript).toEqual({
+      'nordwerk': ['nordwerk', 'nordwerk', 'nordwerk'],
+      'alpen-werkzeug': ['alpen-werkzeug', 'alpen-werkzeug', 'alpen-werkzeug'],
+      'brenner-iberia': ['brenner-iberia', 'brenner-iberia', 'brenner-iberia'],
+    })
+  })
+
+  it('uses each event in exactly one customer script', () => {
+    const customerScriptIds = Object.values(CUSTOMER_EVENT_SCRIPTS).flat()
+
+    expect([...customerScriptIds].sort()).toEqual([...catalogueIds].sort())
+  })
+
+  it('returns an empty script for a customer without one', () => {
+    expect(getEventScript({ role: 'customer', customerId: 'unknown-customer' })).toEqual([])
   })
 })

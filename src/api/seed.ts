@@ -7,6 +7,7 @@ import type {
   DocumentType,
   EstimatedEta,
   EventMapping,
+  ExceptionType,
   ExtractedDocumentFields,
   Leg,
   Milestone,
@@ -16,6 +17,7 @@ import type {
   ShipmentDocument,
   ShipmentException,
   Site,
+  Viewer,
 } from '@/api/types'
 
 /**
@@ -54,24 +56,8 @@ const carriers: Carrier[] = [
   { id: 'nordsee-line', name: 'Nordsee Line', mode: 'sea' },
 ]
 
-/** Id of the shipment the "Simulate carrier event" demo action changes. */
-export const SIMULATED_EVENT_SHIPMENT_ID = 'SH-1060'
-
-/**
- * Position of the scripted step in the SH-1060 tracking: it follows the steps seeded on that
- * shipment. The raw event, milestone and exception ids below derive from it, and a seed test
- * checks it still matches the seeded array lengths.
- */
-export const SIMULATED_EVENT_SEQUENCE = 4
-
-/** Id of the scripted raw event, used to apply the simulation only once. */
-export const SIMULATED_EVENT_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-E${SIMULATED_EVENT_SEQUENCE}`
-
-/** Id of the milestone the scripted event creates. */
-export const SIMULATED_MILESTONE_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-M${SIMULATED_EVENT_SEQUENCE}`
-
-/** Id of the exception the scripted event opens: the first one on a shipment seeded without any. */
-export const SIMULATED_EXCEPTION_ID = `${SIMULATED_EVENT_SHIPMENT_ID}-X1`
+/** Id of the shipment whose vessel the first scripted event rolls; the seed starts it on track. */
+const ROLLED_VESSEL_SHIPMENT_ID = 'SH-1060'
 
 /** Returns a function that turns an offset in hours from `demoNow` into an ISO date. */
 function createClock(demoNow: Date): (hoursFromNow: number) => string {
@@ -703,7 +689,7 @@ function deliveredEarlyShipment(at: (hours: number) => string): Shipment {
   }
 }
 
-/** The sailing of the SH-1060 sea leg; the simulated event moves it to the next one. */
+/** The sailing of the SH-1060 sea leg; the vessel-rolled event moves it to the next one. */
 type Sailing = {
   vessel: string
   voyage: string
@@ -711,9 +697,9 @@ type Sailing = {
   departureHours: number
 }
 
-/** Legs of SH-1060 for a given sailing, shared by the seed and the simulated event. */
+/** Legs of SH-1060 for a given sailing, shared by the seed and the vessel-rolled event. */
 function simulationTargetLegs(at: (hours: number) => string, sailing: Sailing): Leg[] {
-  const id = SIMULATED_EVENT_SHIPMENT_ID
+  const id = ROLLED_VESSEL_SHIPMENT_ID
   const arrivalHours = sailing.departureHours + 36
   return [
     { id: `${id}-L1`, mode: 'road', carrierId: 'vascor-trans', origin: 'Bilbao plant', destination: 'Bilbao port', plannedDepartureAt: at(-8), plannedArrivalAt: at(-6) },
@@ -724,10 +710,10 @@ function simulationTargetLegs(at: (hours: number) => string, sailing: Sailing): 
 
 /**
  * SH-1060 · on-track sea shipment from Bilbao to Le Havre. The "Simulate carrier event" demo
- * action rolls its vessel, which is how the seed covers the rolled-vessel scenario.
+ * action rolls its vessel first, which is how the seed covers the rolled-vessel scenario.
  */
 function simulationTargetShipment(at: (hours: number) => string): Shipment {
-  const id = SIMULATED_EVENT_SHIPMENT_ID
+  const id = ROLLED_VESSEL_SHIPMENT_ID
   const legs = simulationTargetLegs(at, { vessel: 'Mareline Levante', voyage: 'ML-0842', departureHours: 6 })
   const tracking = buildTracking(id, legs, [
     { kind: 'carrier', legId: `${id}-L1`, status: 'pickedUp', location: 'Bilbao plant', occurredAt: at(-8), channel: 'portal', rawText: 'Recogida realizada - Planta Bilbao', mapping: rule('Recogida realizada → Picked up') },
@@ -1003,74 +989,357 @@ export function createSeed(demoNow: Date = new Date(DEMO_NOW_ISO)): DemoState {
       ...outOfScopeShipments(at),
     ],
     unseenExceptionShipmentIds: [],
+    appliedEventIds: [],
   }
 }
 
-/** Changes the scripted "Simulate carrier event" applies to {@link SIMULATED_EVENT_SHIPMENT_ID}. */
-export type SimulatedCarrierEvent = {
-  /** Legs after the roll: the sea leg carries the new vessel, voyage and sailing times. */
-  legs: Leg[]
-  rawEvent: RawCarrierEvent
-  milestone: Milestone
+/** A change to the planned times (or vessel) of one leg, applied on top of the stored leg. */
+export type LegChange = {
+  legId: string
+  changes: Partial<Omit<Leg, 'id'>>
+}
+
+/** What a scripted event does to the shipment's open exceptions. */
+export type ScriptedExceptionEffect
+  = | { kind: 'none' }
+    | {
+      /** Opens the first exception of the shipment: it is seeded without any. */
+      kind: 'opens'
+      type: ExceptionType
+      /** AI diagnosis text; the cited events are the shipment's latest raw event and the new one. */
+      diagnosis: string
+      /** Pending customer notice, never sent without ops approval. */
+      draftBody: string
+    }
+    | {
+      /** Removes the shipment's open exceptions: the good news resolved them. */
+      kind: 'closes'
+    }
+
+/**
+ * One scripted carrier event of the demo: what a carrier reports on a single shipment and every
+ * consequence the app derives from it. Hand-written on purpose so the demo reads like real
+ * operations; ids of the raw event, milestone and exception are assigned when it is applied,
+ * which is safe because each shipment has exactly one event.
+ */
+export type ScriptedCarrierEvent = {
+  id: string
+  shipmentId: string
+  /** Toast text; names the shipment so a viewer always knows which one changed. */
+  headline: string
+  /** The raw carrier message; its normalised status is the milestone status. */
+  carrierMessage: {
+    carrierId: string
+    channel: CarrierChannel
+    rawText: string
+    mapping: EventMapping
+  }
+  milestone: {
+    legId: string
+    status: MilestoneStatus
+    location: string
+  }
+  legChanges: LegChange[]
   carrierEta: CarrierEta
   estimatedEta: EstimatedEta
-  exception: ShipmentException
-  /** Customer summary rewritten for the roll, quoting the new estimate. */
+  /** Customer summary rewritten for the event; quotes the days of {@link estimatedEta}. */
   customerSummary: string
+  addedDocuments: ShipmentDocument[]
+  addedRequiredDocuments: DocumentType[]
+  /** True when the early warning seeded on the shipment no longer holds after the event. */
+  clearsAiSignal: boolean
+  exceptionEffect: ScriptedExceptionEffect
+}
+
+/** Ids of the scripted events in the order ops walk through them. */
+export const OPS_EVENT_SCRIPT: string[] = [
+  'vessel-rolled-sh-1060',
+  'rotterdam-congestion-sh-1053',
+  'customs-cleared-sh-1042',
+  'driver-swap-sh-1035',
+  'border-cleared-sh-1037',
+  'picked-up-sh-1066',
+  'delivered-sh-1033',
+  'carrier-update-sh-1029',
+  'out-for-delivery-sh-1048',
+]
+
+/**
+ * Ids of the scripted events of each customer, in order, all on that customer's own shipments.
+ * Mixes good and bad news so each customer sees a different story.
+ */
+export const CUSTOMER_EVENT_SCRIPTS: Record<string, string[]> = {
+  'nordwerk': ['rotterdam-congestion-sh-1053', 'customs-cleared-sh-1042', 'driver-swap-sh-1035'],
+  'alpen-werkzeug': ['border-cleared-sh-1037', 'picked-up-sh-1066', 'delivered-sh-1033'],
+  'brenner-iberia': ['vessel-rolled-sh-1060', 'carrier-update-sh-1029', 'out-for-delivery-sh-1048'],
 }
 
 /**
- * The scripted carrier event of the demo: Mareline rolls the SH-1060 container to the next
- * sailing. `receivedAt` is the moment the demo action is triggered; the ETAs are relative to
- * `demoNow` so they stay consistent with the rest of the seed.
+ * Event ids the viewer's "Simulate carrier event" button walks through. A customer id without a
+ * script yields an empty list, so the button reports that there is nothing left to run.
  */
-export function createSimulatedCarrierEvent(receivedAt: Date, demoNow: Date = new Date(DEMO_NOW_ISO)): SimulatedCarrierEvent {
-  const at = createClock(demoNow)
-  const id = SIMULATED_EVENT_SHIPMENT_ID
-  const receivedAtIso = receivedAt.toISOString()
-
-  return {
-    legs: simulationTargetLegs(at, { vessel: 'Mareline Poniente', voyage: 'ML-0846', departureHours: 78 }),
-    rawEvent: {
-      id: SIMULATED_EVENT_ID,
-      carrierId: 'mareline',
-      channel: 'edi',
-      receivedAt: receivedAtIso,
-      rawText: 'CODECO ROLLED - NOT LOADED ML-0842 / NEXT VSL MARELINE PONIENTE ML-0846',
-      normalizedStatus: 'vesselRolled',
-      mapping: rule('CODECO ROLLED → Vessel rolled'),
-    },
-    milestone: {
-      id: SIMULATED_MILESTONE_ID,
-      legId: `${id}-L2`,
-      status: 'vesselRolled',
-      location: 'Bilbao port',
-      occurredAt: receivedAtIso,
-      receivedAt: receivedAtIso,
-      source: 'carrier',
-      rawEventIds: [SIMULATED_EVENT_ID],
-    },
-    carrierEta: providedEta(at(122), 'mareline', 'edi', receivedAtIso),
-    estimatedEta: {
-      date: at(124),
-      earliest: at(118),
-      latest: at(134),
-      confidence: 86,
-      reason: 'Mareline moved the container to the next sailing, Mareline Poniente, which departs in about 3 days.',
-    },
-    exception: {
-      id: SIMULATED_EXCEPTION_ID,
-      type: 'vesselRolled',
-      openedAt: receivedAtIso,
-      aiDiagnosis: {
-        summary: 'Mareline did not load the container on Mareline Levante (ML-0842) and moved it to Mareline Poniente (ML-0846). Delivery to Le Havre moves about 3 days later than planned.',
-        basedOnEventIds: [`${id}-E3`, SIMULATED_EVENT_ID],
-      },
-      draft: {
-        status: 'pending',
-        body: 'Hello Brenner Iberia team, the vessel carrying shipment SH-1060 (PO 4500-1203) will leave Bilbao without your container. It is booked on the next sailing and we now expect delivery about 3 days later than planned.',
-      },
-    },
-    customerSummary: 'Your order left our Bilbao plant on Oct 20, but the vessel is leaving Bilbao without your container. It\'s booked on the next sailing, which departs in about 3 days, so we expect it in Le Havre on Oct 25–26 instead of Oct 22.',
+export function getEventScript(viewer: Viewer): string[] {
+  if (viewer.role === 'ops') {
+    return OPS_EVENT_SCRIPT
   }
+  return CUSTOMER_EVENT_SCRIPTS[viewer.customerId] ?? []
+}
+
+/**
+ * Builds the event catalogue. `receivedAt` is the moment the demo action is triggered and is when
+ * every event "happens"; ETAs are relative to `demoNow` so they stay consistent with the seed.
+ * The list is in the order of {@link OPS_EVENT_SCRIPT}.
+ */
+export function createScriptedEvents(receivedAt: Date, demoNow: Date = new Date(DEMO_NOW_ISO)): ScriptedCarrierEvent[] {
+  const at = createClock(demoNow)
+  const receivedAtIso = receivedAt.toISOString()
+  const rolledLegs = simulationTargetLegs(at, { vessel: 'Mareline Poniente', voyage: 'ML-0846', departureHours: 78 })
+
+  return [
+    {
+      id: 'vessel-rolled-sh-1060',
+      shipmentId: 'SH-1060',
+      headline: 'SH-1060: vessel rolled to the next sailing',
+      carrierMessage: {
+        carrierId: 'mareline',
+        channel: 'edi',
+        rawText: 'CODECO ROLLED - NOT LOADED ML-0842 / NEXT VSL MARELINE PONIENTE ML-0846',
+        mapping: rule('CODECO ROLLED → Vessel rolled'),
+      },
+      milestone: { legId: 'SH-1060-L2', status: 'vesselRolled', location: 'Bilbao port' },
+      legChanges: rolledLegs.map(({ id: legId, ...changes }) => ({ legId, changes })),
+      carrierEta: providedEta(at(122), 'mareline', 'edi', receivedAtIso),
+      estimatedEta: {
+        date: at(124),
+        earliest: at(118),
+        latest: at(134),
+        confidence: 86,
+        reason: 'Mareline moved the container to the next sailing, Mareline Poniente, which departs in about 3 days.',
+      },
+      customerSummary: 'Your order left our Bilbao plant on Oct 20, but the vessel is leaving Bilbao without your container. It\'s booked on the next sailing, which departs in about 3 days, so we expect it in Le Havre on Oct 25–26 instead of Oct 22.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: {
+        kind: 'opens',
+        type: 'vesselRolled',
+        diagnosis: 'Mareline did not load the container on Mareline Levante (ML-0842) and moved it to Mareline Poniente (ML-0846). Delivery to Le Havre moves about 3 days later than planned.',
+        draftBody: 'Hello Brenner Iberia team, the vessel carrying shipment SH-1060 (PO 4500-1203) will leave Bilbao without your container. It is booked on the next sailing and we now expect delivery about 3 days later than planned.',
+      },
+    },
+    {
+      id: 'rotterdam-congestion-sh-1053',
+      shipmentId: 'SH-1053',
+      headline: 'SH-1053: vessel waiting for a berth in Rotterdam',
+      carrierMessage: {
+        carrierId: 'nordsee-line',
+        channel: 'edi',
+        rawText: 'IFTSTA WAITING FOR BERTH ROTTERDAM ANCHORAGE NORDSEE BOREAS NB-1172',
+        mapping: rule('IFTSTA WAITING FOR BERTH → Delayed'),
+      },
+      milestone: { legId: 'SH-1053-L2', status: 'delayed', location: 'Rotterdam anchorage' },
+      legChanges: [],
+      // The carrier has not revised its ETA: the delay is our prediction, not its report.
+      carrierEta: providedEta(at(34), 'nordsee-line', 'edi', at(-10)),
+      estimatedEta: {
+        date: at(58),
+        earliest: at(52),
+        latest: at(66),
+        confidence: 85,
+        reason: 'Nordsee Boreas is waiting at the Rotterdam anchorage for a free berth and the carrier has not updated its ETA; similar waits took about a day.',
+      },
+      customerSummary: 'Your order left our Bilbao plant on Oct 18 and is at sea, but the vessel is waiting for a free berth at Rotterdam port. Waits like this usually take about a day, so we expect it in Duisburg on Oct 22–23 instead of Oct 21.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: {
+        kind: 'opens',
+        type: 'predictedDelay',
+        diagnosis: 'Nordsee Boreas is waiting at the Rotterdam anchorage for a free berth. The carrier ETA has not changed, but with the terminal congested delivery to Duisburg is likely about 1 day later than the carrier ETA.',
+        draftBody: 'Hello Nordwerk team, the vessel carrying shipment SH-1053 (PO 4500-1179) is waiting for a free berth at Rotterdam port. We now expect delivery about one day later than planned and will confirm as soon as it docks.',
+      },
+    },
+    {
+      id: 'customs-cleared-sh-1042',
+      shipmentId: 'SH-1042',
+      headline: 'SH-1042: customs released the container',
+      carrierMessage: {
+        carrierId: 'nordsee-line',
+        channel: 'email',
+        rawText: 'HMRC release received for box NSLU 482913, container free for collection at Southampton port',
+        mapping: ai(93),
+      },
+      milestone: { legId: 'SH-1042-L2', status: 'customsCleared', location: 'Southampton port' },
+      legChanges: [{ legId: 'SH-1042-L3', changes: { plannedDepartureAt: at(1), plannedArrivalAt: at(34) } }],
+      carrierEta: providedEta(at(34), 'transauto', 'email', receivedAtIso),
+      estimatedEta: {
+        date: at(34),
+        earliest: at(30),
+        latest: at(38),
+        confidence: 88,
+        reason: 'UK customs released the container and the truck is leaving Southampton; the drive to Birmingham takes about a day.',
+      },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 14 and UK customs has now released it at Southampton port. The truck is on its way, so we expect it in Birmingham on Oct 21–22 instead of Oct 20.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: { kind: 'closes' },
+    },
+    {
+      id: 'driver-swap-sh-1035',
+      shipmentId: 'SH-1035',
+      headline: 'SH-1035: a second driver took over, truck back on the road',
+      carrierMessage: {
+        carrierId: 'transauto',
+        channel: 'api',
+        rawText: 'IN TRANSIT A-7 MACON TEAM DRIVER ON BOARD',
+        mapping: rule('IN TRANSIT → In transit'),
+      },
+      milestone: { legId: 'SH-1035-L1', status: 'inTransit', location: 'A-7 near Mâcon' },
+      legChanges: [],
+      carrierEta: providedEta(at(12), 'transauto', 'api', receivedAtIso),
+      estimatedEta: {
+        date: at(12),
+        earliest: at(10),
+        latest: at(14),
+        confidence: 90,
+        reason: 'A second driver took over at Mâcon, so the truck no longer has to wait out the mandatory rest.',
+      },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 19. A second driver took over near Mâcon, so the truck is back on the road instead of waiting out the rest break. We expect it in Munich on Oct 20–21, only a few hours after planned.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: true,
+      exceptionEffect: { kind: 'closes' },
+    },
+    {
+      id: 'border-cleared-sh-1037',
+      shipmentId: 'SH-1037',
+      headline: 'SH-1037: cleared the Swiss border',
+      carrierMessage: {
+        carrierId: 'euroruta',
+        channel: 'api',
+        rawText: 'IN_TRANSIT · BORDER CLEARED BASEL',
+        mapping: rule('IN_TRANSIT → In transit'),
+      },
+      milestone: { legId: 'SH-1037-L1', status: 'inTransit', location: 'Basel border crossing' },
+      legChanges: [],
+      carrierEta: providedEta(at(9), 'euroruta', 'api', receivedAtIso),
+      estimatedEta: {
+        date: at(9),
+        earliest: at(7),
+        latest: at(11),
+        confidence: 89,
+        reason: 'The truck cleared the Basel border sooner than the queue suggested and has a short drive left to Zurich.',
+      },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 18 and has cleared the Basel border sooner than expected. We now expect it in Zurich on Oct 20, only a few hours after planned.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: true,
+      exceptionEffect: { kind: 'closes' },
+    },
+    {
+      id: 'picked-up-sh-1066',
+      shipmentId: 'SH-1066',
+      headline: 'SH-1066: picked up at the Barcelona warehouse',
+      carrierMessage: {
+        carrierId: 'euroruta',
+        channel: 'api',
+        rawText: 'PICKED_UP',
+        mapping: rule('PICKED_UP → Picked up'),
+      },
+      milestone: { legId: 'SH-1066-L1', status: 'pickedUp', location: 'Barcelona warehouse' },
+      legChanges: [{ legId: 'SH-1066-L1', changes: { plannedDepartureAt: at(0) } }],
+      carrierEta: providedEta(at(52), 'euroruta', 'api', receivedAtIso),
+      estimatedEta: {
+        date: at(50),
+        earliest: at(46),
+        latest: at(56),
+        confidence: 86,
+        reason: 'Picked up at the Barcelona warehouse; the estimate uses the average transit time of this lane.',
+      },
+      customerSummary: 'Your order was picked up at our Barcelona warehouse on Oct 20 and is on its way. We expect it in Zurich on Oct 22.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: { kind: 'none' },
+    },
+    {
+      id: 'delivered-sh-1033',
+      shipmentId: 'SH-1033',
+      headline: 'SH-1033: delivered in Basel, proof of delivery received',
+      carrierMessage: {
+        carrierId: 'euroruta',
+        channel: 'api',
+        rawText: 'DELIVERED · SIGNED BASEL',
+        mapping: rule('DELIVERED → Delivered'),
+      },
+      milestone: { legId: 'SH-1033-L1', status: 'delivered', location: 'Alpen Werkzeug Basel, Basel' },
+      legChanges: [],
+      carrierEta: providedEta(at(0), 'euroruta', 'api', receivedAtIso),
+      estimatedEta: {
+        date: at(0),
+        earliest: at(0),
+        latest: at(0),
+        confidence: 100,
+        reason: 'Delivered and confirmed by the signed proof of delivery.',
+      },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 19 and was delivered to your Basel site on Oct 20, 18 hours ahead of plan. The signed proof of delivery is ready to download.',
+      addedDocuments: [receivedDocument('SH-1033', 'proofOfDelivery', receivedAtIso)],
+      addedRequiredDocuments: ['proofOfDelivery'],
+      clearsAiSignal: false,
+      exceptionEffect: { kind: 'none' },
+    },
+    {
+      id: 'carrier-update-sh-1029',
+      shipmentId: 'SH-1029',
+      headline: 'SH-1029: carrier reports the truck in Seville, delivering today',
+      carrierMessage: {
+        carrierId: 'vascor-trans',
+        channel: 'portal',
+        rawText: 'En reparto - Sevilla, franja de descarga asignada en Brenner Iberia Sur',
+        mapping: rule('En reparto → Out for delivery'),
+      },
+      milestone: { legId: 'SH-1029-L1', status: 'outForDelivery', location: 'Brenner Iberia Sur, Seville' },
+      legChanges: [],
+      carrierEta: providedEta(at(2), 'vascor-trans', 'portal', receivedAtIso),
+      estimatedEta: {
+        date: at(2),
+        earliest: at(1),
+        latest: at(3),
+        confidence: 95,
+        reason: 'Vascor Trans reports the truck in Seville with an unloading slot assigned and delivering today; only the delivery confirmation is missing.',
+      },
+      customerSummary: 'Your order left our Bilbao plant on Oct 17. After a quiet spell the carrier reported back: the truck is in Seville with an unloading slot at your site, and we expect the delivery to be confirmed on Oct 20.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: { kind: 'closes' },
+    },
+    {
+      id: 'out-for-delivery-sh-1048',
+      shipmentId: 'SH-1048',
+      headline: 'SH-1048: out for delivery in Lisbon',
+      carrierMessage: {
+        carrierId: 'vascor-trans',
+        channel: 'portal',
+        rawText: 'En reparto - Lisboa',
+        mapping: rule('En reparto → Out for delivery'),
+      },
+      milestone: { legId: 'SH-1048-L1', status: 'outForDelivery', location: 'Lisbon' },
+      legChanges: [],
+      carrierEta: providedEta(at(11), 'vascor-trans', 'portal', receivedAtIso),
+      estimatedEta: {
+        date: at(11),
+        earliest: at(10),
+        latest: at(13),
+        confidence: 90,
+        reason: 'Vascor Trans reports the truck out for delivery in Lisbon.',
+      },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 19 and is out for delivery in Lisbon. We expect it to arrive on Oct 20.',
+      addedDocuments: [],
+      addedRequiredDocuments: [],
+      clearsAiSignal: false,
+      exceptionEffect: { kind: 'none' },
+    },
+  ]
 }

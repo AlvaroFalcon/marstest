@@ -373,7 +373,17 @@ export const demoStateSchema = referenceDataSchema.extend({
    * field existed still parses.
    */
   unseenExceptionShipmentIds: z.array(z.string()).default([]),
+  /**
+   * Ids of the scripted carrier events already applied, so each one runs once whichever view
+   * triggered it. Defaults to empty so a state persisted before this field existed still parses.
+   */
+  appliedEventIds: z.array(z.string()).default([]),
 })
 
 /** @see demoStateSchema */
 export type DemoState = z.infer<typeof demoStateSchema>
+
+/** Who is asking for the next scripted carrier event: ops, or one customer. */
+export type Viewer
+  = | { role: 'ops' }
+    | { role: 'customer', customerId: string }

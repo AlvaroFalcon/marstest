@@ -86,6 +86,30 @@ describe('createMockDb', () => {
     expect(db.read()).toEqual(createSeed())
   })
 
+  it('accepts a stored state saved before the applied events field existed', () => {
+    const { appliedEventIds, ...legacyState } = createSeed()
+    const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify(legacyState) })
+
+    const db = createMockDb({ storage })
+
+    expect(appliedEventIds).toEqual([])
+    expect(db.read().appliedEventIds).toEqual([])
+  })
+
+  it('persists the applied event ids across a reload and clears them on reset', () => {
+    const storage = createFakeStorage()
+    const db = createMockDb({ storage })
+
+    db.write((state) => {
+      state.appliedEventIds.push('vessel-rolled-sh-1060')
+    })
+    const reloadedIds = createMockDb({ storage }).read().appliedEventIds
+    db.reset()
+
+    expect(reloadedIds).toEqual(['vessel-rolled-sh-1060'])
+    expect(db.read().appliedEventIds).toEqual([])
+  })
+
   it('ignores stored state that is not valid JSON', () => {
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: '{not json' })
 
