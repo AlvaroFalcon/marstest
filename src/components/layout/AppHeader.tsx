@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { PackageIcon } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { cn } from '@/lib/utils'
@@ -14,12 +15,14 @@ export type AppHeaderProps = {
   onSimulateCarrierEvent: () => void
   /** True while the simulated event is being applied: the button is disabled and flagged busy. */
   isSimulating: boolean
+  /** Notification bell, shown left of the viewer switch. */
+  notificationSlot: ReactNode
   className?: string
 }
 
 /**
  * Application header: grey demo strip (synthetic-data notice, simulate, reset, theme) and a
- * brand bar with the "Viewing as" role switch. It is its own size container, so desktop and
+ * brand bar with the notification bell and the "Viewing as" role switch. It is its own size container, so desktop and
  * mobile layouts follow the space it gets rather than the viewport.
  */
 export function AppHeader({
@@ -30,6 +33,7 @@ export function AppHeader({
   isResetting,
   onSimulateCarrierEvent,
   isSimulating,
+  notificationSlot,
   className,
 }: AppHeaderProps) {
   const intl = useIntl()
@@ -63,7 +67,10 @@ export function AppHeader({
             {intl.formatMessage({ id: 'shell.brand' })}
           </span>
         </div>
-        <ViewerSelect options={viewerOptions} value={selectedViewer} onValueChange={onViewerChange} />
+        <div className="flex items-center gap-3">
+          {notificationSlot}
+          <ViewerSelect options={viewerOptions} value={selectedViewer} onValueChange={onViewerChange} />
+        </div>
       </div>
     </header>
   )

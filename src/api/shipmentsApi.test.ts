@@ -427,3 +427,143 @@ describe('simulateCarrierEvent', () => {
     })
   })
 })
+
+describe('notifications', () => {
+  describe('creation', () => {
+    it('adds one notification per applied event with the event headline', async () => {
+      const api = createTestApi()
+
+      await simulateTimes(api, ops, 2)
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications.map(notification => notification.id)).toEqual([
+        'N-rotterdam-congestion-sh-1053',
+        'N-vessel-rolled-sh-1060',
+      ])
+      expect(notifications[1].headline).toBe('SH-1060: vessel rolled to the next sailing')
+      expect(notifications[1].shipmentId).toBe('SH-1060')
+      expect(notifications[1].opensException).toBe(true)
+      expect(notifications[1].readBy).toEqual([])
+    })
+
+    it('returns the id of the new notification in the applied result', async () => {
+      const api = createTestApi()
+
+      const [result] = await simulateTimes(api, ops, 1)
+
+      expect(result).toMatchObject({ kind: 'applied', notificationId: 'N-vessel-rolled-sh-1060' })
+    })
+
+    it('adds none when the script is finished', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 3)
+
+      await api.simulateCarrierEvent(nordwerk)
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications).toHaveLength(3)
+    })
+
+    it('flags an event that closes an exception as not opening one', async () => {
+      const api = createTestApi()
+
+      await simulateTimes(api, ops, 3)
+      const [closing] = await api.listNotifications(ops)
+
+      expect(closing.id).toBe('N-customs-cleared-sh-1042')
+      expect(closing.opensException).toBe(false)
+    })
+  })
+
+  describe('scoping and ordering', () => {
+    it('lists the events of every customer for ops, newest first', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+      await simulateTimes(api, alpen, 1)
+
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications.map(notification => notification.shipmentId)).toEqual(['SH-1037', 'SH-1053'])
+    })
+
+    it('lists only the events on their own shipments for a customer', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+      await simulateTimes(api, alpen, 1)
+
+      const nordwerkList = await api.listNotifications(nordwerk)
+      const alpenList = await api.listNotifications(alpen)
+      const brennerList = await api.listNotifications(brenner)
+
+      expect(nordwerkList.map(notification => notification.shipmentId)).toEqual(['SH-1053'])
+      expect(alpenList.map(notification => notification.shipmentId)).toEqual(['SH-1037'])
+      expect(brennerList).toEqual([])
+    })
+
+    it('returns an empty list before any event', async () => {
+      const api = createTestApi()
+
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications).toEqual([])
+    })
+  })
+
+  describe('markNotificationRead', () => {
+    it('marks it read for that viewer only', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+
+      await api.markNotificationRead(nordwerk, 'N-rotterdam-congestion-sh-1053')
+      const [forNordwerk] = await api.listNotifications(nordwerk)
+      const [forOps] = await api.listNotifications(ops)
+
+      expect(forNordwerk.readBy).toEqual(['customer:nordwerk'])
+      expect(forOps.readBy).toEqual(['customer:nordwerk'])
+    })
+
+    it('records the ops viewer under the ops key', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+
+      await api.markNotificationRead(ops, 'N-rotterdam-congestion-sh-1053')
+      const [notification] = await api.listNotifications(ops)
+
+      expect(notification.readBy).toEqual(['ops'])
+    })
+
+    it('is idempotent when the viewer reads it twice', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+
+      await api.markNotificationRead(ops, 'N-rotterdam-congestion-sh-1053')
+      await api.markNotificationRead(ops, 'N-rotterdam-congestion-sh-1053')
+      const [notification] = await api.listNotifications(ops)
+
+      expect(notification.readBy).toEqual(['ops'])
+    })
+
+    it('does nothing for an unknown id', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, nordwerk, 1)
+
+      await api.markNotificationRead(ops, 'N-does-not-exist')
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications).toHaveLength(1)
+      expect(notifications[0].readBy).toEqual([])
+    })
+  })
+
+  describe('resetDemo', () => {
+    it('empties the notifications', async () => {
+      const api = createTestApi()
+      await simulateTimes(api, ops, 2)
+
+      await api.resetDemo()
+      const notifications = await api.listNotifications(ops)
+
+      expect(notifications).toEqual([])
+    })
+  })
+})

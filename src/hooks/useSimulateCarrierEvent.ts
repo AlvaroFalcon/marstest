@@ -2,28 +2,10 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useIntl } from 'react-intl'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
-import type { SimulateCarrierEventResult } from '@/api/shipmentsApi'
-import type { RoutedViewer } from '@/hooks/useViewer'
+import { NOTIFICATIONS_QUERY_KEY } from '@/hooks/useNotifications'
 import { useShipmentsApi } from '@/hooks/useShipmentsApi'
 import { useViewer } from '@/hooks/useViewer'
-import routes from '@/routes'
-
-type AppliedEvent = Extract<SimulateCarrierEventResult, { kind: 'applied' }>
-
-/**
- * Where the toast's "View" action leads: the exception when ops can still open one (the event
- * opened it), otherwise the shipment in the viewer's own area. A closing event leaves ops no
- * exception to open, so they land on the shipment.
- */
-function getViewPath(viewer: RoutedViewer, event: AppliedEvent): string {
-  if (viewer.role === 'customer') {
-    return routes.customer.shipment(viewer.customerId, event.shipment.id)
-  }
-  if (event.opensException) {
-    return routes.ops.exception(event.shipment.id)
-  }
-  return routes.ops.shipment(event.shipment.id)
-}
+import { getNotificationPath } from '@/lib/notifications'
 
 /**
  * Applies the next scripted carrier event of the current viewer and refreshes everything on
@@ -33,7 +15,7 @@ function getViewPath(viewer: RoutedViewer, event: AppliedEvent): string {
  *
  * Feedback is a toast with the event headline and a "View" action to the affected shipment (or
  * its exception, for ops). When the viewer's script is finished the toast says how to run the
- * demo again. Failures show an error toast.
+ * demo again. "View" also marks the event's notification read for the viewer. Failures show an error toast.
  */
 export function useSimulateCarrierEvent() {
   const api = useShipmentsApi()
@@ -53,7 +35,11 @@ export function useSimulateCarrierEvent() {
       toast.info(result.headline, {
         action: {
           label: intl.formatMessage({ id: 'demo.simulateView' }),
-          onClick: () => void navigate(getViewPath(viewer, result)),
+          onClick: () => {
+            // Same effect as opening it from the panel: read for the viewer who triggered it.
+            void api.markNotificationRead(viewer, result.notificationId).then(() => queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY }))
+            void navigate(getNotificationPath(viewer, { shipmentId: result.shipment.id, opensException: result.opensException }))
+          },
         },
       })
     },

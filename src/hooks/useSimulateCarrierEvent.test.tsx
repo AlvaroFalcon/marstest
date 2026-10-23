@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ShipmentsApi } from '@/api/shipmentsApi'
 import type { Viewer } from '@/api/types'
@@ -107,6 +107,45 @@ describe('useSimulateCarrierEvent', () => {
 
       expect(await screen.findByText('SH-1033: delivered in Basel, proof of delivery received')).toBeInTheDocument()
       expect(screen.getByLabelText('Current path')).toHaveTextContent('/ops/shipments/SH-1033')
+    })
+  })
+
+  describe('notifications', () => {
+    it('marks the notification read for the viewer when View is clicked', async () => {
+      const api = createTestApi()
+      renderProbe('/ops/exceptions', api)
+
+      await clickSimulate()
+      await userEvent.click(await screen.findByRole('button', { name: 'View' }))
+
+      await waitFor(async () => {
+        const [notification] = await api.listNotifications({ role: 'ops' })
+        expect(notification.readBy).toEqual(['ops'])
+      })
+    })
+
+    it('leaves the notification unread for the viewer when the toast is ignored', async () => {
+      const api = createTestApi()
+      renderProbe('/ops/exceptions', api)
+
+      await clickSimulate()
+      await screen.findByRole('button', { name: 'View' })
+      const [notification] = await api.listNotifications({ role: 'ops' })
+
+      expect(notification.readBy).toEqual([])
+    })
+
+    it('does not mark it read for other viewers when a customer clicks View', async () => {
+      const api = createTestApi()
+      renderProbe('/customers/nordwerk/shipments', api)
+
+      await clickSimulate()
+      await userEvent.click(await screen.findByRole('button', { name: 'View' }))
+
+      await waitFor(async () => {
+        const [notification] = await api.listNotifications({ role: 'ops' })
+        expect(notification.readBy).toEqual(['customer:nordwerk'])
+      })
     })
   })
 

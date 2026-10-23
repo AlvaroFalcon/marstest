@@ -86,6 +86,20 @@ describe('createMockDb', () => {
     expect(db.read()).toEqual(createSeed())
   })
 
+  it('accepts a stored state saved before the notifications field existed', () => {
+    const { notifications, ...legacyState } = createSeed()
+    const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify(legacyState) })
+
+    const db = createMockDb({ storage })
+
+    expect(notifications).toEqual([])
+    expect(db.read().notifications).toEqual([])
+  })
+
+  it('stores the demo state under the v4 key', () => {
+    expect(DEMO_STATE_STORAGE_KEY).toBe('marstest:demo-state:v4')
+  })
+
   it('accepts a stored state saved before the applied events field existed', () => {
     const { appliedEventIds, ...legacyState } = createSeed()
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify(legacyState) })

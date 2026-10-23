@@ -1,5 +1,6 @@
 import { Outlet } from 'react-router'
 import { AppHeader } from '@/components/layout/AppHeader'
+import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { useResetDemo } from '@/hooks/useResetDemo'
 import { useSimulateCarrierEvent } from '@/hooks/useSimulateCarrierEvent'
 import { useViewerSwitch } from '@/hooks/useViewerSwitch'
@@ -20,6 +21,7 @@ export function AppLayout() {
         isResetting={resetDemo.isPending}
         onSimulateCarrierEvent={() => simulateCarrierEvent.mutate()}
         isSimulating={simulateCarrierEvent.isPending}
+        notificationSlot={<NotificationCenter />}
       />
       <Outlet />
     </div>
