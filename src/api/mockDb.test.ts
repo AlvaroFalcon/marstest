@@ -96,6 +96,23 @@ describe('createMockDb', () => {
     expect(db.read().notifications).toEqual([])
   })
 
+  it('reads a stored notification saved before the effect field existed as an update', () => {
+    const legacyNotification = {
+      id: 'N-vessel-rolled-sh-1060',
+      eventId: 'vessel-rolled-sh-1060',
+      shipmentId: 'SH-1060',
+      customerId: 'brenner-iberia',
+      headline: 'SH-1060: vessel rolled to the next sailing',
+      receivedAt: '2026-10-20T10:00:00.000Z',
+      readBy: [],
+    }
+    const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify({ ...createSeed(), notifications: [legacyNotification] }) })
+
+    const db = createMockDb({ storage })
+
+    expect(db.read().notifications.map(notification => notification.effect)).toEqual([{ kind: 'update' }])
+  })
+
   it('accepts a stored state saved before the applied events field existed', () => {
     const { appliedEventIds, ...legacyState } = createSeed()
     const storage = createFakeStorage({ [DEMO_STATE_STORAGE_KEY]: JSON.stringify(legacyState) })

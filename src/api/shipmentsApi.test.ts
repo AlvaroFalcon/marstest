@@ -143,7 +143,7 @@ describe('createShipmentsApi', () => {
       throw new Error('Expected the first ops event to be applied')
     }
     expect(first.shipment.id).toBe('SH-1060')
-    expect(first.opensException).toBe(true)
+    expect(first.effect).toEqual({ kind: 'opened', exceptionType: 'vesselRolled' })
     expect(first.shipment.rawEvents.at(-1)?.receivedAt).toBe('2026-10-20T10:30:00.000Z')
     expect(first.shipment.milestones.at(-1)?.status).toBe('vesselRolled')
     expect(first.shipment.legs[1]).toMatchObject({ vessel: 'Mareline Poniente', voyage: 'ML-0846' })
@@ -323,7 +323,7 @@ describe('simulateCarrierEvent', () => {
       if (result.kind !== 'applied') {
         throw new Error('Expected the event to be applied')
       }
-      expect(result.opensException).toBe(true)
+      expect(result.effect).toEqual({ kind: 'opened', exceptionType: 'predictedDelay' })
       expect(result.shipment.exceptions.map(exception => exception.type)).toEqual(['predictedDelay'])
       expect(result.shipment.exceptions[0].draft.status).toBe('pending')
       expect(await api.listUnseenExceptionShipmentIds()).toEqual(['SH-1053'])
@@ -340,7 +340,7 @@ describe('simulateCarrierEvent', () => {
       if (result.kind !== 'applied') {
         throw new Error('Expected the event to be applied')
       }
-      expect(result.opensException).toBe(false)
+      expect(result.effect).toEqual({ kind: 'closed' })
       expect(result.shipment.exceptions).toEqual([])
       expect(exceptionShipmentIds).not.toContain('SH-1042')
     })
@@ -430,6 +430,26 @@ describe('simulateCarrierEvent', () => {
 
 describe('notifications', () => {
   describe('creation', () => {
+    it('stores the effect of every scripted event on its notification', async () => {
+      const api = createTestApi()
+
+      await simulateTimes(api, ops, 9)
+      const notifications = await api.listNotifications(ops)
+
+      const effectByShipment = Object.fromEntries(notifications.map(notification => [notification.shipmentId, notification.effect]))
+      expect(effectByShipment).toEqual({
+        'SH-1060': { kind: 'opened', exceptionType: 'vesselRolled' },
+        'SH-1053': { kind: 'opened', exceptionType: 'predictedDelay' },
+        'SH-1042': { kind: 'closed' },
+        'SH-1035': { kind: 'closed' },
+        'SH-1037': { kind: 'closed' },
+        'SH-1029': { kind: 'closed' },
+        'SH-1033': { kind: 'delivered' },
+        'SH-1066': { kind: 'update' },
+        'SH-1048': { kind: 'update' },
+      })
+    })
+
     it('adds one notification per applied event with the event headline', async () => {
       const api = createTestApi()
 
@@ -442,7 +462,7 @@ describe('notifications', () => {
       ])
       expect(notifications[1].headline).toBe('SH-1060: vessel rolled to the next sailing')
       expect(notifications[1].shipmentId).toBe('SH-1060')
-      expect(notifications[1].opensException).toBe(true)
+      expect(notifications[1].effect).toEqual({ kind: 'opened', exceptionType: 'vesselRolled' })
       expect(notifications[1].readBy).toEqual([])
     })
 
@@ -471,7 +491,7 @@ describe('notifications', () => {
       const [closing] = await api.listNotifications(ops)
 
       expect(closing.id).toBe('N-customs-cleared-sh-1042')
-      expect(closing.opensException).toBe(false)
+      expect(closing.effect).toEqual({ kind: 'closed' })
     })
   })
 

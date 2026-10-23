@@ -1,4 +1,4 @@
-import type { CarrierNotification, Viewer } from '@/api/types'
+import type { CarrierNotification, ExceptionType, Viewer } from '@/api/types'
 import type { ElapsedTime } from '@/lib/provenance'
 import { getElapsedTime } from '@/lib/provenance'
 import routes from '@/routes'
@@ -28,7 +28,7 @@ export function countUnreadNotifications(notifications: readonly CarrierNotifica
 }
 
 /** The part of a notification (or applied event) that decides where "View" leads. */
-export type NotificationTarget = Pick<CarrierNotification, 'shipmentId' | 'opensException'>
+export type NotificationTarget = Pick<CarrierNotification, 'shipmentId' | 'effect'>
 
 /**
  * Where a notification leads, shared by the toast "View" and the notification panel so both open
@@ -40,7 +40,7 @@ export function getNotificationPath(viewer: Viewer, target: NotificationTarget):
   if (viewer.role === 'customer') {
     return routes.customer.shipment(viewer.customerId, target.shipmentId)
   }
-  if (target.opensException) {
+  if (target.effect.kind === 'opened') {
     return routes.ops.exception(target.shipmentId)
   }
   return routes.ops.shipment(target.shipmentId)
@@ -63,4 +63,38 @@ export function getNotificationAge(receivedAt: string, now: Date): NotificationA
     return { kind: 'justNow' }
   }
   return { kind: 'elapsed', elapsed }
+}
+
+/**
+ * Which badge a notification row shows, as data only (the component owns labels, icons and
+ * colours). Ops see the inbox presentation of the exception an event opened; customers only get
+ * the customer list's words, never ops vocabulary.
+ */
+export type NotificationSeverity
+  = | { kind: 'exception', exceptionType: ExceptionType }
+    | { kind: 'resolved' }
+    | { kind: 'atRisk' }
+    | { kind: 'backOnTrack' }
+    | { kind: 'delivered' }
+    | { kind: 'update' }
+
+/**
+ * Maps the stored effect of a notification and the viewer's role to its severity badge.
+ * `exception` carries only the type: a stale-tracking exception needs hours without news, which
+ * no notification knows (the effect is stored once, when it is created), so the component shows
+ * its generic stale-tracking label.
+ */
+export function getNotificationSeverity(notification: Pick<CarrierNotification, 'effect'>, viewer: Viewer): NotificationSeverity {
+  const { effect } = notification
+  const isOps = viewer.role === 'ops'
+  if (effect.kind === 'opened') {
+    return isOps ? { kind: 'exception', exceptionType: effect.exceptionType } : { kind: 'atRisk' }
+  }
+  if (effect.kind === 'closed') {
+    return isOps ? { kind: 'resolved' } : { kind: 'backOnTrack' }
+  }
+  if (effect.kind === 'delivered') {
+    return { kind: 'delivered' }
+  }
+  return { kind: 'update' }
 }

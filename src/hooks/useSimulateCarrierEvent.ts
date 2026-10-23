@@ -39,7 +39,7 @@ export function useSimulateCarrierEvent() {
           onClick: () => {
             // Same effect as opening it from the panel: read for the viewer who triggered it.
             markRead.mutate({ viewer, notificationId: result.notificationId })
-            void navigate(getNotificationPath(viewer, { shipmentId: result.shipment.id, opensException: result.opensException }))
+            void navigate(getNotificationPath(viewer, { shipmentId: result.shipment.id, effect: result.effect }))
           },
         },
       })

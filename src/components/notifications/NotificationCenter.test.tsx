@@ -1,6 +1,8 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useLocation } from 'react-router'
+import { createMockDb } from '@/api/mockDb'
+import { createShipmentsApi } from '@/api/shipmentsApi'
 import type { ShipmentsApi } from '@/api/shipmentsApi'
 import { NotificationCenter } from '@/components/notifications/NotificationCenter'
 import { createTestApi } from '@/test/createTestApi'
@@ -133,5 +135,75 @@ describe('NotificationCenter', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Try again' }))
 
     await waitFor(() => expect(screen.getByText('No notifications yet')).toBeInTheDocument())
+  })
+
+  describe('severity badges', () => {
+    it('shows ops the inbox badge of the exception the event opened', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent({ role: 'ops' })
+      renderCenter('/ops/exceptions', api)
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 1 unread' }))
+
+      const row = await screen.findByRole('button', { name: /SH-1060: vessel rolled/ })
+      expect(within(row).getByText('Delayed')).toBeInTheDocument()
+    })
+
+    it('shows a customer "At risk" for the same event, never ops labels', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent({ role: 'customer', customerId: 'brenner-iberia' })
+      renderCenter('/customers/brenner-iberia/shipments', api)
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 1 unread' }))
+
+      const row = await screen.findByRole('button', { name: /SH-1060: vessel rolled/ })
+      expect(within(row).getByText('At risk')).toBeInTheDocument()
+      expect(screen.queryByText('Delayed')).not.toBeInTheDocument()
+      expect(screen.queryByText('Delay predicted')).not.toBeInTheDocument()
+      expect(screen.queryByText('Resolved')).not.toBeInTheDocument()
+    })
+
+    it('shows ops "Resolved" for an event that closed an exception', async () => {
+      const api = createTestApi()
+      for (let click = 0; click < 3; click += 1) {
+        await api.simulateCarrierEvent({ role: 'ops' })
+      }
+      renderCenter('/ops/exceptions', api)
+      await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 3 unread' }))
+      const row = await screen.findByRole('button', { name: /SH-1042: customs released/ })
+
+      expect(within(row).getByText('Resolved')).toBeInTheDocument()
+    })
+
+    it('shows a customer "Back on track" for an event that closed an exception', async () => {
+      const api = createTestApi()
+      await api.simulateCarrierEvent({ role: 'customer', customerId: 'nordwerk' })
+      await api.simulateCarrierEvent({ role: 'customer', customerId: 'nordwerk' })
+      renderCenter('/customers/nordwerk/shipments', api)
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 2 unread' }))
+
+      const row = await screen.findByRole('button', { name: /SH-1042: customs released/ })
+      expect(within(row).getByText('Back on track')).toBeInTheDocument()
+    })
+
+    it('keeps the badge of a notification after its exception is closed later', async () => {
+      const db = createMockDb({ storage: { getItem: () => null, setItem: () => {} } })
+      const api = createShipmentsApi({ db, latencyMs: 0 })
+      await api.simulateCarrierEvent({ role: 'ops' })
+      db.write((state) => {
+        const shipment = state.shipments.find(candidate => candidate.id === 'SH-1060')
+        if (shipment) {
+          shipment.exceptions = []
+        }
+      })
+      renderCenter('/ops/exceptions', api)
+
+      await userEvent.click(await screen.findByRole('button', { name: 'Notifications, 1 unread' }))
+
+      const row = await screen.findByRole('button', { name: /SH-1060: vessel rolled/ })
+      expect(within(row).getByText('Delayed')).toBeInTheDocument()
+      expect(within(row).queryByText('Resolved')).not.toBeInTheDocument()
+    })
   })
 })

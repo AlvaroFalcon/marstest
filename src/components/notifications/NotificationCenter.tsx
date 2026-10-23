@@ -13,6 +13,7 @@ import {
   countUnreadNotifications,
   getNotificationAge,
   getNotificationPath,
+  getNotificationSeverity,
   isNotificationRead,
 } from '@/lib/notifications'
 
@@ -48,6 +49,7 @@ export function NotificationCenter({ className }: NotificationCenterProps) {
       id: notification.id,
       headline: notification.headline,
       isRead: isNotificationRead(notification, viewer),
+      severity: getNotificationSeverity(notification, viewer),
       timeLabel: age.kind === 'justNow'
         ? intl.formatMessage({ id: 'notifications.time.justNow' })
         : formatElapsedTime(intl, age.elapsed),

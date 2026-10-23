@@ -14,6 +14,10 @@
 | 2. Hooks | Done | `useNotifications`, `useMarkNotificationRead`; pure helpers in `src/lib/notifications.ts`, `getNotificationPath` shared with the toast "View" |
 | 3. UI | Done | `NotificationBell`, `NotificationList`, `NotificationsEmpty`, `NotificationCenter`; header slot left of the viewer switch |
 | 4. Tests | Done | Unit, component, hook and `e2e/notifications.spec.ts` (desktop and mobile) |
+| Review of PR #32 | Done | Toast "View" through `useMarkNotificationRead`, `@/` imports, skeleton `role="status"`, named props type, JSDoc, split E2E test, follow-up #33 |
+| M2.1 Data | Done | `effect` stored on each notification; `getNotificationSeverity`; storage key `v5` |
+| M2.2 Presentation | Done | `NotificationSeverityBadge` (reuses the inbox and customer list badges), divider between rows |
+| M2.3 Tests | Done | Mapping per effect and role, badge per kind, ops vs customer labels, E2E per viewer |
 
 ## Decisions taken at the gate (user, 2026-10-23)
 
@@ -23,6 +27,7 @@
 | Count badge | Info pill with the exact number, hidden at 0; accessible name "Notifications" at 0 |
 | Type name | `CarrierNotification`, since `Notification` shadows the DOM global |
 | Toast covering the mobile sheet | Left as is: the toast goes away by itself, like over the site filter sheet |
+| M2: stale-tracking exception (no hours known) | "No update" without hours, inbox neutral tone and clock icon |
 
 Claude defaults (reviewed with the user as part of the gate): popover `w-96` / `max-h-96` and sheet
 capped at 80 svh, `Bell` / `BellOff` icons, skeleton while loading and an error with "Try again",
@@ -40,9 +45,10 @@ frozen clock makes every `receivedAt` equal.
 
 - [x] `npm run build` passes
 - [x] `npm run lint` passes
-- [x] `npm run test` passes (1000 tests)
-- [x] `npm run test:e2e` passes (271 passed, 9 skipped as before)
-- [x] Every acceptance criterion of the plan is met (each mapped to unit, component and E2E tests)
+- [x] `npm run test` passes (1022 tests)
+- [x] `npm run test:e2e` passes (287 passed, 9 skipped as before)
+- [x] Every acceptance criterion of the plan is met, milestone 2 included (each mapped to unit,
+      component and E2E tests; the row divider is CSS only and checked visually)
 
 ## Follow-ups
 

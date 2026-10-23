@@ -4,7 +4,7 @@ import type { MockDb } from '@/api/mockDb'
 import { createScriptedEvents, DEMO_NOW_ISO, getEventScript } from '@/api/seed'
 import type { ScriptedCarrierEvent } from '@/api/seed'
 import { getViewerKey } from '@/lib/notifications'
-import type { CarrierNotification, DemoState, ReferenceData, Shipment, ShipmentException, Viewer } from '@/api/types'
+import type { CarrierNotification, DemoState, NotificationEffect, ReferenceData, Shipment, ShipmentException, Viewer } from '@/api/types'
 
 /** Simulated network latency, so loading states are visible in the demo (ADR 0033). */
 export const DEFAULT_LATENCY_MS = 200
@@ -49,8 +49,8 @@ export type SimulateCarrierEventResult
     notificationId: string
     /** Toast text of the event. */
     headline: string
-    /** True when the event opened an exception, so ops can jump to it. */
-    opensException: boolean
+    /** What the event did, so ops can jump to the exception it opened. */
+    effect: NotificationEffect
   }
   | { kind: 'scriptFinished' }
 
@@ -118,9 +118,9 @@ function getNotificationId(eventId: string): string {
 
 /**
  * Applies a scripted event to its shipment inside a `db.write`, adds its notification and returns
- * whether it opened an exception.
+ * the effect it had. An opened or closed exception wins over a delivery.
  */
-function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, receivedAt: string): boolean {
+function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, receivedAt: string): NotificationEffect {
   const shipment = findShipment(state, event.shipmentId)
   const previousRawEvent = shipment.rawEvents.at(-1)
   const rawEventId = `${shipment.id}-E${shipment.rawEvents.length + 1}`
@@ -178,6 +178,7 @@ function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, recei
     state.unseenExceptionShipmentIds.push(shipment.id)
   }
   state.appliedEventIds.push(event.id)
+  const effect = getNotificationEffect(event)
   state.notifications.push({
     id: getNotificationId(event.id),
     eventId: event.id,
@@ -185,11 +186,26 @@ function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, recei
     customerId: shipment.customerId,
     headline: event.headline,
     receivedAt,
-    opensException: exceptionEffect.kind === 'opens',
+    effect,
     readBy: [],
   })
 
-  return exceptionEffect.kind === 'opens'
+  return effect
+}
+
+/** Classifies a scripted event for its notification: opened, closed, delivered or plain update. */
+function getNotificationEffect(event: ScriptedCarrierEvent): NotificationEffect {
+  const { exceptionEffect } = event
+  if (exceptionEffect.kind === 'opens') {
+    return { kind: 'opened', exceptionType: exceptionEffect.type }
+  }
+  if (exceptionEffect.kind === 'closes') {
+    return { kind: 'closed' }
+  }
+  if (event.milestone.status === 'delivered') {
+    return { kind: 'delivered' }
+  }
+  return { kind: 'update' }
 }
 
 /** Creates the fake API over `db`. The app uses the {@link shipmentsApi} instance. */
@@ -249,16 +265,16 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
         return { kind: 'scriptFinished' }
       }
 
-      let opensException = false
+      let effect: NotificationEffect = { kind: 'update' }
       db.write((state) => {
-        opensException = applyScriptedEvent(state, event, receivedAt.toISOString())
+        effect = applyScriptedEvent(state, event, receivedAt.toISOString())
       })
       return {
         kind: 'applied',
         shipment: findShipment(db.read(), event.shipmentId),
         notificationId: getNotificationId(event.id),
         headline: event.headline,
-        opensException,
+        effect,
       }
     }),
 

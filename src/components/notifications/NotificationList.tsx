@@ -1,11 +1,14 @@
+import type { NotificationSeverity } from '@/lib/notifications'
 import { cn } from '@/lib/utils'
 import { useIntl } from 'react-intl'
+import { NotificationSeverityBadge } from './NotificationSeverityBadge'
 
 /** View model of one row: the parent resolves read state and the time label. */
 export type NotificationItem = {
   id: string
   headline: string
   isRead: boolean
+  severity: NotificationSeverity
   /** Already formatted age, e.g. "Just now" or "3 min ago". */
   timeLabel: string
 }
@@ -24,7 +27,7 @@ export function NotificationList({ items, onSelect, className }: NotificationLis
   const intl = useIntl()
 
   return (
-    <ul className={cn('flex flex-col gap-1', className)}>
+    <ul className={cn('flex flex-col divide-y divide-border', className)}>
       {items.map(item => (
         <li key={item.id}>
           <button
@@ -60,7 +63,10 @@ export function NotificationList({ items, onSelect, className }: NotificationLis
                 )}
                 {` ${item.headline}`}
               </span>
-              <span className="text-caption text-muted-foreground">{item.timeLabel}</span>
+              <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <NotificationSeverityBadge severity={item.severity} />
+                <span className="text-caption text-muted-foreground">{item.timeLabel}</span>
+              </span>
             </span>
           </button>
         </li>

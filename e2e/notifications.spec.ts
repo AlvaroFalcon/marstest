@@ -118,4 +118,74 @@ test.describe('notification center', () => {
 
     await expect(page.getByText('No notifications yet')).toBeVisible()
   })
+
+  test.describe('severity badges', () => {
+    test('shows ops "Delayed" on the vessel rolled event', async ({ page }) => {
+      await page.goto('/ops/exceptions')
+      await simulateCarrierEvent(page, 'SH-1060: vessel rolled to the next sailing')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 1 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1060: vessel rolled.*Delayed/ })).toBeVisible()
+    })
+
+    test('shows ops "Resolved" on an event that closes an exception', async ({ page }) => {
+      await page.goto('/ops/exceptions')
+      await simulateCarrierEvent(page, 'SH-1060: vessel rolled to the next sailing')
+      await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
+      await simulateCarrierEvent(page, 'SH-1042: customs released the container')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 3 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1042: customs released.*Resolved/ })).toBeVisible()
+    })
+
+    test('shows Nordwerk "At risk" on the Rotterdam congestion event', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+      await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 1 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1053: vessel waiting.*At risk/ })).toBeVisible()
+      await expect(page.getByText('Delay predicted')).toHaveCount(0)
+    })
+
+    test('shows Nordwerk "Back on track" on the customs released event', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+      await simulateCarrierEvent(page, 'SH-1053: vessel waiting for a berth in Rotterdam')
+      await simulateCarrierEvent(page, 'SH-1042: customs released the container')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 2 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1042: customs released.*Back on track/ })).toBeVisible()
+      await expect(page.getByText('Resolved')).toHaveCount(0)
+    })
+
+    test('shows Alpen "Delivered" on the delivery event', async ({ page }) => {
+      await page.goto('/customers/alpen-werkzeug/shipments')
+      await simulateCarrierEvent(page, 'SH-1037: cleared the Swiss border')
+      await simulateCarrierEvent(page, 'SH-1066: picked up at the Barcelona warehouse')
+      await simulateCarrierEvent(page, 'SH-1033: delivered in Basel, proof of delivery received')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 3 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1033: delivered in Basel.*Delivered/ })).toBeVisible()
+    })
+
+    test('shows Alpen "Update" on an event that is neither an exception nor a delivery', async ({ page }) => {
+      await page.goto('/customers/alpen-werkzeug/shipments')
+      await simulateCarrierEvent(page, 'SH-1037: cleared the Swiss border')
+      await simulateCarrierEvent(page, 'SH-1066: picked up at the Barcelona warehouse')
+      await missTheToast(page)
+
+      await page.getByRole('button', { name: 'Notifications, 2 unread' }).click()
+
+      await expect(page.getByRole('button', { name: /SH-1066: picked up.*Update/ })).toBeVisible()
+    })
+  })
 })

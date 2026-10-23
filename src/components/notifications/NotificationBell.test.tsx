@@ -7,8 +7,8 @@ import type { MockMatchMedia } from '@/test/mockMatchMedia'
 import { renderWithProviders } from '@/test/renderWithProviders'
 
 const items: NotificationBellProps['items'] = [
-  { id: 'N-1', headline: 'SH-1060: vessel rolled to the next sailing', isRead: false, timeLabel: 'Just now' },
-  { id: 'N-2', headline: 'SH-1053: vessel waiting for a berth in Rotterdam', isRead: true, timeLabel: 'Just now' },
+  { id: 'N-1', headline: 'SH-1060: vessel rolled to the next sailing', isRead: false, severity: { kind: 'exception', exceptionType: 'vesselRolled' }, timeLabel: 'Just now' },
+  { id: 'N-2', headline: 'SH-1053: vessel waiting for a berth in Rotterdam', isRead: true, severity: { kind: 'update' }, timeLabel: 'Just now' },
 ]
 
 function renderBell(props: Partial<NotificationBellProps> = {}) {

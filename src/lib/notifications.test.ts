@@ -3,6 +3,7 @@ import {
   countUnreadNotifications,
   getNotificationAge,
   getNotificationPath,
+  getNotificationSeverity,
   getViewerKey,
   isNotificationRead,
 } from '@/lib/notifications'
@@ -15,7 +16,7 @@ function buildNotification(overrides: Partial<CarrierNotification> = {}): Carrie
     customerId: 'brenner-iberia',
     headline: 'SH-1060: vessel rolled to the next sailing',
     receivedAt: '2026-10-20T10:00:00.000Z',
-    opensException: true,
+    effect: { kind: 'opened', exceptionType: 'predictedDelay' },
     readBy: [],
     ...overrides,
   }
@@ -77,20 +78,20 @@ describe('getNotificationPath', () => {
   it('leads a customer to their own shipment detail', () => {
     const path = getNotificationPath(
       { role: 'customer', customerId: 'nordwerk' },
-      { shipmentId: 'SH-1053', opensException: true },
+      { shipmentId: 'SH-1053', effect: { kind: 'opened', exceptionType: 'predictedDelay' } },
     )
 
     expect(path).toBe('/customers/nordwerk/shipments/SH-1053')
   })
 
   it('leads ops to the exception when the event opened one', () => {
-    const path = getNotificationPath({ role: 'ops' }, { shipmentId: 'SH-1060', opensException: true })
+    const path = getNotificationPath({ role: 'ops' }, { shipmentId: 'SH-1060', effect: { kind: 'opened', exceptionType: 'predictedDelay' } })
 
     expect(path).toBe('/ops/exceptions/SH-1060')
   })
 
   it('leads ops to the shipment detail when the event opened no exception', () => {
-    const path = getNotificationPath({ role: 'ops' }, { shipmentId: 'SH-1042', opensException: false })
+    const path = getNotificationPath({ role: 'ops' }, { shipmentId: 'SH-1042', effect: { kind: 'closed' } })
 
     expect(path).toBe('/ops/shipments/SH-1042')
   })
@@ -115,5 +116,58 @@ describe('getNotificationAge', () => {
     const age = getNotificationAge('2026-10-20T09:59:00.000Z', now)
 
     expect(age).toEqual({ kind: 'elapsed', elapsed: { unit: 'minutes', value: 1 } })
+  })
+})
+
+describe('getNotificationSeverity', () => {
+  const ops = { role: 'ops' } as const
+  const customer = { role: 'customer', customerId: 'nordwerk' } as const
+
+  it('returns the exception type for ops when the event opened a vessel-rolled exception', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'opened', exceptionType: 'vesselRolled' } }, ops)
+
+    expect(severity).toEqual({ kind: 'exception', exceptionType: 'vesselRolled' })
+  })
+
+  it('returns at risk for a customer when the event opened an exception', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'opened', exceptionType: 'predictedDelay' } }, customer)
+
+    expect(severity).toEqual({ kind: 'atRisk' })
+  })
+
+  it('returns resolved for ops when the event closed an exception', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'closed' } }, ops)
+
+    expect(severity).toEqual({ kind: 'resolved' })
+  })
+
+  it('returns back on track for a customer when the event closed an exception', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'closed' } }, customer)
+
+    expect(severity).toEqual({ kind: 'backOnTrack' })
+  })
+
+  it('returns delivered for ops when the shipment was delivered', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'delivered' } }, ops)
+
+    expect(severity).toEqual({ kind: 'delivered' })
+  })
+
+  it('returns delivered for a customer when the shipment was delivered', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'delivered' } }, customer)
+
+    expect(severity).toEqual({ kind: 'delivered' })
+  })
+
+  it('returns update for ops when the event changed nothing in exceptions', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'update' } }, ops)
+
+    expect(severity).toEqual({ kind: 'update' })
+  })
+
+  it('returns update for a customer when the event changed nothing in exceptions', () => {
+    const severity = getNotificationSeverity({ effect: { kind: 'update' } }, customer)
+
+    expect(severity).toEqual({ kind: 'update' })
   })
 })

@@ -71,3 +71,49 @@ shipment, like the toast's "View". Ops see every event, a customer only events o
 - Browser or push notifications, sound, email.
 - "Mark all as read", deleting or filtering notifications.
 - Notifications for things other than simulated carrier events.
+
+## Milestone 2: severity badges and row separation (same PR, approved 2026-10-23)
+
+Every notification row gets a badge that tells how serious the event was, reusing the inbox's
+tones, icons and labels, and rows are visually separated so each notification reads on its own.
+
+### Decisions
+
+| Decision | Options considered | Chosen | Decided by | ADR |
+| --- | --- | --- | --- | --- |
+| Presentation | Badge per row / left stripe + badge / icon only | Badge under the headline, next to the time | User | — |
+| Customer vocabulary | Ops badges / customer labels | Customer labels (the customer list's words), never ops vocabulary | User | — |
+| Updates without an exception | No badge / grey "Update" | Grey "Update", so every row has a badge | User | — |
+| Order | By date / by severity | By date, newest first (unchanged) | User | — |
+| Where severity comes from | Recomputed / stored | Stored on the notification when it is created, so it does not change later | Claude | — |
+
+### Severity per event (proposal)
+
+| Event effect | Ops badge | Customer badge |
+| --- | --- | --- |
+| Opens an exception | The inbox badge of that exception type (`ExceptionStatusBadge`: tone, icon, label) | "At risk" (customer list presentation) |
+| Closes an exception | "Resolved", success tone, check icon | "Back on track", success tone, check icon |
+| Delivers the shipment | "Delivered" (customer list presentation) | "Delivered" |
+| Anything else | "Update", neutral grey | "Update", neutral grey |
+
+### Steps
+
+1. **Data** — `src/api/types.ts`, `src/api/shipmentsApi.ts`: the notification stores its effect
+   (`opened` with the exception type, `closed`, `delivered`, `update`) when the event is applied;
+   storage key `v5`.
+2. **Presentation** — `src/lib/notifications.ts` (pure mapping effect + viewer role → badge
+   kind), `src/components/notifications/NotificationSeverityBadge.tsx`, `NotificationList.tsx`
+   (badge next to the time label, a divider between rows), `src/locales/en.ts`.
+3. **Tests** — mapping per effect and role, badge per row for ops and customer, customers never see
+   ops labels, E2E for the badge of an opening and a closing event.
+
+### Acceptance criteria
+
+- [ ] Every notification row shows a severity badge with an icon and a label, never colour alone
+- [ ] Ops see the inbox badge of the exception an event opened, "Resolved" for an event that closed
+      one, "Delivered" for a delivery and "Update" otherwise
+- [ ] Customers see "At risk", "Back on track", "Delivered" or "Update", never ops labels such as
+      "Delay predicted"
+- [ ] The badge of a notification does not change when its exception is closed later
+- [ ] Rows are separated by a divider, so each notification is clearly distinct
+- [ ] Notifications stay ordered by date, newest first
