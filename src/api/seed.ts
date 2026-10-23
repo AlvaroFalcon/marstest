@@ -278,6 +278,7 @@ function customsHoldShipment(at: (hours: number) => string): Shipment {
       confidence: 81,
       reason: 'Held by UK customs until the certificate of origin and a corrected invoice are provided; similar holds took about 2 days to release.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 14 and reached Southampton port on Oct 19. It\'s waiting for UK customs clearance while we send a missing document; holds like this usually clear in about 2 days. We expect it in Birmingham on Oct 22–23 instead of Oct 20.',
     documents: [
       receivedDocument(id, 'commercialInvoice', at(-150), { hsCode: '8467.29', grossWeightKg: 1840 }),
       receivedDocument(id, 'packingList', at(-150), { grossWeightKg: 1840 }),
@@ -326,6 +327,7 @@ function quietTerminalShipment(at: (hours: number) => string): Shipment {
       confidence: 78,
       reason: 'The container entered the Barcelona terminal 20 h ago and Mareline Tramontana is on schedule; no update since.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 18 and is at the Barcelona port terminal, waiting for its vessel. Everything is on schedule: we expect it in Zurich on Oct 22.',
     documents: [...swissRoadDocuments(id, at(-51), '8467.11', 2480), pendingDocument(id, 'billOfLading')],
     exceptions: [],
   }
@@ -363,6 +365,7 @@ function predictedDelayShipment(at: (hours: number) => string): Shipment {
       confidence: 84,
       reason: 'The truck has been stopped in the Basel border queue for 2 h, and EuroRuta trucks on this lane arrived 11 h late on average this month.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 18 and is now in the queue at the Basel border. Trucks on this route have been crossing about half a day late this month, so we expect it in Zurich on Oct 21 instead of Oct 20.',
     documents: swissRoadDocuments(id, at(-41), '8207.70', 1320),
     aiSignal: {
       text: 'Delay very likely (~14 h). The truck has been in the Basel border queue for 2 h and EuroRuta trucks on this lane arrived 11 h late on average this month. The carrier ETA has not changed, so we keep showing it as reported.',
@@ -417,6 +420,7 @@ function staleShipment(at: (hours: number) => string): Shipment {
       confidence: 62,
       reason: 'No carrier update for 48 h, so the estimate falls back to the average transit time of this lane.',
     },
+    customerSummary: 'Your order left our Bilbao plant on Oct 17 and was last reported near Mérida on Oct 18. The carrier hasn\'t sent an update since, so we\'re asking them for news and basing our estimate on the usual transit time of this route: we expect it in Seville on Oct 20–21.',
     documents: euRoadDocuments(id, at(-61), '8481.80', 780),
     exceptions: [
       {
@@ -464,6 +468,7 @@ function incidentShipment(at: (hours: number) => string): Shipment {
       confidence: 77,
       reason: 'The carrier reported an accident and the trailer is being inspected; a replacement truck usually takes about a day.',
     },
+    customerSummary: 'Your order left our Bilbao plant on Oct 19. On Oct 20 the truck was involved in a road incident on the A10 near Poitiers; the driver is fine and the goods are being checked. Switching to a replacement truck usually takes about a day, so we expect it in Stuttgart on Oct 21–22 instead of Oct 21.',
     documents: euRoadDocuments(id, at(-31), '8483.40', 2650),
     exceptions: [
       {
@@ -514,6 +519,7 @@ function onTrackShipment(at: (hours: number) => string): Shipment {
       confidence: 90,
       reason: 'EuroRuta is on schedule and this lane was on time in 9 of the last 10 trips.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 19 and is on the road near Nîmes. Everything is on schedule: we expect it in Basel on Oct 21.',
     documents: swissRoadDocuments(id, at(-21), '8207.50', 640),
     exceptions: [],
   }
@@ -549,6 +555,7 @@ function suspectedDelayShipment(at: (hours: number) => string): Shipment {
       confidence: 58,
       reason: 'Slow traffic on the A-8 near Nice; the carrier ETA may slip by about 7 h.',
     },
+    customerSummary: 'Your order left our Barcelona warehouse on Oct 19 and is on the road near Nice, where traffic is slow right now. It may arrive a few hours later than planned; we expect it in Milan on Oct 21.',
     documents: euRoadDocuments(id, at(-17), '8460.29', 1150),
     aiSignal: {
       text: 'Possible delay of 0–14 h, most likely about 7 h. Signals: the last GPS position reports 12 km/h on the A-8 near Nice and traffic there is slow. Not enough evidence to open an exception yet; we re-evaluate with every new GPS ping.',
@@ -590,6 +597,7 @@ function confidentDelayShipment(at: (hours: number) => string): Shipment {
       confidence: 92,
       reason: 'The driver started an 11 h mandatory rest 1 h ago, so with about 8 h of driving left the truck cannot reach Munich before early tomorrow morning.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 19. The driver is taking a mandatory rest break near Mâcon, and with about 8 hours of driving still to go the truck can\'t make it today. We expect it in Munich early on Oct 21 instead of Oct 20.',
     documents: euRoadDocuments(id, at(-27), '8503.00', 2100),
     aiSignal: {
       text: 'Delay very likely (~10 h). The driver started an 11 h mandatory rest at the Mâcon rest area 1 h ago, with about 8 h of driving left to Munich. The carrier ETA has not changed, so we keep showing it as reported.',
@@ -643,6 +651,7 @@ function noCarrierEtaShipment(at: (hours: number) => string): Shipment {
       confidence: 70,
       reason: 'Vascor Trans does not send ETAs; the estimate uses the pickup time and the average transit time of this lane.',
     },
+    customerSummary: 'Your order left our Barcelona warehouse on Oct 20. This carrier doesn\'t share arrival times, so our estimate is based on the usual transit time of this route: we expect it in Madrid on Oct 20–21.',
     documents: euRoadDocuments(id, at(-9), '8414.80', 520),
     aiSignal: {
       text: 'Possible delay: Vascor Trans sends no ETA, so our estimate has nothing to be compared with. Signal: the only update so far is the pickup, 8 h ago. Not enough evidence to alert the customer; we re-evaluate with every new update from the carrier.',
@@ -685,6 +694,7 @@ function deliveredEarlyShipment(at: (hours: number) => string): Shipment {
       confidence: 100,
       reason: 'Delivered and confirmed by the signed proof of delivery.',
     },
+    customerSummary: 'Your order left our Zaragoza plant on Oct 16 and was delivered to your Hamburg site on Oct 18 at 10:00, one day earlier than planned. The signed proof of delivery is ready to download.',
     documents: [
       ...euRoadDocuments(id, at(-101), '8467.29', 3100),
       receivedDocument(id, 'proofOfDelivery', at(-47.5)),
@@ -744,6 +754,7 @@ function simulationTargetShipment(at: (hours: number) => string): Shipment {
       confidence: 87,
       reason: 'The container is at the Bilbao terminal and Mareline Levante is on schedule.',
     },
+    customerSummary: 'Your order left our Bilbao plant on Oct 20 and is at the Bilbao port terminal, ready to be loaded on its vessel. Everything is on schedule: we expect it in Le Havre on Oct 22.',
     documents: [
       receivedDocument(id, 'commercialInvoice', at(-8), { hsCode: '8466.94', grossWeightKg: 960 }),
       receivedDocument(id, 'packingList', at(-8), { grossWeightKg: 960 }),
@@ -799,6 +810,7 @@ function routineShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(-70), 'vascor-trans', 'portal', at(-70)),
       estimatedEta: { date: at(-70), earliest: at(-70), latest: at(-70), confidence: 100, reason: 'Delivered and confirmed by the signed proof of delivery.' },
+      customerSummary: 'Your order left our Bilbao plant on Oct 16 and was delivered to your Valencia site on Oct 17 at 12:00, two hours later than planned. The signed proof of delivery is ready to download.',
       documents: [...euRoadDocuments(brennerDelivered, at(-85), '8431.39', 1450), receivedDocument(brennerDelivered, 'proofOfDelivery', at(-69))],
       exceptions: [],
     },
@@ -817,6 +829,7 @@ function routineShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(52), 'euroruta', 'api', at(-4)),
       estimatedEta: { date: at(54), earliest: at(50), latest: at(60), confidence: 80, reason: 'Not picked up yet; the estimate uses the booked pickup time and the average transit time of this lane.' },
+      customerSummary: 'Your order is booked and waiting to be picked up at our Barcelona warehouse. We expect it in Zurich on Oct 22.',
       documents: [
         receivedDocument(alpenBooked, 'commercialInvoice', at(-4), { hsCode: '9403.20', grossWeightKg: 1980 }),
         pendingDocument(alpenBooked, 'packingList'),
@@ -842,6 +855,7 @@ function routineShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(12), 'vascor-trans', 'portal', at(-2)),
       estimatedEta: { date: at(13), earliest: at(11), latest: at(15), confidence: 86, reason: 'Vascor Trans is on schedule on this lane.' },
+      customerSummary: 'Your order left our Zaragoza plant on Oct 19 and is on the road near Mérida. It\'s running on schedule: we expect it in Lisbon on Oct 20–21.',
       documents: euRoadDocuments(brennerLisbon, at(-13), '8413.70', 890),
       exceptions: [],
     },
@@ -864,6 +878,7 @@ function routineShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(34), 'nordsee-line', 'edi', at(-10)),
       estimatedEta: { date: at(34), earliest: at(31), latest: at(38), confidence: 88, reason: 'Nordsee Boreas is on schedule and the Rotterdam terminal reports no congestion.' },
+      customerSummary: 'Your order left our Bilbao plant on Oct 18 and is at sea, crossing the Bay of Biscay. Everything is on schedule: we expect it in Duisburg on Oct 21–22.',
       documents: [
         receivedDocument(nordwerkSea, 'commercialInvoice', at(-41), { hsCode: '9403.20', grossWeightKg: 4200 }),
         receivedDocument(nordwerkSea, 'packingList', at(-41), { grossWeightKg: 4200 }),
@@ -887,6 +902,7 @@ function routineShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(10), 'euroruta', 'api', at(-1.5)),
       estimatedEta: { date: at(10), earliest: at(9), latest: at(12), confidence: 91, reason: 'EuroRuta is on schedule and the Basel border queue is short this morning.' },
+      customerSummary: 'Your order left our Bilbao plant on Oct 19 and is on the road near Besançon. It\'s running on schedule: we expect it in Bern on Oct 20.',
       documents: swissRoadDocuments(alpenBern, at(-23), '8466.93', 410),
       exceptions: [],
     },
@@ -921,6 +937,7 @@ function outOfScopeShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(3), 'euroruta', 'api', at(-3)),
       estimatedEta: { date: at(3), earliest: at(2), latest: at(5), confidence: 89, reason: 'Short lane with no reported traffic.' },
+      customerSummary: 'Your order left our Lyon warehouse on Oct 20 and is on its way. Everything is on schedule: we expect it in Geneva on Oct 20.',
       documents: swissRoadDocuments(alpenGeneva, at(-4), '8205.59', 380),
       exceptions: [],
     },
@@ -940,6 +957,7 @@ function outOfScopeShipments(at: (hours: number) => string): Shipment[] {
       ]),
       carrierEta: providedEta(at(-4), 'transauto', 'api', at(-30)),
       estimatedEta: { date: at(8), earliest: at(2), latest: at(20), confidence: 60, reason: 'No carrier update for 30 h, so the estimate falls back to the average transit time of this lane.' },
+      customerSummary: 'Your order left our Lyon warehouse on Oct 18 and was last reported near Nancy on Oct 19. The carrier hasn\'t sent an update since, so we\'re asking them for news and basing our estimate on the usual transit time of this route: we expect it in Frankfurt on Oct 20–21 instead of Oct 20.',
       documents: euRoadDocuments(nordwerkFrankfurt, at(-41), '8466.94', 1020),
       exceptions: [
         {
@@ -997,6 +1015,8 @@ export type SimulatedCarrierEvent = {
   carrierEta: CarrierEta
   estimatedEta: EstimatedEta
   exception: ShipmentException
+  /** Customer summary rewritten for the roll, quoting the new estimate. */
+  customerSummary: string
 }
 
 /**
@@ -1051,5 +1071,6 @@ export function createSimulatedCarrierEvent(receivedAt: Date, demoNow: Date = ne
         body: 'Hello Brenner Iberia team, the vessel carrying shipment SH-1060 (PO 4500-1203) will leave Bilbao without your container. It is booked on the next sailing and we now expect delivery about 3 days later than planned.',
       },
     },
+    customerSummary: 'Your order left our Bilbao plant on Oct 20, but the vessel is leaving Bilbao without your container. It\'s booked on the next sailing, which departs in about 3 days, so we expect it in Le Havre on Oct 25–26 instead of Oct 22.',
   }
 }

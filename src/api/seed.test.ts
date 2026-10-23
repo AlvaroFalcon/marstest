@@ -21,6 +21,15 @@ function shipmentById(state: DemoState, shipmentId: string): Shipment {
   return shipment
 }
 
+const dayFormatter = new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' })
+
+/** The days of the estimate window as the hand-written summaries quote them ("Oct 22", "–23"). */
+function quotedEstimateDays({ estimatedEta }: Pick<Shipment, 'estimatedEta'>): string[] {
+  const firstDay = dayFormatter.format(new Date(estimatedEta.earliest))
+  const lastDayOfMonth = new Date(estimatedEta.latest).getUTCDate()
+  return firstDay.endsWith(` ${lastDayOfMonth}`) ? [firstDay] : [firstDay, `–${lastDayOfMonth}`]
+}
+
 function hoursBetween(fromIsoDate: string, toIsoDate: string): number {
   return (new Date(toIsoDate).getTime() - new Date(fromIsoDate).getTime()) / HOUR_MS
 }
@@ -240,6 +249,19 @@ describe('seeded AI signals', () => {
   })
 })
 
+describe('seeded customer summaries', () => {
+  it('quote the days of the estimate and the destination city of their own shipment', () => {
+    const { shipments } = createSeed()
+
+    for (const shipment of shipments) {
+      for (const quotedDay of quotedEstimateDays(shipment)) {
+        expect(shipment.customerSummary, shipment.id).toContain(quotedDay)
+      }
+      expect(shipment.customerSummary, shipment.id).toContain(shipment.destination.city)
+    }
+  })
+})
+
 describe('createSimulatedCarrierEvent', () => {
   it('builds a vessel-rolled event for SH-1060 received at the given time', () => {
     const receivedAt = new Date('2026-10-20T10:15:00.000Z')
@@ -252,5 +274,14 @@ describe('createSimulatedCarrierEvent', () => {
     expect(event.exception.draft).toMatchObject({ body: expect.stringContaining('Brenner Iberia') })
     expect(event.exception.draft).toMatchObject({ body: expect.stringContaining('PO 4500-1203') })
     expect(event.legs[1]).toMatchObject({ vessel: 'Mareline Poniente', voyage: 'ML-0846' })
+  })
+
+  it('rewrites the customer summary with the days of the new estimate', () => {
+    const event = createSimulatedCarrierEvent(new Date('2026-10-20T10:15:00.000Z'))
+
+    expect(event.customerSummary).toContain('next sailing')
+    for (const quotedDay of quotedEstimateDays(event)) {
+      expect(event.customerSummary).toContain(quotedDay)
+    }
   })
 })

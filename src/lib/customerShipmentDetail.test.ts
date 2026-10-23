@@ -155,12 +155,12 @@ describe('buildCustomerShipmentDetail', () => {
   })
 
   describe('summary and documents', () => {
-    it('builds the summary with the origin city resolved from the sites', () => {
+    it('builds the summary from the hand-written text of the shipment', () => {
       const shipment = getSeedShipment('SH-1042')
 
       const detail = buildCustomerShipmentDetail(shipment, getReferenceData(), NOW)
 
-      expect(detail.summary.text).toContain('Your order left Zaragoza on Oct 14.')
+      expect(detail.summary.text).toContain('Your order left our Zaragoza plant on Oct 14')
       expect(detail.summary.eventCount).toBe(6)
     })
 

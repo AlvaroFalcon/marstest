@@ -21,7 +21,7 @@ test.describe('customer shipment detail', () => {
     await expect(page.getByText('At risk', { exact: true })).toBeVisible()
     await expect(page.getByText('No update for 25 h')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'AI summary' })).toBeVisible()
-    await expect(page.getByText('Your order left Zaragoza on Oct 14. Latest update on Oct 19: it is waiting for customs clearance at Southampton port.')).toBeVisible()
+    await expect(page.getByText(/^Your order left our Zaragoza plant on Oct 14 and reached Southampton port on Oct 19\./)).toBeVisible()
     await expect(page.getByText('Based on 6 carrier events')).toBeVisible()
     await expect(page.getByText('Carrier ETA', { exact: true })).toBeVisible()
     await expect(page.getByText('Our estimate', { exact: true })).toBeVisible()
