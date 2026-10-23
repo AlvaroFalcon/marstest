@@ -7,6 +7,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
+  // Playwright defaults to half the cores, which is a single worker on the 2-core CI runner.
+  workers: process.env.CI ? '100%' : undefined,
   // CI also writes the HTML report that the workflow uploads when the E2E job fails.
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
