@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { useIntl } from 'react-intl'
+import { Navigate } from 'react-router'
 import { ExceptionStatusBadge } from '@/components/exceptions/ExceptionStatusBadge'
 import { RecommendedAction } from '@/components/exceptions/RecommendedAction'
 import { toExceptionStatus } from '@/components/exceptions/toExceptionStatus'
@@ -23,6 +24,7 @@ import { shouldOfferCertificateActions } from '@/lib/customerNotice'
 import { getFreshness } from '@/lib/freshness'
 import { buildSourceEventRows } from '@/lib/sourceEvents'
 import { cn } from '@/lib/utils'
+import routes from '@/routes'
 
 export type ExceptionDetailPanelProps = {
   shipmentId: string
@@ -49,18 +51,16 @@ type ReadyDetailProps = {
   shipment: Shipment
   referenceData: ReferenceData
   isCard: boolean
-  /** Shown when the shipment has no open exception. */
-  unavailable: ReactNode
 }
 
-function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDetailProps) {
+function ReadyDetail({ shipment, referenceData, isCard }: ReadyDetailProps) {
   const now = useNow()
   const sourceEvents = useSourceEventsSheet()
   const exception = pickMostUrgentException(shipment)
 
-  // A shipment without an open exception has no exception detail; it looks like an unknown id.
+  // The exception was resolved (or never existed): the shipment detail is the closest screen left.
   if (exception === null) {
-    return unavailable
+    return <Navigate to={routes.ops.shipment(shipment.id)} replace />
   }
 
   const freshness = getFreshness(shipment, now)
@@ -109,8 +109,9 @@ function ReadyDetail({ shipment, referenceData, isCard, unavailable }: ReadyDeta
 /**
  * Detail of one open exception for the ops screen. On wide layouts the detail is one white card
  * beside the inbox; with a back link (narrow layouts) its sections sit directly on the page, as in
- * the mobile design. A missing id, a shipment outside the ops scope and a shipment without an open
- * exception all show the same "isn't available" card, so the screen never reveals which one it was.
+ * the mobile design. A missing id and a shipment outside the ops scope show the same "isn't available"
+ * card, so the screen never reveals which one it was. A shipment in scope without an open exception
+ * (for example one a carrier event just resolved) redirects to its ops shipment detail.
  * The back link, when given, is shown in every state so a narrow layout never traps the user.
  */
 export function ExceptionDetailPanel({ shipmentId, backHref, className }: ExceptionDetailPanelProps) {
@@ -147,7 +148,6 @@ export function ExceptionDetailPanel({ shipmentId, backHref, className }: Except
           shipment={shipment.shipment}
           referenceData={shipment.referenceData}
           isCard={isCard}
-          unavailable={unavailable}
         />
       )
       break

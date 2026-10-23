@@ -1,4 +1,4 @@
-import { createSeed, createSimulatedCarrierEvent } from '@/api/seed'
+import { createScriptedEvents, createSeed } from '@/api/seed'
 import type { EventMapping, MilestoneStatus, RawCarrierEvent } from '@/api/types'
 import { normalizeStatus } from '@/lib/normalizeStatus'
 
@@ -44,7 +44,13 @@ describe('normalizeStatus', () => {
     )
 
     it('maps the simulated SH-1060 event to vessel rolled with its rule label', () => {
-      const { rawEvent } = createSimulatedCarrierEvent(new Date('2026-10-20T10:00:00.000Z'))
+      const [rolledEvent] = createScriptedEvents(new Date('2026-10-20T10:00:00.000Z'))
+      const rawEvent = {
+        id: 'SH-1060-E4',
+        receivedAt: '2026-10-20T10:00:00.000Z',
+        normalizedStatus: rolledEvent.milestone.status,
+        ...rolledEvent.carrierMessage,
+      }
 
       const result = normalizeStatus(rawEvent)
 

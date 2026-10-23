@@ -15,7 +15,7 @@ test.describe('simulate carrier event', () => {
 
     await simulateCarrierEvent(page)
 
-    await expect(page.getByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeVisible()
+    await expect(page.getByText('SH-1060: vessel rolled to the next sailing')).toBeVisible()
     await expect(page.getByRole('button', { name: 'View' })).toBeVisible()
     const card = page.getByRole('link', { name: /SH-1060/ })
     await expect(card).toBeVisible()
@@ -58,17 +58,6 @@ test.describe('simulate carrier event', () => {
     }
   })
 
-  test('says it was already simulated on a repeat click', async ({ page }) => {
-    await page.goto('/ops/exceptions')
-    await simulateCarrierEvent(page)
-    await expect(page.getByRole('link', { name: /SH-1060/ })).toBeVisible()
-
-    await simulateCarrierEvent(page)
-
-    await expect(page.getByText('Already simulated. Reset the demo to run it again.')).toBeVisible()
-    await expect(page.getByRole('link', { name: /SH-1060/ })).toHaveCount(1)
-  })
-
   test('keeps the event and the New marker after a reload', async ({ page }) => {
     await page.goto('/ops/exceptions')
     await simulateCarrierEvent(page)
@@ -106,15 +95,113 @@ test.describe('simulate carrier event', () => {
     await expect(page.getByRole('link', { name: /SH-1060/ })).toHaveCount(0)
     await expect(page.getByLabel('Inbox summary')).toContainText(/Need attention\s*5/)
     await simulateCarrierEvent(page)
-    await expect(page.getByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeVisible()
+    await expect(page.getByText('SH-1060: vessel rolled to the next sailing')).toBeVisible()
   })
 
-  test('shows customers the toast without a View action', async ({ page }) => {
-    await page.goto('/customers/nordwerk/shipments')
+  test('applies the second ops event on SH-1053 and opens its exception', async ({ page }) => {
+    await page.goto('/ops/exceptions')
+    await simulateCarrierEvent(page)
+    await expect(page.getByText('SH-1060: vessel rolled to the next sailing')).toBeVisible()
 
     await simulateCarrierEvent(page)
 
-    await expect(page.getByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeVisible()
-    await expect(page.getByRole('button', { name: 'View' })).toHaveCount(0)
+    await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+    await expect(page.getByRole('link', { name: /SH-1053/ })).toBeVisible()
+    await expect(page.getByLabel('Inbox summary')).toContainText(/Need attention\s*7/)
+  })
+
+  test('sends ops to the shipment detail from the View action of an event that closes an exception', async ({ page }) => {
+    await page.goto('/ops/exceptions')
+    await simulateCarrierEvent(page)
+    await expect(page.getByText('SH-1060: vessel rolled to the next sailing')).toBeVisible()
+    await simulateCarrierEvent(page)
+    await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+    await page.reload()
+    await expect(page.getByRole('link', { name: /SH-1053/ })).toBeVisible()
+    await simulateCarrierEvent(page)
+    await expect(page.getByText('SH-1042: customs released the container')).toBeVisible()
+
+    await page.getByRole('button', { name: 'View' }).click()
+
+    await expect(page).toHaveURL('/ops/shipments/SH-1042')
+    await expect(page.getByRole('heading', { level: 1, name: /^SH-1042/ })).toBeVisible()
+  })
+
+  test('removes the closed exception from the inbox', async ({ page }) => {
+    await page.goto('/ops/exceptions')
+    await expect(page.getByRole('link', { name: /SH-1042/ })).toBeVisible()
+    for (let click = 0; click < 3; click += 1) {
+      await simulateCarrierEvent(page)
+    }
+
+    await expect(page.getByText('SH-1042: customs released the container')).toBeVisible()
+
+    await expect(page.getByRole('link', { name: /SH-1042/ })).toHaveCount(0)
+    await expect(page.getByLabel('Inbox summary')).toContainText(/Need attention\s*6/)
+  })
+
+  test.describe('customer view', () => {
+    test('walks the three Nordwerk events and then says there are no more', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1042: customs released the container')).toBeVisible()
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1035: a second driver took over, truck back on the road')).toBeVisible()
+      await simulateCarrierEvent(page)
+
+      await expect(page.getByText('No more events here. Reset the demo to run them again.')).toBeVisible()
+    })
+
+    test('opens the customer shipment detail from the View action', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+
+      await simulateCarrierEvent(page)
+      await page.getByRole('button', { name: 'View' }).click()
+
+      await expect(page).toHaveURL('/customers/nordwerk/shipments/SH-1053')
+      await expect(page.getByRole('heading', { level: 1, name: /^SH-1053/ })).toBeVisible()
+    })
+
+    test('runs the first Alpen event on its own shipment SH-1037', async ({ page }) => {
+      await page.goto('/customers/alpen-werkzeug/shipments')
+
+      await simulateCarrierEvent(page)
+
+      await expect(page.getByText('SH-1037: cleared the Swiss border')).toBeVisible()
+    })
+
+    test('shows in ops the event applied from the customer view and skips it in the ops script', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+
+      await page.goto('/ops/exceptions')
+
+      const card = page.getByRole('link', { name: /SH-1053/ })
+      await expect(card).toBeVisible()
+      await expect(card).toContainText('New')
+      await expect(page.getByLabel('Inbox summary')).toContainText(/Need attention\s*6/)
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1060: vessel rolled to the next sailing')).toBeVisible()
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1042: customs released the container')).toBeVisible()
+    })
+
+    test('restarts the customer script after Reset demo', async ({ page }) => {
+      await page.goto('/customers/nordwerk/shipments')
+      await simulateCarrierEvent(page)
+      await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+
+      await page.reload()
+      await page.getByRole('button', { name: 'Reset demo' }).click()
+      await expect(page.getByText('Demo reset')).toBeVisible()
+      await page.reload()
+      await simulateCarrierEvent(page)
+
+      await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
+    })
   })
 })

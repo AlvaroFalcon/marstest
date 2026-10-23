@@ -37,11 +37,11 @@ test.describe('demo story', () => {
 
     await page.getByRole('button', { name: /^Simulate (carrier )?event$/ }).click()
 
-    await expect(page.getByText('New carrier event: SH-1060 vessel rolled to next sailing')).toBeVisible()
+    await expect(page.getByText('SH-1053: vessel waiting for a berth in Rotterdam')).toBeVisible()
     await page.getByRole('combobox', { name: 'Viewing as' }).click()
     await page.getByRole('option', { name: 'Ops · Spain sites' }).click()
     await expect(page).toHaveURL('/ops/exceptions')
-    await expect(page.getByRole('link', { name: /SH-1060/ })).toContainText('New')
+    await expect(page.getByRole('link', { name: /SH-1053/ })).toContainText('New')
     if (!isMobile) {
       await expect(page.getByRole('link', { name: /SH-1042/ })).toContainText('Customer notified')
     }
