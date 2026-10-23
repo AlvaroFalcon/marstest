@@ -7,7 +7,7 @@ import type { DemoState } from '@/api/types'
  * `sessionStorage` key of the demo state. Bump the version when the schema or the seed changes:
  * a tab holding an older but still valid state would otherwise keep stale data until "Reset demo".
  */
-export const DEMO_STATE_STORAGE_KEY = 'marstest:demo-state:v3'
+export const DEMO_STATE_STORAGE_KEY = 'marstest:demo-state:v5'
 
 /** The part of the Web Storage API the mock database needs, so tests can pass a fake. */
 export type DemoStorage = Pick<Storage, 'getItem' | 'setItem'>

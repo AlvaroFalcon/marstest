@@ -82,7 +82,7 @@ export function DataState<TData>({ query, emptyState, children }: DataStateProps
 **Intent:** make a value available to a subtree without prop drilling (Context).
 
 **Use when** the value is truly global and changes rarely (theme, current user, selected role, locale). Expose it through a hook (`useCurrentRole`) that throws when used outside the provider.
-**Avoid when** the value changes often or has many consumers that only need part of it: Context re-renders every consumer, so use zustand with selectors. Server data belongs in TanStack Query, not Context.
+**Avoid when** the value changes often or has many consumers that only need part of it: Context re-renders every consumer, so split it into smaller contexts or keep the value in the URL. Server data belongs in TanStack Query, not Context.
 
 ## Controlled and uncontrolled
 

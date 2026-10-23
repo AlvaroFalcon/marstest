@@ -364,6 +364,44 @@ export const referenceDataSchema = z.object({
 /** @see referenceDataSchema */
 export type ReferenceData = z.infer<typeof referenceDataSchema>
 
+/**
+ * What a carrier event did to the shipment, stored on its notification when it is created so the
+ * severity of an old notification never changes after its exception is closed later.
+ */
+export const notificationEffectSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('opened'), exceptionType: exceptionTypeSchema }),
+  z.object({ kind: z.literal('closed') }),
+  z.object({ kind: z.literal('delivered') }),
+  z.object({ kind: z.literal('update') }),
+])
+
+/** @see notificationEffectSchema */
+export type NotificationEffect = z.infer<typeof notificationEffectSchema>
+
+/**
+ * What a simulated carrier event leaves behind for the viewers to find later, in the notification
+ * panel. `readBy` holds the viewer keys (see `getViewerKey`) that already opened it, so ops and
+ * each customer keep their own read state. `customerId` scopes who may see it.
+ */
+export const carrierNotificationSchema = z.object({
+  id: z.string(),
+  eventId: z.string(),
+  shipmentId: z.string(),
+  customerId: z.string(),
+  headline: z.string(),
+  receivedAt: isoDateTimeSchema,
+  /**
+   * What the event did. `opened` sends ops to the exception instead of the shipment. Defaults to
+   * `update` so a notification persisted before this field existed still parses (its effect cannot
+   * be guessed).
+   */
+  effect: notificationEffectSchema.default({ kind: 'update' }),
+  readBy: z.array(z.string()),
+})
+
+/** @see carrierNotificationSchema */
+export type CarrierNotification = z.infer<typeof carrierNotificationSchema>
+
 /** The whole demo state: what the mock database holds and persists to `sessionStorage`. */
 export const demoStateSchema = referenceDataSchema.extend({
   shipments: z.array(shipmentSchema),
@@ -378,6 +416,11 @@ export const demoStateSchema = referenceDataSchema.extend({
    * triggered it. Defaults to empty so a state persisted before this field existed still parses.
    */
   appliedEventIds: z.array(z.string()).default([]),
+  /**
+   * Notifications of the applied events, oldest first. Defaults to empty so a state persisted
+   * before this field existed still parses.
+   */
+  notifications: z.array(carrierNotificationSchema).default([]),
 })
 
 /** @see demoStateSchema */

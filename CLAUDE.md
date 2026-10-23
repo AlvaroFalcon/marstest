@@ -36,13 +36,10 @@ All installed (decided in `docs/decisions/0009-full-recommended-stack.md`).
 | Styling | [Tailwind CSS v4](https://tailwindcss.com/) (CSS-first config in `src/index.css`, no `tailwind.config.ts`) |
 | Routing | [react-router](https://reactrouter.com/) v7 |
 | Server state / fetching | [TanStack Query](https://tanstack.com/query) v5 |
-| Global client state | [zustand](https://github.com/pmndrs/zustand) (only if Context is not enough) |
 | Theme | [next-themes](https://github.com/pacocoursey/next-themes) — installed by the shadcn `sonner` primitive to read the current theme; also drives the dark-mode toggle (`docs/decisions/0037-keep-next-themes-for-sonner-theme.md`) |
 | Toasts | [sonner](https://sonner.emilkowal.ski/) through the shadcn `sonner` primitive |
-| Forms | [react-hook-form](https://react-hook-form.com/) + `@hookform/resolvers` (pinned to `~5.2.2`: from 5.4.3 its optional peer dependencies make npm write a lockfile that `npm ci` rejects) |
 | Validation | [zod](https://zod.dev/) v4 |
 | Tables | [TanStack Table](https://tanstack.com/table) v9 + shadcn `Data Table` |
-| HTTP | [ky](https://github.com/sindresorhus/ky) |
 | Utilities | [es-toolkit](https://es-toolkit.dev/) (prefer over lodash and hand-written helpers) |
 | i18n | [react-intl](https://formatjs.github.io/docs/react-intl/) (messages in `src/locales/`) |
 | Testing | [Vitest](https://vitest.dev/) + jsdom, [React Testing Library](https://testing-library.com/), [msw](https://mswjs.io/) v3, [Playwright](https://playwright.dev/) |

@@ -3,7 +3,8 @@ import { createMockDb } from '@/api/mockDb'
 import type { MockDb } from '@/api/mockDb'
 import { createScriptedEvents, DEMO_NOW_ISO, getEventScript } from '@/api/seed'
 import type { ScriptedCarrierEvent } from '@/api/seed'
-import type { DemoState, ReferenceData, Shipment, ShipmentException, Viewer } from '@/api/types'
+import { getViewerKey } from '@/lib/notifications'
+import type { CarrierNotification, DemoState, NotificationEffect, ReferenceData, Shipment, ShipmentException, Viewer } from '@/api/types'
 
 /** Simulated network latency, so loading states are visible in the demo (ADR 0033). */
 export const DEFAULT_LATENCY_MS = 200
@@ -44,10 +45,12 @@ export type SimulateCarrierEventResult
   = | {
     kind: 'applied'
     shipment: Shipment
+    /** Id of the notification the event created, so the toast "View" can mark it read. */
+    notificationId: string
     /** Toast text of the event. */
     headline: string
-    /** True when the event opened an exception, so ops can jump to it. */
-    opensException: boolean
+    /** What the event did, so ops can jump to the exception it opened. */
+    effect: NotificationEffect
   }
   | { kind: 'scriptFinished' }
 
@@ -82,6 +85,13 @@ export type ShipmentsApi = {
   listUnseenExceptionShipmentIds: () => Promise<string[]>
   /** Clears the "new" marker of one shipment's exception. Idempotent: unknown or seen ids change nothing. */
   markExceptionSeen: (shipmentId: string) => Promise<void>
+  /**
+   * Notifications the viewer may see, newest first: ops see all of them, a customer only those of
+   * their own shipments. Read state is per viewer and left to the caller (see `isNotificationRead`).
+   */
+  listNotifications: (viewer: Viewer) => Promise<CarrierNotification[]>
+  /** Marks one notification read for this viewer only. Idempotent: unknown or read ids change nothing. */
+  markNotificationRead: (viewer: Viewer, notificationId: string) => Promise<void>
   /** Restores the seed. */
   resetDemo: () => Promise<void>
 }
@@ -102,8 +112,15 @@ function findException(shipment: Shipment, exceptionId: string): ShipmentExcepti
   return exception
 }
 
-/** Applies a scripted event to its shipment inside a `db.write` and returns whether it opened an exception. */
-function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, receivedAt: string): boolean {
+function getNotificationId(eventId: string): string {
+  return `N-${eventId}`
+}
+
+/**
+ * Applies a scripted event to its shipment inside a `db.write`, adds its notification and returns
+ * the effect it had. An opened or closed exception wins over a delivery.
+ */
+function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, receivedAt: string): NotificationEffect {
   const shipment = findShipment(state, event.shipmentId)
   const previousRawEvent = shipment.rawEvents.at(-1)
   const rawEventId = `${shipment.id}-E${shipment.rawEvents.length + 1}`
@@ -161,8 +178,34 @@ function applyScriptedEvent(state: DemoState, event: ScriptedCarrierEvent, recei
     state.unseenExceptionShipmentIds.push(shipment.id)
   }
   state.appliedEventIds.push(event.id)
+  const effect = getNotificationEffect(event)
+  state.notifications.push({
+    id: getNotificationId(event.id),
+    eventId: event.id,
+    shipmentId: shipment.id,
+    customerId: shipment.customerId,
+    headline: event.headline,
+    receivedAt,
+    effect,
+    readBy: [],
+  })
 
-  return exceptionEffect.kind === 'opens'
+  return effect
+}
+
+/** Classifies a scripted event for its notification: opened, closed, delivered or plain update. */
+function getNotificationEffect(event: ScriptedCarrierEvent): NotificationEffect {
+  const { exceptionEffect } = event
+  if (exceptionEffect.kind === 'opens') {
+    return { kind: 'opened', exceptionType: exceptionEffect.type }
+  }
+  if (exceptionEffect.kind === 'closes') {
+    return { kind: 'closed' }
+  }
+  if (event.milestone.status === 'delivered') {
+    return { kind: 'delivered' }
+  }
+  return { kind: 'update' }
 }
 
 /** Creates the fake API over `db`. The app uses the {@link shipmentsApi} instance. */
@@ -222,15 +265,16 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
         return { kind: 'scriptFinished' }
       }
 
-      let opensException = false
+      let effect: NotificationEffect = { kind: 'update' }
       db.write((state) => {
-        opensException = applyScriptedEvent(state, event, receivedAt.toISOString())
+        effect = applyScriptedEvent(state, event, receivedAt.toISOString())
       })
       return {
         kind: 'applied',
         shipment: findShipment(db.read(), event.shipmentId),
+        notificationId: getNotificationId(event.id),
         headline: event.headline,
-        opensException,
+        effect,
       }
     }),
 
@@ -239,6 +283,25 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
     markExceptionSeen: shipmentId => respond(() => {
       db.write((state) => {
         state.unseenExceptionShipmentIds = state.unseenExceptionShipmentIds.filter(candidate => candidate !== shipmentId)
+      })
+    }),
+
+    listNotifications: viewer => respond(() => {
+      const { notifications } = db.read()
+      const visible = viewer.role === 'ops'
+        ? notifications
+        : notifications.filter(notification => notification.customerId === viewer.customerId)
+      // Insertion order, not `receivedAt`: the demo clock is frozen, so every timestamp ties.
+      return visible.toReversed()
+    }),
+
+    markNotificationRead: (viewer, notificationId) => respond(() => {
+      const viewerKey = getViewerKey(viewer)
+      db.write((state) => {
+        const notification = state.notifications.find(candidate => candidate.id === notificationId)
+        if (notification && !notification.readBy.includes(viewerKey)) {
+          notification.readBy.push(viewerKey)
+        }
       })
     }),
 

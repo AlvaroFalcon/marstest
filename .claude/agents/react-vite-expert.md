@@ -23,7 +23,7 @@ Everything you write — code, identifiers, comments, JSDoc, commit messages, lo
 - `type` over `interface`. No `any`, no `as` casting: use type guards or zod.
 - Resolve nullable values early; children receive non-null props.
 - Project structure from CLAUDE.md §4: pages in `src/pages/` named `<Name>Page.tsx`, every path in `src/routes.ts`, hooks in `src/hooks/`, pure logic in `src/lib/`, one folder per external service.
-- State priority: server state (TanStack Query) → URL state (zod-validated search params) → Context → zustand. No Redux. No `useEffect` + `fetch`.
+- State priority: server state (TanStack Query) → URL state (zod-validated search params) → Context. No Redux. No `useEffect` + `fetch`.
 - No manual `useMemo` / `useCallback` / `memo` unless profiling proves the need.
 - Extract substantial or complex JSX compositions into named components.
 - No commented-out code, no `TODO` comments, no single-character names.

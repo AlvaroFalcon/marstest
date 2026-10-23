@@ -28,7 +28,7 @@ The `Record` type guarantees at compile time that every mode has a strategy.
 
 **Intent:** notify subscribers when a subject changes.
 
-**Use when** several unrelated parts react to the same event (notifications, real-time updates, cross-component sync). In React you rarely write it by hand: **zustand stores**, Context and TanStack Query cache are observers already. Write it manually only for non-React integrations (WebSocket, `BroadcastChannel`), and connect it with `useSyncExternalStore`.
+**Use when** several unrelated parts react to the same event (notifications, real-time updates, cross-component sync). In React you rarely write it by hand: Context and the TanStack Query cache are observers already. Write it manually only for non-React integrations (WebSocket, `BroadcastChannel`), and connect it with `useSyncExternalStore`.
 **Avoid when** a parent can pass a callback prop.
 
 ```ts

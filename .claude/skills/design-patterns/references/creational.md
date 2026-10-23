@@ -92,12 +92,10 @@ export class ShipmentQueryBuilder {
 **Avoid when** the instance holds mutable state that tests need to reset; export a factory and create the instance in `App.tsx` instead.
 
 ```ts
-// src/api/client.ts
-import ky from "ky";
-import { config } from "../config";
+// src/config.ts — environment validated once at start-up, one shared config object.
+const environment = environmentSchema.parse(import.meta.env);
 
-/** Shared HTTP client: base URL, timeout and auth headers configured once. */
-export const apiClient = ky.create({ prefixUrl: config.apiUrl, timeout: 10_000 });
+export const config = { apiUrl: environment.VITE_API_URL, defaultLocale: "en" } as const;
 ```
 
 ```ts
