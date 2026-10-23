@@ -68,6 +68,18 @@ function useBadgeContent(kind: ProvenanceBadgeProps['kind']): BadgeContent {
   }
 }
 
+type SrOnlyPrefixProps = {
+  prefix: string | undefined
+}
+
+function SrOnlyPrefix({ prefix }: SrOnlyPrefixProps) {
+  if (prefix === undefined) {
+    return null
+  }
+
+  return <span className="sr-only">{prefix}</span>
+}
+
 /**
  * Small label that tells where a piece of data comes from when it is not a plain carrier fact
  * (ADR 0028): "Carrier ETA", "Estimated · 78%", "Derived from GPS", "No update for 48 h". The
@@ -80,7 +92,7 @@ export function ProvenanceBadge({ kind, className }: ProvenanceBadgeProps) {
   return (
     <span className={cn(provenanceBadgeVariants({ tone }), className)}>
       <Icon aria-hidden className="size-3.5 shrink-0" />
-      {srOnlyPrefix === undefined ? null : <span className="sr-only">{srOnlyPrefix}</span>}
+      <SrOnlyPrefix prefix={srOnlyPrefix} />
       {label}
     </span>
   )

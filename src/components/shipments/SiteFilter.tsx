@@ -59,6 +59,28 @@ type SiteRowProps = {
   showCountLabel: boolean
 }
 
+type SiteRowCountProps = {
+  count: number
+  countText: string
+  showCountLabel: boolean
+}
+
+/** The count of a row: the full label, or only the number with the label kept for screen readers. */
+function SiteRowCount({ count, countText, showCountLabel }: SiteRowCountProps) {
+  const intl = useIntl()
+
+  if (showCountLabel) {
+    return countText
+  }
+
+  return (
+    <>
+      <span aria-hidden="true">{intl.formatNumber(count)}</span>
+      <span className="sr-only">{countText}</span>
+    </>
+  )
+}
+
 /**
  * One radio row. The radio button covers the whole row but is transparent: the check icon is the
  * visible indicator (no circles), and the row shows the focus ring through `:has(:focus-visible)`.
@@ -85,14 +107,7 @@ function SiteRow({ value, name, isSelected, count, countKind, showCountLabel }: 
       <Check aria-hidden="true" className={cn('size-4 text-info', !isSelected && 'invisible')} />
       <span id={nameId} className="flex-1">{name}</span>
       <span id={countId} className="text-muted-foreground tabular-nums">
-        {showCountLabel
-          ? countText
-          : (
-              <>
-                <span aria-hidden="true">{intl.formatNumber(count)}</span>
-                <span className="sr-only">{countText}</span>
-              </>
-            )}
+        <SiteRowCount count={count} countText={countText} showCountLabel={showCountLabel} />
       </span>
     </div>
   )
@@ -164,6 +179,33 @@ function SiteFilterList({
   )
 }
 
+type SiteFilterTriggerLabelProps = {
+  selectedOption: SiteFilterOption | undefined
+  inScopeSiteCount: number
+}
+
+function SiteFilterTriggerLabel({ selectedOption, inScopeSiteCount }: SiteFilterTriggerLabelProps) {
+  const intl = useIntl()
+
+  if (selectedOption === undefined) {
+    return (
+      <CompactText
+        compact={intl.formatMessage({ id: 'siteFilter.triggerAllShort' }, { count: inScopeSiteCount })}
+        full={intl.formatMessage({ id: 'siteFilter.triggerAll' }, { count: inScopeSiteCount })}
+      />
+    )
+  }
+
+  return (
+    <span className="truncate">
+      {intl.formatMessage(
+        { id: 'siteFilter.triggerSite' },
+        { site: selectedOption.site.name, count: selectedOption.exceptionCount },
+      )}
+    </span>
+  )
+}
+
 /**
  * Site filter of the exceptions inbox. The trigger shows the current choice with a count; the list
  * opens in a popover on wide layouts and in a bottom sheet on narrow ones, and picking a row
@@ -208,20 +250,7 @@ export function SiteFilter({
   const trigger = (
     <Button variant="outline" className={cn('max-w-full', className)}>
       <Factory aria-hidden="true" />
-      {selectedOption === undefined
-        ? (
-            <>
-              <CompactText compact={intl.formatMessage({ id: 'siteFilter.triggerAllShort' }, { count: inScopeOptions.length })} full={intl.formatMessage({ id: 'siteFilter.triggerAll' }, { count: inScopeOptions.length })} />
-            </>
-          )
-        : (
-            <span className="truncate">
-              {intl.formatMessage(
-                { id: 'siteFilter.triggerSite' },
-                { site: selectedOption.site.name, count: selectedOption.exceptionCount },
-              )}
-            </span>
-          )}
+      <SiteFilterTriggerLabel selectedOption={selectedOption} inScopeSiteCount={inScopeOptions.length} />
       <ChevronDown aria-hidden="true" />
     </Button>
   )

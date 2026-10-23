@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import { useIntl } from 'react-intl'
-import { createColumnHelper, tableFeatures, useTable } from '@tanstack/react-table'
+import { createColumnHelper, FlexRender, tableFeatures, useTable, type Header } from '@tanstack/react-table'
 import { ArrowDown, ArrowUp, ChevronRight, ChevronsUpDown } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -63,6 +63,18 @@ function SortHeaderButton({ label, direction, onClick }: SortHeaderButtonProps) 
       <Icon aria-hidden="true" />
     </Button>
   )
+}
+
+type HeaderContentProps = {
+  header: Header<typeof features, ShipmentListRow>
+}
+
+function HeaderContent({ header }: HeaderContentProps) {
+  if (header.isPlaceholder) {
+    return null
+  }
+
+  return <FlexRender header={header} />
 }
 
 /**
@@ -192,7 +204,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
                 aria-sort={getAriaSort(header.column.id)}
                 className="text-caption font-medium whitespace-normal text-muted-foreground"
               >
-                {header.isPlaceholder ? null : <table.FlexRender header={header} />}
+                <HeaderContent header={header} />
               </TableHead>
             ))}
           </TableRow>
@@ -203,7 +215,7 @@ export function ShipmentsTable({ rows, now, sort, onSortChange, className }: Shi
           <TableRow key={row.id} className="relative">
             {row.getAllCells().map(cell => (
               <TableCell key={cell.id} className="py-3 whitespace-normal">
-                <table.FlexRender cell={cell} />
+                <FlexRender cell={cell} />
               </TableCell>
             ))}
           </TableRow>

@@ -22,6 +22,32 @@ export type JourneyProps = {
   className?: string
 }
 
+type StepSelectHintProps = {
+  isShown: boolean
+}
+
+function StepSelectHint({ isShown }: StepSelectHintProps) {
+  const intl = useIntl()
+
+  if (!isShown) {
+    return null
+  }
+
+  return (
+    <CardDescription>
+      {/* Both texts are in the DOM; the container query hides one so only one is announced. */}
+      <span className="journey-row:hidden">{intl.formatMessage({ id: 'journey.hint.tap' })}</span>
+      <span className="
+        hidden
+        journey-row:inline
+      "
+      >
+        {intl.formatMessage({ id: 'journey.hint.click' })}
+      </span>
+    </CardDescription>
+  )
+}
+
 /**
  * Card with the route of a shipment as arrow-linked nodes (ADR 0024). Wide cards lay the nodes out
  * in a row with the leg label under each arrow; narrow ones (and journeys with many steps, which
@@ -38,21 +64,7 @@ export function Journey({ shipment, now, carrierNames, onStepSelect, className }
     <Card className={cn('@container/journey', className)} data-density={density}>
       <CardHeader>
         <h2 className="text-base font-semibold">{intl.formatMessage({ id: 'journey.title' })}</h2>
-        {onStepSelect
-          ? (
-              <CardDescription>
-                {/* Both texts are in the DOM; the container query hides one so only one is announced. */}
-                <span className="journey-row:hidden">{intl.formatMessage({ id: 'journey.hint.tap' })}</span>
-                <span className="
-                  hidden
-                  journey-row:inline
-                "
-                >
-                  {intl.formatMessage({ id: 'journey.hint.click' })}
-                </span>
-              </CardDescription>
-            )
-          : null}
+        <StepSelectHint isShown={onStepSelect !== undefined} />
       </CardHeader>
       <CardContent>
         <ol

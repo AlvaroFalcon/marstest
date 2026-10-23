@@ -10,9 +10,12 @@ import { ShipmentsFooter } from '@/components/shipments/ShipmentsFooter'
 import { ShipmentsListMessage } from '@/components/shipments/ShipmentsListMessage'
 import { ShipmentsListSkeleton } from '@/components/shipments/ShipmentsListSkeleton'
 import { ShipmentsSearchBox } from '@/components/shipments/ShipmentsSearchBox'
-import { useCustomerShipments } from '@/hooks/useCustomerShipments'
+import { useCustomerShipments, type UseCustomerShipmentsResult } from '@/hooks/useCustomerShipments'
 import { DESKTOP_QUERY, useMediaQuery } from '@/hooks/useMediaQuery'
 import { useNow } from '@/hooks/useNow'
+import type { ShipmentListPage } from '@/lib/shipmentList'
+
+type ReadyCustomerShipments = Extract<UseCustomerShipmentsResult, { status: 'ready' }>
 
 type PageMainProps = {
   /** Banner shown above the heading, or `false` for none. */
@@ -30,6 +33,95 @@ function PageMain({ alert = false, children }: PageMainProps) {
       </h1>
       {children}
     </main>
+  )
+}
+
+type CustomerShipmentRowsProps = {
+  rows: ShipmentListPage['rows']
+  now: Date
+  isDesktop: boolean
+}
+
+/** The rows as a table on wide layouts and as a list of cards on narrow ones. */
+function CustomerShipmentRows({ rows, now, isDesktop }: CustomerShipmentRowsProps) {
+  const intl = useIntl()
+
+  if (isDesktop) {
+    return <CustomerShipmentsTable rows={rows} now={now} className="rounded-xl border bg-card" />
+  }
+
+  return (
+    <ul
+      aria-label={intl.formatMessage({ id: 'shipmentList.cards.label' })}
+      className="flex flex-col gap-2"
+    >
+      {rows.map(row => (
+        <li key={row.id} className="flex flex-col">
+          <CustomerShipmentCard row={row} now={now} />
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+type CustomerListFooterProps = {
+  list: ShipmentListPage
+  onPageChange: ReadyCustomerShipments['setPage']
+}
+
+/** Pagination when there is more than one page; otherwise only the "Showing N of M" line. */
+function CustomerListFooter({ list, onPageChange }: CustomerListFooterProps) {
+  const intl = useIntl()
+
+  if (list.pageCount > 1) {
+    return (
+      <ShipmentsFooter
+        shownCount={list.rows.length}
+        totalCount={list.totalCount}
+        page={list.page}
+        pageCount={list.pageCount}
+        onPageChange={onPageChange}
+      />
+    )
+  }
+
+  return (
+    <p className="text-sm text-muted-foreground" aria-live="polite">
+      {intl.formatMessage(
+        { id: 'shipmentList.showing' },
+        { shown: list.rows.length, total: list.totalCount },
+      )}
+    </p>
+  )
+}
+
+type CustomerShipmentResultsProps = {
+  shipments: ReadyCustomerShipments
+  now: Date
+  isDesktop: boolean
+}
+
+/** The empty state when nothing matches; otherwise the rows and their footer. */
+function CustomerShipmentResults({ shipments, now, isDesktop }: CustomerShipmentResultsProps) {
+  const intl = useIntl()
+  const { list, query } = shipments
+
+  if (list.totalCount === 0) {
+    return (
+      <ShipmentsListMessage
+        title={intl.formatMessage({ id: 'customerShipments.empty.title' })}
+        action={query.search === ''
+          ? null
+          : { label: intl.formatMessage({ id: 'customerShipments.empty.clear' }), onClick: () => shipments.setSearch('') }}
+      />
+    )
+  }
+
+  return (
+    <>
+      <CustomerShipmentRows rows={list.rows} now={now} isDesktop={isDesktop} />
+      <CustomerListFooter list={list} onPageChange={shipments.setPage} />
+    </>
   )
 }
 
@@ -63,7 +155,7 @@ function CustomerShipmentsList({ customerId }: CustomerShipmentsListProps) {
     )
   }
 
-  const { alert, list, query, tabCounts } = shipments
+  const { alert, query, tabCounts } = shipments
 
   // Search comes first on narrow layouts and after the tabs on wide ones; rendering each order
   // (instead of CSS `order`) keeps the keyboard order equal to the visual order.
@@ -103,51 +195,7 @@ function CustomerShipmentsList({ customerId }: CustomerShipmentsListProps) {
         />
         {!isDesktop && tabs}
       </div>
-      {list.totalCount === 0
-        ? (
-            <ShipmentsListMessage
-              title={intl.formatMessage({ id: 'customerShipments.empty.title' })}
-              action={query.search === ''
-                ? null
-                : { label: intl.formatMessage({ id: 'customerShipments.empty.clear' }), onClick: () => shipments.setSearch('') }}
-            />
-          )
-        : (
-            <>
-              {isDesktop
-                ? <CustomerShipmentsTable rows={list.rows} now={now} className="rounded-xl border bg-card" />
-                : (
-                    <ul
-                      aria-label={intl.formatMessage({ id: 'shipmentList.cards.label' })}
-                      className="flex flex-col gap-2"
-                    >
-                      {list.rows.map(row => (
-                        <li key={row.id} className="flex flex-col">
-                          <CustomerShipmentCard row={row} now={now} />
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-              {list.pageCount > 1
-                ? (
-                    <ShipmentsFooter
-                      shownCount={list.rows.length}
-                      totalCount={list.totalCount}
-                      page={list.page}
-                      pageCount={list.pageCount}
-                      onPageChange={shipments.setPage}
-                    />
-                  )
-                : (
-                    <p className="text-sm text-muted-foreground" aria-live="polite">
-                      {intl.formatMessage(
-                        { id: 'shipmentList.showing' },
-                        { shown: list.rows.length, total: list.totalCount },
-                      )}
-                    </p>
-                  )}
-            </>
-          )}
+      <CustomerShipmentResults shipments={shipments} now={now} isDesktop={isDesktop} />
     </PageMain>
   )
 }

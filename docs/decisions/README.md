@@ -84,3 +84,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0069](0069-viewport-media-query-for-site-filter-presentation.md) | Site filter presentation switches by viewport media query | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0070](0070-document-check-one-row-per-document-neutral-chip.md) | Document check shows one row per document with a neutral chip | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0071](0071-exception-header-freshness-is-tracking-freshness.md) | Exception detail header shows tracking freshness, not carrier ETA update time | User, on Claude's proposal | Accepted | 2026-10-21 |
+| [0072](0072-no-ternaries-that-choose-jsx.md) | No ternaries that choose JSX | User | Accepted | 2026-10-22 |

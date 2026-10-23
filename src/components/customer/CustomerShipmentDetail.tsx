@@ -43,6 +43,27 @@ function CustomerFreshnessText({ detail, now }: CustomerFreshnessTextProps) {
   )
 }
 
+type CustomerArrivalProps = Pick<CustomerShipmentDetailProps, 'shipment' | 'now'> & {
+  arrival: CustomerShipmentDetailModel['arrival']
+}
+
+/** The delivery card once delivered; the ETA pair while in transit. */
+function CustomerArrival({ shipment, arrival, now }: CustomerArrivalProps) {
+  if (arrival.kind === 'delivered') {
+    return <DeliveredEtaPair arrival={arrival} />
+  }
+
+  return (
+    <EtaPair
+      carrierEta={shipment.carrierEta}
+      carrierName={arrival.etaCarrierName}
+      estimatedEta={shipment.estimatedEta}
+      now={now}
+      variant="reason"
+    />
+  )
+}
+
 /**
  * Customer view of one of their shipments: title and status, AI summary, ETAs or delivery,
  * journey and documents, in a single column. It never receives internal data, and nothing on it
@@ -51,7 +72,6 @@ function CustomerFreshnessText({ detail, now }: CustomerFreshnessTextProps) {
  */
 export function CustomerShipmentDetail({ shipment, detail, now, className }: CustomerShipmentDetailProps) {
   const intl = useIntl()
-  const { arrival } = detail
 
   return (
     <article className={cn('@container flex flex-col gap-6', className)}>
@@ -74,17 +94,7 @@ export function CustomerShipmentDetail({ shipment, detail, now, className }: Cus
       >
         {detail.summary.text}
       </AiBlock>
-      {arrival.kind === 'delivered'
-        ? <DeliveredEtaPair arrival={arrival} />
-        : (
-            <EtaPair
-              carrierEta={shipment.carrierEta}
-              carrierName={arrival.etaCarrierName}
-              estimatedEta={shipment.estimatedEta}
-              now={now}
-              variant="reason"
-            />
-          )}
+      <CustomerArrival shipment={shipment} arrival={detail.arrival} now={now} />
       <Journey carrierNames={detail.carrierNames} now={now} shipment={shipment} />
       <CustomerDocuments rows={detail.documents} />
     </article>

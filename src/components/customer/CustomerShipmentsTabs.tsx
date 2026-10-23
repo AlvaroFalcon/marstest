@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { useIntl } from 'react-intl'
 import { TriangleAlert } from 'lucide-react'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -28,6 +29,21 @@ const ATTENTION_CHIP_CLASS_NAME = `
   data-active:text-primary-foreground
   dark:data-active:text-primary-foreground
 `
+
+type TabsScrollerProps = {
+  isDesktop: boolean
+  children: ReactNode
+}
+
+function TabsScroller({ isDesktop, children }: TabsScrollerProps) {
+  if (isDesktop) {
+    return children
+  }
+
+  // Own scroll container: four chips are wider than a phone, and the page itself must never
+  // scroll sideways. The padding keeps the focus ring from being clipped.
+  return <div className="max-w-full overflow-x-auto p-1">{children}</div>
+}
 
 export type CustomerShipmentsTabsProps = {
   activeTab: CustomerShipmentTab
@@ -76,11 +92,7 @@ export function CustomerShipmentsTabs({ activeTab, counts, onTabChange, isDeskto
       }}
       className={className}
     >
-      {isDesktop
-        ? tabs
-        // Own scroll container: four chips are wider than a phone, and the page itself must never
-        // scroll sideways. The padding keeps the focus ring from being clipped.
-        : <div className="max-w-full overflow-x-auto p-1">{tabs}</div>}
+      <TabsScroller isDesktop={isDesktop}>{tabs}</TabsScroller>
     </Tabs>
   )
 }

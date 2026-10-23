@@ -70,19 +70,19 @@ function InboxBody({ content, siteFilter }: Pick<ExceptionInboxProps, 'content' 
   }
 
   if (content.items.length === 0) {
-    return siteFilter.selectedSiteId === null
-      ? (
-          <InboxMessage title={intl.formatMessage({ id: 'exceptionInbox.empty.title' })} action={null} />
-        )
-      : (
-          <InboxMessage
-            title={intl.formatMessage({ id: 'exceptionInbox.empty.siteTitle' })}
-            action={{
-              label: intl.formatMessage({ id: 'exceptionInbox.empty.showAllSites' }),
-              onClick: () => siteFilter.onSelect(null),
-            }}
-          />
-        )
+    if (siteFilter.selectedSiteId === null) {
+      return <InboxMessage title={intl.formatMessage({ id: 'exceptionInbox.empty.title' })} action={null} />
+    }
+
+    return (
+      <InboxMessage
+        title={intl.formatMessage({ id: 'exceptionInbox.empty.siteTitle' })}
+        action={{
+          label: intl.formatMessage({ id: 'exceptionInbox.empty.showAllSites' }),
+          onClick: () => siteFilter.onSelect(null),
+        }}
+      />
+    )
   }
 
   return (
@@ -94,6 +94,16 @@ function InboxBody({ content, siteFilter }: Pick<ExceptionInboxProps, 'content' 
       ))}
     </ul>
   )
+}
+
+type InboxKpisProps = Pick<ExceptionInboxProps, 'content'>
+
+function InboxKpis({ content }: InboxKpisProps) {
+  if (content.status === 'ready') {
+    return <ExceptionKpis {...content.kpis} />
+  }
+
+  return <ExceptionKpisSkeleton />
 }
 
 /**
@@ -108,7 +118,7 @@ export function ExceptionInbox({ content, siteFilter, className }: ExceptionInbo
 
   return (
     <section aria-labelledby="exception-inbox-heading" className={cn('@container flex flex-col gap-6', className)}>
-      {content.status === 'ready' ? <ExceptionKpis {...content.kpis} /> : <ExceptionKpisSkeleton />}
+      <InboxKpis content={content} />
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between gap-2">
           <h2 id="exception-inbox-heading" className="text-lg font-semibold">

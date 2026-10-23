@@ -46,6 +46,26 @@ type EtaCardProps = {
   isHighlighted?: boolean
 }
 
+type EtaCardNoteProps = {
+  note: string | undefined
+}
+
+function EtaCardNote({ note }: EtaCardNoteProps) {
+  if (note === undefined) {
+    return null
+  }
+
+  return (
+    <dd className="
+      text-caption text-muted-foreground
+      @xl:text-sm
+    "
+    >
+      {note}
+    </dd>
+  )
+}
+
 /**
  * One of the two ETA cards: label, large value with an optional badge, and a one-line note.
  * Label, value and note are a description list so assistive technology reads them as a group.
@@ -69,17 +89,7 @@ export function EtaCard({ label, value, valueClassName, badge, note, isHighlight
         <span className={cn('text-eta font-medium', valueClassName)}>{value}</span>
         {badge}
       </dd>
-      {note === undefined
-        ? null
-        : (
-            <dd className="
-              text-caption text-muted-foreground
-              @xl:text-sm
-            "
-            >
-              {note}
-            </dd>
-          )}
+      <EtaCardNote note={note} />
     </dl>
   )
 }

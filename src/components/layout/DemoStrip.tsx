@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { Loader2Icon, PresentationIcon, RotateCcwIcon, ZapIcon } from 'lucide-react'
 import { useIntl } from 'react-intl'
 import { cn } from '@/lib/utils'
@@ -12,6 +13,20 @@ export type DemoStripProps = {
   /** True while the simulated event is being applied: the button is disabled and flagged busy. */
   isSimulating: boolean
   className?: string
+}
+
+type BusyIconProps = {
+  isBusy: boolean
+  /** Icon shown while the action is idle. */
+  children: ReactNode
+}
+
+function BusyIcon({ isBusy, children }: BusyIconProps) {
+  if (isBusy) {
+    return <Loader2Icon aria-hidden="true" className="motion-safe:animate-spin" />
+  }
+
+  return children
 }
 
 /**
@@ -55,9 +70,9 @@ export function DemoStrip({ onResetDemo, isResetting, onSimulateCarrierEvent, is
           aria-busy={isSimulating}
           onClick={onSimulateCarrierEvent}
         >
-          {isSimulating
-            ? <Loader2Icon aria-hidden="true" className="motion-safe:animate-spin" />
-            : <ZapIcon aria-hidden="true" />}
+          <BusyIcon isBusy={isSimulating}>
+            <ZapIcon aria-hidden="true" />
+          </BusyIcon>
           <span className="@xl:hidden">{intl.formatMessage({ id: 'demo.simulateShort' })}</span>
           <span className="
             hidden
@@ -76,9 +91,9 @@ export function DemoStrip({ onResetDemo, isResetting, onSimulateCarrierEvent, is
           aria-label={intl.formatMessage({ id: 'demo.reset' })}
           onClick={onResetDemo}
         >
-          {isResetting
-            ? <Loader2Icon aria-hidden="true" className="motion-safe:animate-spin" />
-            : <RotateCcwIcon aria-hidden="true" className="@xl:hidden" />}
+          <BusyIcon isBusy={isResetting}>
+            <RotateCcwIcon aria-hidden="true" className="@xl:hidden" />
+          </BusyIcon>
           <span className="
             hidden
             @xl:inline

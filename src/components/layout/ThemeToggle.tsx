@@ -7,6 +7,18 @@ export type ThemeToggleProps = {
   className?: string
 }
 
+type ThemeIconProps = {
+  isDark: boolean
+}
+
+function ThemeIcon({ isDark }: ThemeIconProps) {
+  if (isDark) {
+    return <MoonIcon aria-hidden="true" />
+  }
+
+  return <SunIcon aria-hidden="true" />
+}
+
 /**
  * Two-state icon button that switches between the light and dark theme.
  * The accessible name describes the action (the theme it will switch to), and the icon shows
@@ -27,7 +39,7 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
       aria-label={intl.formatMessage({ id: isDark ? 'shell.theme.switchToLight' : 'shell.theme.switchToDark' })}
       onClick={() => setTheme(isDark ? 'light' : 'dark')}
     >
-      {isDark ? <MoonIcon aria-hidden="true" /> : <SunIcon aria-hidden="true" />}
+      <ThemeIcon isDark={isDark} />
     </Button>
   )
 }

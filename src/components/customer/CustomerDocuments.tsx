@@ -22,6 +22,22 @@ const DOCUMENT_NAME_IDS = {
   proofOfDelivery: 'customerShipment.document.proofOfDelivery',
 } as const satisfies Record<CustomerDocumentType, MessageId>
 
+type DocumentNameProps = {
+  documentType: CustomerDocumentType
+  name: string
+}
+
+/** The document name; only "CMR" has a compact form for narrow containers. */
+function DocumentName({ documentType, name }: DocumentNameProps) {
+  const intl = useIntl()
+
+  if (documentType === 'cmr') {
+    return <CompactText full={name} compact={intl.formatMessage({ id: 'customerShipment.document.cmrShort' })} />
+  }
+
+  return name
+}
+
 type DocumentRowItemProps = {
   row: CustomerDocumentRow
 }
@@ -38,9 +54,7 @@ function DocumentRowItem({ row }: DocumentRowItemProps) {
     <li className="flex min-h-11 items-center justify-between gap-3 py-1">
       <span className="flex min-w-0 items-center gap-2 text-sm">
         <FileText aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
-        {documentType === 'cmr'
-          ? <CompactText full={name} compact={intl.formatMessage({ id: 'customerShipment.document.cmrShort' })} />
-          : name}
+        <DocumentName documentType={documentType} name={name} />
       </span>
       <DocumentAvailability availability={availability} name={name} />
     </li>
@@ -84,6 +98,22 @@ function DocumentAvailability({ availability, name }: DocumentAvailabilityProps)
   )
 }
 
+type DocumentListProps = Pick<CustomerDocumentsProps, 'rows'>
+
+function DocumentList({ rows }: DocumentListProps) {
+  const intl = useIntl()
+
+  if (rows.length === 0) {
+    return <p className="text-sm text-muted-foreground">{intl.formatMessage({ id: 'customerShipment.documents.empty' })}</p>
+  }
+
+  return (
+    <ul className="flex flex-col divide-y">
+      {rows.map(row => <DocumentRowItem key={row.documentType} row={row} />)}
+    </ul>
+  )
+}
+
 /**
  * The documents a customer may see for one shipment. Each row says what it is and what the
  * customer can do now: download it, wait for it ("Pending") or wait for the delivery. Downloads are
@@ -99,13 +129,7 @@ export function CustomerDocuments({ rows, className }: CustomerDocumentsProps) {
         <h2 className="text-base font-semibold">{intl.formatMessage({ id: 'customerShipment.documents.title' })}</h2>
       </CardHeader>
       <CardContent>
-        {rows.length === 0
-          ? <p className="text-sm text-muted-foreground">{intl.formatMessage({ id: 'customerShipment.documents.empty' })}</p>
-          : (
-              <ul className="flex flex-col divide-y">
-                {rows.map(row => <DocumentRowItem key={row.documentType} row={row} />)}
-              </ul>
-            )}
+        <DocumentList rows={rows} />
       </CardContent>
     </Card>
   )

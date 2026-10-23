@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react'
 import { cva } from 'class-variance-authority'
 import { useIntl } from 'react-intl'
-import type { JourneyStep } from '@/lib/journey'
+import type { JourneyConnector, JourneyStep } from '@/lib/journey'
 import { cn } from '@/lib/utils'
-import { ProvenanceBadge } from '@/components/provenance/ProvenanceBadge'
+import { ProvenanceBadge, type ProvenanceBadgeProps } from '@/components/provenance/ProvenanceBadge'
 import {
   JourneyConnectorChevron,
   JourneyConnectorLabel,
@@ -77,6 +77,65 @@ function StepBody({ onSelect, children }: StepBodyProps) {
   )
 }
 
+type ConnectorLineProps = {
+  connector: JourneyConnector | null
+}
+
+function ConnectorLine({ connector }: ConnectorLineProps) {
+  if (connector === null) {
+    return null
+  }
+
+  return <JourneyConnectorLine state={connector.state} />
+}
+
+type ConnectorToNextProps = ConnectorLineProps & {
+  carrierNames: Readonly<Record<string, string>>
+}
+
+/** Chevron and leg label drawn after the node; the last step has no connector and draws neither. */
+function ConnectorToNext({ connector, carrierNames }: ConnectorToNextProps) {
+  const intl = useIntl()
+
+  if (connector === null) {
+    return null
+  }
+
+  return (
+    <>
+      <JourneyConnectorChevron state={connector.state} />
+      <JourneyConnectorLabel
+        label={formatConnectorLabel(intl, connector, carrierNames)}
+        mode={connector.mode}
+      />
+    </>
+  )
+}
+
+type StepSublineProps = {
+  subline: string
+}
+
+function StepSubline({ subline }: StepSublineProps) {
+  if (subline === '') {
+    return null
+  }
+
+  return <span className="text-caption text-muted-foreground">{subline}</span>
+}
+
+type StepBadgeProps = {
+  kind: ProvenanceBadgeProps['kind'] | null
+}
+
+function StepBadge({ kind }: StepBadgeProps) {
+  if (kind === null) {
+    return null
+  }
+
+  return <ProvenanceBadge kind={kind} />
+}
+
 export type JourneyStepItemProps = {
   step: JourneyStep
   /** Carrier display names by id, resolved by the parent from the reference data. */
@@ -112,7 +171,7 @@ export function JourneyStepItem({ step, carrierNames, onStepSelect, className }:
       )}
       data-state={step.state}
     >
-      {connectorToNext ? <JourneyConnectorLine state={connectorToNext.state} /> : null}
+      <ConnectorLine connector={connectorToNext} />
       <StepBody onSelect={isSelectable ? () => onStepSelect(step) : undefined}>
         <span className={nodeVariants({ state: step.state })}>
           <Icon
@@ -130,21 +189,11 @@ export function JourneyStepItem({ step, carrierNames, onStepSelect, className }:
         >
           <span className="sr-only">{intl.formatMessage({ id: `journey.state.${step.state}` })}</span>
           <span className={titleVariants({ state: step.state })}>{step.place}</span>
-          {subline === '' ? null : <span className="text-caption text-muted-foreground">{subline}</span>}
-          {badgeKind ? <ProvenanceBadge kind={badgeKind} /> : null}
+          <StepSubline subline={subline} />
+          <StepBadge kind={badgeKind} />
         </span>
       </StepBody>
-      {connectorToNext
-        ? (
-            <>
-              <JourneyConnectorChevron state={connectorToNext.state} />
-              <JourneyConnectorLabel
-                label={formatConnectorLabel(intl, connectorToNext, carrierNames)}
-                mode={connectorToNext.mode}
-              />
-            </>
-          )
-        : null}
+      <ConnectorToNext connector={connectorToNext} carrierNames={carrierNames} />
     </li>
   )
 }
