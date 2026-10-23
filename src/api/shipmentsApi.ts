@@ -151,6 +151,7 @@ export function createShipmentsApi({ db, latencyMs = DEFAULT_LATENCY_MS, now = (
         shipment.carrierEta = event.carrierEta
         shipment.estimatedEta = event.estimatedEta
         shipment.exceptions.push(event.exception)
+        shipment.customerSummary = event.customerSummary
         state.unseenExceptionShipmentIds.push(SIMULATED_EVENT_SHIPMENT_ID)
       })
       return { shipment: findShipment(db.read(), SIMULATED_EVENT_SHIPMENT_ID), applied: true }

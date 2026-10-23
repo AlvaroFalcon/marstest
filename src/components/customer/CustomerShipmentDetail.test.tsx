@@ -64,12 +64,12 @@ describe('CustomerShipmentDetail', () => {
   })
 
   describe('AI summary', () => {
-    it('shows the data-only summary of SH-1042 under the AI summary title', () => {
+    it('shows the hand-written summary of SH-1042 under the AI summary title', () => {
       renderDetail(getSeedShipment('SH-1042'))
 
       expect(screen.getByRole('heading', { name: 'AI summary' })).toBeInTheDocument()
       expect(screen.getByText(
-        'Your order left Zaragoza on Oct 14. Latest update on Oct 19: it is waiting for customs clearance at Southampton port. We expect it in Birmingham on Oct 22–23 instead of Oct 20.',
+        'Your order left our Zaragoza plant on Oct 14 and reached Southampton port on Oct 19. It\'s waiting for UK customs clearance while we send a missing document; holds like this usually clear in about 2 days. We expect it in Birmingham on Oct 22–23 instead of Oct 20.',
       )).toBeInTheDocument()
     })
 
@@ -84,7 +84,7 @@ describe('CustomerShipmentDetail', () => {
       renderDetail(getSeedShipment('SH-1009'))
 
       expect(screen.getByText(
-        'Your order left Zaragoza on Oct 16 and was delivered to your Hamburg site on Oct 18 at 10:00, 1 day earlier than planned. The signed proof of delivery is ready to download.',
+        'Your order left our Zaragoza plant on Oct 16 and was delivered to your Hamburg site on Oct 18 at 10:00, one day earlier than planned. The signed proof of delivery is ready to download.',
       )).toBeInTheDocument()
     })
   })

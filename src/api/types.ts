@@ -342,6 +342,13 @@ export const shipmentSchema = z.object({
   documents: z.array(shipmentDocumentSchema),
   exceptions: z.array(shipmentExceptionSchema),
   aiSignal: aiSignalSchema.optional(),
+  /**
+   * Simulated AI summary for the customer view, hand-written in the seed so it reads like a person
+   * wrote it: where the order is, why the estimate moved and what we are doing about it. It holds
+   * no internal data (diagnosis, ERP order, document check) and is replaced by the simulated
+   * carrier event together with the ETAs it quotes.
+   */
+  customerSummary: z.string(),
 })
 
 /** @see shipmentSchema */

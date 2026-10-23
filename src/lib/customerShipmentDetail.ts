@@ -103,7 +103,6 @@ export function buildCustomerShipmentDetail(
   now: Date,
 ): CustomerShipmentDetailModel {
   const freshness = getFreshness(shipment, now)
-  const originCity = referenceData.sites.find(site => site.id === shipment.originSiteId)?.city ?? shipment.originSiteId
 
   return {
     shipmentId: shipment.id,
@@ -112,7 +111,7 @@ export function buildCustomerShipmentDetail(
     freshness: freshness.kind === 'notApplicable'
       ? { kind: 'final' }
       : { kind: 'tracking', freshness },
-    summary: summarizeShipmentForCustomer({ shipment, originCity }),
+    summary: summarizeShipmentForCustomer(shipment),
     arrival: buildArrival(shipment, referenceData),
     documents: buildCustomerDocumentRows(shipment),
     carrierNames: Object.fromEntries(referenceData.carriers.map(carrier => [carrier.id, carrier.name])),

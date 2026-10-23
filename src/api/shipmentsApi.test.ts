@@ -130,6 +130,7 @@ describe('createShipmentsApi', () => {
     expect(new Set(first.shipment.milestones.map(milestone => milestone.id)).size).toBe(first.shipment.milestones.length)
     expect(first.shipment.carrierEta).toMatchObject({ status: 'provided', updatedAt: '2026-10-20T10:30:00.000Z' })
     expect(first.shipment.exceptions.map(exception => exception.type)).toEqual(['vesselRolled'])
+    expect(first.shipment.customerSummary).toContain('we expect it in Le Havre on Oct 25–26 instead of Oct 22')
     expect(second.applied).toBe(false)
     expect(second.shipment).toEqual(first.shipment)
     expect(exceptions).toHaveLength(7)
