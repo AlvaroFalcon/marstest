@@ -6,6 +6,7 @@ import { CustomerShipmentCard } from '@/components/customer/CustomerShipmentCard
 import { CustomerShipmentsTable } from '@/components/customer/CustomerShipmentsTable'
 import { CustomerShipmentsTabs } from '@/components/customer/CustomerShipmentsTabs'
 import { ProactiveAlert } from '@/components/customer/ProactiveAlert'
+import { DocumentTitle } from '@/components/layout/DocumentTitle'
 import { ShipmentsFooter } from '@/components/shipments/ShipmentsFooter'
 import { ShipmentsListMessage } from '@/components/shipments/ShipmentsListMessage'
 import { ShipmentsListSkeleton } from '@/components/shipments/ShipmentsListSkeleton'
@@ -25,8 +26,11 @@ type PageMainProps = {
 
 /** Landmark and heading shared by every state of the page, so the heading never disappears while loading or failing. */
 function PageMain({ alert = false, children }: PageMainProps) {
+  const intl = useIntl()
+
   return (
     <main className="@container flex flex-col gap-4">
+      <DocumentTitle page={intl.formatMessage({ id: 'customerShipments.title' })} />
       {alert}
       <h1 className="text-2xl font-semibold">
         <FormattedMessage id="customerShipments.title" />

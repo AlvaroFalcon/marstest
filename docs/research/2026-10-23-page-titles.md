@@ -1,0 +1,73 @@
+# Research: Page titles (started as SEO)
+
+- **Date:** 2026-10-23
+- **Slug:** `page-titles`
+- **Status:** Reviewed
+
+## Goal
+
+Improve how the app is understood by search engines and by link-preview crawlers (Slack, LinkedIn, X, WhatsApp, email clients) when someone shares its URL. Today every page is the same blank `index.html` titled `marstest`, so a shared link shows no meaningful title, description or image, and a search result would look the same for every route. The audience is whoever receives or searches for the prototype URL (reviewers of the tech test, stakeholders), not end customers searching for their shipments.
+
+## Current state
+
+| Area | Files | Notes |
+| --- | --- | --- |
+| HTML document | `index.html` | `lang="en"`, charset, viewport, SVG favicon and `<title>marstest</title>`. No `meta description`, no Open Graph / Twitter tags, no `theme-color`, no canonical, no `apple-touch-icon`, no web manifest. |
+| Per-page titles | `src/pages/**` | No page sets `document.title` or renders `<title>`. Every route shows `marstest` in the tab, history and search results. |
+| Static files | `public/favicon.svg`, `public/icons.svg` | `favicon.svg` is the default Vite logo (purple bolt), not a product icon. No `robots.txt`, no `sitemap.xml`, no social preview image. |
+| Routing | `src/Router.tsx`, `src/routes.ts` | Client-side only (`BrowserRouter`). `/` redirects with `<Navigate>` to `/ops/exceptions`. Routes: ops exceptions (+ `/:shipmentId`), ops shipments (+ `/:shipmentId`), customer shipments `/customers/:customerId/shipments` (+ `/:shipmentId`), catch-all `NotFoundPage`. |
+| Hosting | `vercel.json` | Rewrites every non-asset path to `index.html`, so **every URL returns HTTP 200**, including unknown ones (soft 404). `/` is redirected on the client, not with an HTTP redirect. Security and cache headers already set. |
+| Headings | pages and detail components | `h1` on ops shipments, customer shipments, both shipment details and the 404 page. **The ops exceptions page (the landing route) has no `h1`**; its first heading is the inbox `h2`. |
+| Landmarks | `NotFoundPage` and pages | Pages render `<main>`; good for crawlers and accessibility already (there is an `e2e/accessibility.spec.ts`). |
+| i18n | `src/locales/en.ts`, `src/config.ts` | Single locale `en`; page titles already exist as messages (`opsExceptions.title`, `opsShipments.title`, `customerShipments.title`, `notFound.title`, `shell.brand` = "Shipment visibility"). |
+| Performance (Core Web Vitals) | build output | One JS chunk of **1,028 kB (301 kB gzip)**, Vite warns above 500 kB; no route-level code splitting. CSS 85 kB (14 kB gzip). The Geist import ships five font subsets (latin, latin-ext, cyrillic, cyrillic-ext, vietnamese); only latin is needed for English. Fonts are not preloaded. |
+| Data | `src/api/seed.ts`, ADR 0033 / 0034 | All content is synthetic demo data from an in-memory fake API, per browser session. Customer and ops pages represent, in a real product, authenticated areas ("Demo mode · synthetic data, no real login"). |
+| Tests | `e2e/*.spec.ts`, `src/**/*.test.tsx` | No test covers titles or meta tags. |
+
+## Dependencies and constraints
+
+- **React 19 document metadata.** React 19 hoists `<title>`, `<meta>` and `<link>` rendered anywhere in the tree into `<head>`. Per-page titles and descriptions need **no extra library** (react-helmet is not needed and not maintained for React 19). Must be checked against current docs through Context7 before planning.
+- **Client-side rendering only.** Google renders JavaScript, so per-page `<title>` set at runtime is picked up by Google. **Link-preview crawlers do not run JavaScript**: they only see the static `index.html`. Open Graph / Twitter tags must therefore live in `index.html` (identical for all routes) unless pages are prerendered.
+- **Prerendering is hard here.** Every page reads from a session-scoped fake API and from `sessionStorage`; prerendered HTML would contain one frozen snapshot and could disagree with the hydrated state. Adding SSR/SSG (react-router framework mode, a prerender plugin) changes the architecture decided in ADR 0001 (Vite SPA only).
+- **Absolute URLs.** `og:url`, `og:image`, canonical links and `sitemap.xml` need the production origin. It is not in the repository (`README.md` only says Vercel); `config.ts` has no site URL variable.
+- **Conventions.** Every user-visible string goes through react-intl (`src/locales/en.ts`); new env variables need `VITE_` prefix, `.env.example` entry and zod validation in `config.ts`; any change to `vercel.json` must keep current headers. Tests colocated; E2E needed if routes or critical paths change.
+- **Styling tokens.** A `theme-color` meta needs a colour; it should match the `--background` token (light and dark via `media`), not a hard-coded new colour.
+
+## Gaps
+
+1. No meaningful document title, neither global nor per route.
+2. No `meta description`.
+3. No Open Graph / Twitter Card tags and no preview image, so shared links render as a bare URL.
+4. No `robots.txt` (and no explicit indexing policy) and no `sitemap.xml`.
+5. Unknown URLs return HTTP 200 (soft 404); the 404 page sets no `noindex`.
+6. Landing route lacks an `h1`.
+7. Generic Vite favicon; no `apple-touch-icon`, `theme-color` or manifest.
+8. Large single JS bundle and unused font subsets hurt LCP/INP on mobile, which Google uses as a ranking signal.
+
+## Risks and tricky parts
+
+- **Indexing private-looking pages.** Customer pages expose a customer id in the URL. Even with synthetic data, indexing `/customers/<id>/shipments/...` teaches the wrong pattern for a product whose real version is behind login. Indexing policy is a product decision, not a technical one.
+- **Dynamic titles with ids.** Detail titles such as "SH-1042 · Shipment visibility" depend on loaded data; while loading or for an unknown id, the title must fall back to something sensible and must not flash the wrong id.
+- **Soft 404 fix on Vercel.** A real 404 status for unknown paths needs the rewrite to know the valid route patterns, which duplicates `routes.ts` in `vercel.json` and can drift. The cheap alternative is `<meta name="robots" content="noindex">` rendered by `NotFoundPage`.
+- **Code splitting vs. E2E.** Lazy-loading routes adds `Suspense` boundaries and loading states; E2E tests that assume instant rendering may need care. It is also a broader performance change than "SEO".
+- **Preview image.** An OG image needs a design asset (1200×630). Generating one is a design choice.
+- **Root redirect.** `/` → `/ops/exceptions` is a client-side redirect; crawlers see `/` with an empty shell first. An HTTP redirect in `vercel.json` would be cleaner but duplicates a route path outside `routes.ts`.
+
+## Open questions
+
+All answered by the user on 2026-10-23. The discussion reframed the feature ([ADR 0073](../decisions/0073-page-titles-only-no-seo.md)).
+
+- [x] **Does SEO make sense here?** No. The real product lives behind a login, so search engines and link-preview crawlers never see its pages; nobody discovers them by searching. What still has value is a meaningful title per page, for usability (tabs, history, bookmarks) and accessibility (screen readers announce it; WCAG 2.4.2 "Page Titled").
+- [x] **Scope:** a document title on every page, and nothing else. Indexing policy, canonical URL, meta description, Open Graph / Twitter tags, `theme-color`, preview image, icons, the exceptions `h1`, performance (code splitting, fonts), HTTP 404 statuses and prerendering are all left out.
+- [x] **Site name:** "Shipment visibility".
+- [x] **Tests:** no new tests for this feature.
+- [x] Correction to the performance gap above: the Geist font subsets are loaded by `unicode-range`, so English pages only download the latin file; the real cost is the single JS bundle.
+
+## References
+
+- `CLAUDE.md` §4 (structure, env vars), §5 (React conventions), §7 (tokens), §9 (testing).
+- ADR 0001 (React + Vite only), ADR 0033 (in-memory fake API), ADR 0034 (demo state in `sessionStorage`).
+- React 19 `<title>` / `<meta>` components: https://react.dev/reference/react-dom/components/title, https://react.dev/reference/react-dom/components/meta
+- Google Search Central, JavaScript SEO basics: https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics
+- Open Graph protocol: https://ogp.me/
+- Vite build output of `npx vite build` on 2026-10-23 (bundle sizes above).
