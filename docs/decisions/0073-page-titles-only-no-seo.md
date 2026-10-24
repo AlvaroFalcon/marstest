@@ -18,7 +18,7 @@ The user asked to improve the app's SEO. The research found no meaningful title 
 
 ## Decision
 
-Option 3: "ponemos el título en cada página y listo, recortamos a eso" ("we put the title on every page and that's it, we cut it down to that", translated). No new automated tests.
+Option 3: we put the title on every page and that's it. No new automated tests.
 
 ## Consequences
 
