@@ -3,7 +3,7 @@
 - **Date:** 2026-10-23
 - **Slug:** `page-titles`
 - **Research:** [`../research/2026-10-23-page-titles.md`](../research/2026-10-23-page-titles.md)
-- **Status:** Draft
+- **Status:** Approved
 
 ## Summary
 
