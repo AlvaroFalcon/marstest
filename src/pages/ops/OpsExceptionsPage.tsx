@@ -6,6 +6,7 @@ import type { ExceptionInboxItem as ExceptionInboxCard } from '@/components/exce
 import type { ExceptionStatus } from '@/components/exceptions/ExceptionStatusBadge'
 import { ExceptionDetailEmptyState } from '@/components/exceptions/ExceptionDetailEmptyState'
 import { ExceptionDetailPanel } from '@/components/exceptions/ExceptionDetailPanel'
+import { DocumentTitle } from '@/components/layout/DocumentTitle'
 import { ScrollColumn } from '@/components/layout/ScrollColumn'
 import { useExceptions } from '@/hooks/useExceptions'
 import { useMarkExceptionSeen, useUnseenExceptionShipmentIds } from '@/hooks/useUnseenExceptions'
@@ -102,6 +103,8 @@ export function OpsExceptionsPage() {
       break
   }
 
+  const documentTitle = <DocumentTitle page={shipmentId ?? intl.formatMessage({ id: 'opsExceptions.title' })} />
+
   const inbox = (
     <ExceptionInbox
       content={content}
@@ -120,6 +123,7 @@ export function OpsExceptionsPage() {
     // margin cancels the columns' 0.25rem focus-ring padding so the content keeps its alignment.
     return (
       <main className="grid grid-cols-[33.5rem_1fr] items-start gap-6">
+        {documentTitle}
         <ScrollColumn label={intl.formatMessage({ id: 'exceptionsLayout.inboxColumn' })} className="-m-1">
           {inbox}
         </ScrollColumn>
@@ -139,10 +143,16 @@ export function OpsExceptionsPage() {
   if (shipmentId !== undefined) {
     return (
       <main>
+        {documentTitle}
         <ExceptionDetailPanel shipmentId={shipmentId} backHref={`${routes.ops.exceptions()}${search}`} />
       </main>
     )
   }
 
-  return <main>{inbox}</main>
+  return (
+    <main>
+      {documentTitle}
+      {inbox}
+    </main>
+  )
 }

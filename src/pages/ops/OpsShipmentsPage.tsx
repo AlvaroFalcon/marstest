@@ -1,4 +1,5 @@
 import { useIntl } from 'react-intl'
+import { DocumentTitle } from '@/components/layout/DocumentTitle'
 import { ShipmentCard } from '@/components/shipments/ShipmentCard'
 import { ShipmentsFooter } from '@/components/shipments/ShipmentsFooter'
 import { ShipmentsListMessage } from '@/components/shipments/ShipmentsListMessage'
@@ -105,6 +106,7 @@ export function OpsShipmentsPage() {
 
   return (
     <main className="@container flex flex-col gap-4">
+      <DocumentTitle page={intl.formatMessage({ id: 'opsShipments.title' })} />
       <h1 className="text-2xl font-semibold">{intl.formatMessage({ id: 'opsShipments.title' })}</h1>
       {shipments.status === 'loading' && <ShipmentsListSkeleton />}
       {shipments.status === 'error' && (

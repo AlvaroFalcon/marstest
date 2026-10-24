@@ -5,6 +5,7 @@
 export const messages = {
   'notFound.title': 'Page not found',
   'notFound.backHome': 'Back to home',
+  'documentTitle.page': '{page} · Shipment visibility',
   'shell.brand': 'Shipment visibility',
   'shell.theme.switchToDark': 'Switch to dark theme',
   'shell.theme.switchToLight': 'Switch to light theme',

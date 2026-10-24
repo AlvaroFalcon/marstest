@@ -3,6 +3,7 @@ import { useIntl } from 'react-intl'
 import { useLocation, useParams } from 'react-router'
 import { CustomerGate } from '@/components/customer/CustomerGate'
 import { CustomerShipmentDetail } from '@/components/customer/CustomerShipmentDetail'
+import { DocumentTitle } from '@/components/layout/DocumentTitle'
 import { DetailBackLink } from '@/components/shipments/DetailBackLink'
 import { DetailMessage } from '@/components/shipments/DetailMessage'
 import { DetailSkeleton } from '@/components/shipments/DetailSkeleton'
@@ -15,17 +16,19 @@ import routes from '@/routes'
 
 type DetailLayoutProps = {
   customerId: string
+  shipmentId: string
   /** Search string of the list the customer came from (leading `?`), handed back by the back link. */
   listSearch: string
   children: ReactNode
 }
 
 /** Landmark and back link shared by every state of the detail, so the way back never disappears. */
-function DetailLayout({ customerId, listSearch, children }: DetailLayoutProps) {
+function DetailLayout({ customerId, shipmentId, listSearch, children }: DetailLayoutProps) {
   const intl = useIntl()
 
   return (
     <main className="@container flex flex-col gap-4">
+      <DocumentTitle page={shipmentId} />
       <DetailBackLink
         href={`${routes.customer.shipments(customerId)}${listSearch}`}
         label={intl.formatMessage({ id: 'customerShipment.back' })}
@@ -56,13 +59,13 @@ function OwnShipment({ customerId, shipmentId, listSearch }: OwnShipmentProps) {
       return <NotFoundPage />
     case 'loading':
       return (
-        <DetailLayout customerId={customerId} listSearch={listSearch}>
+        <DetailLayout customerId={customerId} shipmentId={shipmentId} listSearch={listSearch}>
           <DetailSkeleton label={intl.formatMessage({ id: 'customerShipment.loading' })} />
         </DetailLayout>
       )
     case 'error':
       return (
-        <DetailLayout customerId={customerId} listSearch={listSearch}>
+        <DetailLayout customerId={customerId} shipmentId={shipmentId} listSearch={listSearch}>
           <DetailMessage
             role="alert"
             title={intl.formatMessage({ id: 'customerShipment.error.title' })}
@@ -76,7 +79,7 @@ function OwnShipment({ customerId, shipmentId, listSearch }: OwnShipmentProps) {
       )
     case 'ready':
       return (
-        <DetailLayout customerId={customerId} listSearch={listSearch}>
+        <DetailLayout customerId={customerId} shipmentId={shipmentId} listSearch={listSearch}>
           <CustomerShipmentDetail
             shipment={shipment.shipment}
             detail={buildCustomerShipmentDetail(shipment.shipment, shipment.referenceData, now)}
@@ -101,12 +104,12 @@ export function CustomerShipmentPage() {
     <CustomerGate
       customerId={customerId}
       loading={(
-        <DetailLayout customerId={customerId ?? ''} listSearch={search}>
+        <DetailLayout customerId={customerId ?? ''} shipmentId={shipmentId} listSearch={search}>
           <DetailSkeleton label={intl.formatMessage({ id: 'customerShipment.loading' })} />
         </DetailLayout>
       )}
       error={(
-        <DetailLayout customerId={customerId ?? ''} listSearch={search}>
+        <DetailLayout customerId={customerId ?? ''} shipmentId={shipmentId} listSearch={search}>
           <p role="alert" className="text-muted-foreground">
             {intl.formatMessage({ id: 'customerShipments.loadFailed' })}
           </p>

@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useLocation, useParams } from 'react-router'
 import { useIntl } from 'react-intl'
+import { DocumentTitle } from '@/components/layout/DocumentTitle'
 import { DetailBackLink } from '@/components/shipments/DetailBackLink'
 import { DetailMessage } from '@/components/shipments/DetailMessage'
 import { DetailSkeleton } from '@/components/shipments/DetailSkeleton'
@@ -62,6 +63,7 @@ export function OpsShipmentPage() {
 
   return (
     <main className="flex flex-col gap-4">
+      <DocumentTitle page={shipmentId} />
       <DetailBackLink
         href={getListHref(search)}
         label={intl.formatMessage({ id: 'opsShipment.back' })}
