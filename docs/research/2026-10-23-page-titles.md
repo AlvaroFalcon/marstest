@@ -1,7 +1,7 @@
-# Research: SEO
+# Research: Page titles (started as SEO)
 
 - **Date:** 2026-10-23
-- **Slug:** `seo`
+- **Slug:** `page-titles`
 - **Status:** Reviewed
 
 ## Goal
@@ -55,17 +55,13 @@ Improve how the app is understood by search engines and by link-preview crawlers
 
 ## Open questions
 
-All answered by the user on 2026-10-23 (scope recorded in [ADR 0073](../decisions/0073-seo-scope-metadata-and-titles-only.md)).
+All answered by the user on 2026-10-23. The discussion reframed the feature ([ADR 0073](../decisions/0073-page-titles-only-no-seo.md)).
 
-- [x] **Indexing policy:** left out; focus on meta tags and titles.
-- [x] **Production URL:** not needed; no canonical link, no `og:url`, no `VITE_SITE_URL`.
-- [x] **Brand copy:** site name "Shipment visibility"; description about tracking shipments as well as possible thanks to AI tools.
-- [x] **Preview image and icons:** none; text-only previews, current favicon kept.
-- [x] **Performance:** left out for now. Correction to the gap above: the Geist font subsets are loaded by `unicode-range`, so English pages only download the latin file; the real cost is the single JS bundle.
-- [x] **Soft 404:** not touched.
-- [x] **Prerendering:** out of scope; the app stays a Vite SPA (ADR 0001).
+- [x] **Does SEO make sense here?** No. The real product lives behind a login, so search engines and link-preview crawlers never see its pages; nobody discovers them by searching. What still has value is a meaningful title per page, for usability (tabs, history, bookmarks) and accessibility (screen readers announce it; WCAG 2.4.2 "Page Titled").
+- [x] **Scope:** a document title on every page, and nothing else. Indexing policy, canonical URL, meta description, Open Graph / Twitter tags, `theme-color`, preview image, icons, the exceptions `h1`, performance (code splitting, fonts), HTTP 404 statuses and prerendering are all left out.
+- [x] **Site name:** "Shipment visibility".
 - [x] **Tests:** no new tests for this feature.
-- [x] **Exceptions `h1`:** screen-reader only.
+- [x] Correction to the performance gap above: the Geist font subsets are loaded by `unicode-range`, so English pages only download the latin file; the real cost is the single JS bundle.
 
 ## References
 

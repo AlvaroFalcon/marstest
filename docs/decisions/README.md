@@ -85,4 +85,4 @@ One file per decision, numbered sequentially: `NNNN-<short-title>.md`. Use [`_TE
 | [0070](0070-document-check-one-row-per-document-neutral-chip.md) | Document check shows one row per document with a neutral chip | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0071](0071-exception-header-freshness-is-tracking-freshness.md) | Exception detail header shows tracking freshness, not carrier ETA update time | User, on Claude's proposal | Accepted | 2026-10-21 |
 | [0072](0072-no-ternaries-that-choose-jsx.md) | No ternaries that choose JSX | User | Accepted | 2026-10-22 |
-| [0073](0073-seo-scope-metadata-and-titles-only.md) | SEO work is limited to metadata and page titles | User, on Claude's proposal | Accepted | 2026-10-23 |
+| [0073](0073-page-titles-only-no-seo.md) | Page titles only, no SEO work | User, on Claude's proposal | Accepted | 2026-10-23 |
